@@ -1,0 +1,60 @@
+<!DOCTYPE html> 
+<html>
+
+<head>
+  
+
+<link href="words.css" rel="stylesheet" media="all and (min-width: 769px)" type="text/css">
+<link href="words_small_screens.css" rel="stylesheet" media="all and (max-width: 768px)" type="text/css">
+
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+</head>
+
+<body style="background-color: #071022;">
+  <br>
+<div id="main_box">
+<div id="toplinks-flexbox"> 
+  <a href="text_viewer"><div id="texts_link" class="toplink-buttons">Texts</div></a>
+  <a href="words"><div id="words_link" class="toplink-buttons current">Words</div></a>
+  <!--<div id="other_link" class="toplink-buttons">Other shit</div> -->
+</div>
+
+<div id="main_words_box">
+    <span id="lang_button">
+    <label for="langselect">Language:</label>
+    <select id="langselect" name="langselect" form="formid">
+    <?lng
+    </select></span>
+    <div id="pos_selectors">
+      <span data-pos_code="1" class="pos_sel noun pos_selected">noun</span>
+      <span data-pos_code="2" class="pos_sel verb pos_selected">verb</span>
+      <span data-pos_code="3" class="pos_sel adj pos_selected">adject.</span>
+      <span data-pos_code="4" class="pos_sel adverb pos_selected">adverb</span>
+      <span data-pos_code="5" class="pos_sel prep pos_selected">prep.</span>
+      <span data-pos_code="6" class="pos_sel conj pos_selected">conj.</span>
+      <span data-pos_code="7" class="pos_sel part pos_selected">part.</span>
+      <span data-pos_code="8" class="pos_sel ques pos_selected">ques.</span>
+    </div>
+
+    <div id="mw_selectors">
+      <span data-mw_code="1" class="mw_sel mw_selected">lemmas</span>
+      <span data-mw_code="2" class="mw_sel mw_selected">multiwords</span>
+    </div>
+    
+    <div id="words_body" >
+      <div id="words_top">
+        <div id="left_top_header"><span id="left_top_upper"><textarea id="lemma_searchbox" autocomplete="off" placeholder="Search lemmas..."></textarea></span><span id="left_top_lower"><div id="left_top_title">Lemmas</div></span></div>
+        <div id="right_top_header"><span id="right_top_upper"><textarea id="meaning_searchbox" autocomplete="off" placeholder="Search meanings..."></textarea></span><span id="right_top_lower"><div id="right_top_title">Meanings</div></span></div>
+      </div>
+        <div id="words_results"></div>
+    </div>
+</div>
+</div>
+<span id="spoofspan" style="display: inline;"></span>
+<span id="spoofspan2"><span id="hidden_searchbox"></span></span>
+</body>
+<script src ="words.js"></script>
+</html>
