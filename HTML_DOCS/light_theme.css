@@ -1,0 +1,215 @@
+body {
+  background-color: #f0c36dbd;
+}
+
+p1 {
+color: black;;
+}
+
+a {
+  color: black;
+}
+
+#main_text {
+  background-color: white;  
+}
+
+
+#new_text{
+  background-color: #f0c36dbd;
+}
+#tt_button {
+  background-color: #f0c36dbd;
+  color: black;;
+}
+
+#select_button {
+  background-color: #f0c36dbd;
+  color: black;;
+}
+
+#delete_button {
+  background-color: #f0c36dbd;
+  color: black;;
+}
+
+.link-buttons {
+  background-color: #f0c36dbd;
+  color: #c71f1f;
+}
+
+.link-buttons:hover, .deletion_button:hover {
+  background-color: #d59110;
+  color: red;
+}
+
+#lang_button {
+  background-color: #f0c36dbd;
+  color: black;
+
+}
+
+#textselect, #langselect {
+  background-color: /* #f0c36dbd; */ #f0c36dbd;
+  color: black;
+} 
+
+#newtext {
+  background-color: #f0c36dbd;
+  color: black;
+}
+
+#text_title {
+  background-color: #d59110;
+  color: black;
+}
+
+.submit_btn {
+  background-color: #f0c36dbd;
+  color: black;
+}
+
+
+.submit_btn:hover {
+ 
+  background-color: #d59110;
+}
+
+.deletion_button {
+  background-color: #f0c36dbd;
+  color: #c71f1f;
+}
+
+
+
+
+#title {
+  color: black;
+}
+
+#loadingbutton {
+  background-color: #f0c36dbd;
+  color: black;
+}
+
+.pageno:hover {
+  color: rgb(0 255 186);
+}
+.current_pageno {
+  color: rgb(0 255 186);
+  border-bottom: 2px solid rgb(0 255 186);
+}
+ /*-------------------------tooltip_prevs.css----------------------------*/
+.tooltip {
+color: black;
+}
+
+.tooltip:hover {
+  color: rgb(255 115 205);
+}
+
+.multiword {
+  border-bottom: 2px dotted rgb(0 255 186 / 50%);
+}
+
+
+.lemma_set, .lemma_set_unexplicit {
+  color: rgb(0 255 186);
+}
+.lemma_set:hover, .lemma_set_unexplicit:hover {
+  color: rgb(0 255 34);
+}
+
+.tooltip_selected {
+  color: rgb(255 115 205);
+  border-bottom: 2px solid rgb(23, 33, 54, 0);
+}
+.mw_selectable:hover {
+  border-bottom: 2px solid rgb(0 255 186);
+}
+.mw_current_select {
+  border-bottom: 2px solid rgb(0 255 186);
+}
+
+
+
+#editbtn {
+  color: rgb(0, 255, 34);
+  border: 1px solid rgb(0, 255, 34);
+}
+
+#delbtn {
+  color: red;
+  border: 1px solid red;
+}
+
+
+.tooltip_opt {
+  background-color: #d59110;
+  color: black;
+  background-color: #f0c36dbd;
+}
+
+.tooltip_opt:hover {
+  background-color: #ac7000;
+} 
+  
+  
+.tooltip .lemma_tt, .tooltip_selected .lemma_tt, .tooltip .mw_tt, .tooltip_selected .mw_tt {
+    background-color: #d59110;
+    color: black;
+  }
+
+.lemma_tag_tt {
+  color: black;
+  background-color: #ac7000;
+}
+
+#tt_meaning {
+  background-color: #ac7000;
+  color: black;
+}
+
+#toplinks-flexbox {
+  background-color: #f0c36dbd;
+  color: #cbd9f4a6;
+}
+.toplink-buttons {
+  background-color: #f0c36dbd;
+}
+.toplink-buttons.current {
+  background-color: #d59110;
+  color: black;
+}
+.toplink-buttons:hover {
+  background-color: #f1ad2e;
+  color: black;
+}
+.toplink-buttons.current:hover {
+  background-color: #d59110;
+  color: black;
+}
+
+#edit-letter {
+  border-right: 1px solid #f0c36dbd;
+}
+@keyframes cursor-flash {
+  /*50% { color: black;; }
+  100% { color: inherit; } */
+  50% { border-right: 1px solid red; }
+  100% { border-right: inherit; }
+}
+.edit-displayWord {
+  border-left: 1px solid #f0c36dbd;
+  border-right: 1px solid #f0c36dbd;
+  border-bottom: 2px dotted red;
+  /*animation: border-flash 0.9s steps(1, jump-start) infinite;*/
+}
+@keyframes border-left-flash {
+  50% { 
+    border-left: 1px solid red;
+  }
+  100% { 
+    border-left: 1px solid #f0c36dbd;
+  }
+}

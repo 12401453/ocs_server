@@ -1,0 +1,213 @@
+body {
+  background-color: #071022;
+}
+
+p1 {
+color: #cbd9f4;;
+}
+
+a {
+  color: #cbd9f4a6;
+}
+
+#main_text {
+  background-color: #172136;  
+}
+
+
+#new_text{
+  background-color: #172136;
+}
+#tt_button {
+  background-color: #071022;
+  color: #cbd9f4;;
+}
+
+#select_button {
+  background-color: #071022;
+  color: #cbd9f4;;
+}
+
+#delete_button {
+  background-color: #071022;
+  color: #cbd9f4;;
+}
+
+.link-buttons {
+  background-color: #071022;
+  color: #c71f1f;
+}
+
+.link-buttons:hover, .deletion_button:hover {
+  background-color: #040a16;
+  color: red;
+}
+
+#lang_button {
+  background-color: #071022;
+  color: #cbd9f4;
+
+}
+
+#textselect, #langselect {
+  background-color: /* #172136; */ #071022;
+  color: #cbd9f4;
+} 
+
+#newtext {
+  background-color: #071022;
+  color: #cbd9f4;
+}
+
+#text_title {
+  background-color: #071022;
+  color: #cbd9f4;
+}
+
+.submit_btn {
+  background-color: #071022;
+  color: #cbd9f4;
+}
+
+
+.submit_btn:hover {
+ 
+  background-color: #040a16;
+}
+
+.deletion_button {
+  background-color: #071022;
+  color: #c71f1f;
+}
+
+
+
+
+#title {
+  color: rgb(255 115 205);
+}
+
+#loadingbutton {
+  background-color: #071022;
+  color: #cbd9f4;
+}
+
+.pageno:hover {
+  color: rgb(0 255 186);
+}
+.current_pageno {
+  color: rgb(0 255 186);
+  border-bottom: 2px solid rgb(0 255 186);
+}
+ /*-------------------------tooltip_prevs.css----------------------------*/
+.tooltip {
+color: #cbd9f4;
+}
+
+.tooltip:hover {
+  color: rgb(255 115 205);
+}
+
+.multiword {
+  border-bottom: 2px dotted rgb(0 255 186 / 50%);
+}
+
+
+.lemma_set, .lemma_set_unexplicit {
+  color: rgb(0 255 186);
+}
+.lemma_set:hover, .lemma_set_unexplicit:hover {
+  color: rgb(0 255 34);
+}
+
+.tooltip_selected {
+  color: rgb(255 115 205);
+  border-bottom: 2px solid rgb(23, 33, 54, 0);
+}
+.mw_selectable:hover {
+  border-bottom: 2px solid rgb(0 255 186);
+}
+.mw_current_select {
+  border-bottom: 2px solid rgb(0 255 186);
+}
+
+
+
+#editbtn {
+  color: rgb(0, 255, 34);
+  border: 1px solid rgb(0, 255, 34);
+}
+
+#delbtn {
+  color: red;
+  border: 1px solid red;
+}
+
+
+.tooltip_opt {
+  background-color: #071022;
+  color: #cbd9f4;
+  background-color: #172136;
+}
+
+.tooltip_opt:hover {
+  background-color: #040a16;
+} 
+  
+  
+.tooltip .lemma_tt, .tooltip_selected .lemma_tt, .tooltip .mw_tt, .tooltip_selected .mw_tt {
+    background-color: #071022;
+    color: #cbd9f4;
+  }
+
+.lemma_tag_tt {
+  color: #cbd9f4;
+  background-color: #040a16;
+}
+
+#tt_meaning {
+  background-color: #040a16;
+  color: #cbd9f4;
+}
+
+#toplinks-flexbox {
+  background-color: #172136;
+  color: #cbd9f4a6;
+}
+.toplink-buttons {
+  background-color: #172136;
+}
+.toplink-buttons.current {
+  background-color: #040a16;
+  color: #cbd9f4;
+}
+.toplink-buttons:hover {
+  background-color: #071022;
+  color: #cbd9f4d3;
+}
+.toplink-buttons.current:hover {
+  background-color: #040a16;
+  color: #cbd9f4;
+}
+
+#edit-letter {
+  border-right: 1px solid #172136;
+}
+@keyframes cursor-flash {
+  50% { border-right: 1px solid red; }
+  100% { border-right: inherit; }
+}
+.edit-displayWord {
+  border-left: 1px solid #172136;
+  border-right: 1px solid #172136;
+  border-bottom: 2px dotted red;
+  /*animation: border-flash 0.9s steps(1, jump-start) infinite;*/
+}
+@keyframes border-left-flash {
+  50% { 
+    border-left: 1px solid red;
+  }
+  100% { 
+    border-left: 1px solid #172136;
+  }
+}

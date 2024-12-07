@@ -10,6 +10,7 @@
 <link rel="stylesheet" type="text/css" href="flexbox.css" id="flexbox_styles">
 <link href="dict.css" rel="stylesheet" type="text/css">
 <link href="dict_small_screens.css" rel="stylesheet" media="all and (max-width: 768px)" type="text/css">
+<link id="colour_theme" href="dark_theme.css" rel="stylesheet" media="all and (min-width: 769px)" type="text/css">
 
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -17,7 +18,7 @@
 
 </head>
 
-<body style="background-color: #071022;">
+<body>
   <br>
 <div id="main_box">
 <div id="toplinks-flexbox"> 
