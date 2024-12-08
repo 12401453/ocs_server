@@ -1,0 +1,8 @@
+When it comes to nominal and verbal morphology-tags, all that really matters for the purposes of producing paradigms is the row-number computed from them which the autoreconstructor uses; I could just pre-compute this and have it as a numerical entry in the table for each word. If I want to replicate what TOROT does in terms of lsiting the morphological categories of each word then I might need more though.
+
+Could have a function to show the paradigm of any word with a switch between showing only attested forms and the full generated paradigm
+
+Maybe a 3-way switch at the top that changes the whole front-end behaviour and displayable annotations between phonlogy-morphology-syntax (if it's worth me dealing with the syntax-bullshit at all)
+
+I need an LCS lemmas table which has columns for both the TOROT OCS and TOROT Old Russian forms of each lemma
+    - For now, limit it to the OCS lemmas and include an LCS column that may be blank, my inflection-class, and maybe a root-column which I can base Autoreconstructions off.
