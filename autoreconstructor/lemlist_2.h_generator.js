@@ -224,7 +224,7 @@ function conj_type_Trunc(conj_type) {
 }
 
 const read_stream1 = fs.createReadStream("lemmas_with_text_occurence_gdrive.csv");
-const read_stream2 = fs.createReadStream("lemma_id_map.csv");
+const read_stream2 = fs.createReadStream("chu_lemmas.csv");
 
 read_stream1.on('error', () => {
   console.log("first file doesn't exist");
@@ -241,14 +241,14 @@ let cpp_lemma_list = "std::set<Lemma> lemma_list = {\n";
 
 const new_ids_map = new Map();
 
-async function readMapFile() {
-  const map_file = readline.createInterface({input: read_stream2});
+async function readChuLemmasFile() {
+  const lemmas_file = readline.createInterface({input: read_stream2});
 
-  for await(const line of map_file) {
+  for await(const line of lemmas_file) {
     const row = line.split(",");
-    new_ids_map.set(Number(row[1]), Number(row[0]));
+    new_ids_map.set(row[2]+row[1], Number(row[0]));
   }
-  map_file.close();
+  lemmas_file.close();
 }
 
 async function readLemmasSpreadsheet() {
@@ -256,10 +256,11 @@ async function readLemmasSpreadsheet() {
   for await(const line of lemma_spreadsheet_file) {
     const row = line.split("|");
 
+    const pos_lemma_combo = row[2] + row[0];
     const old_id = Number(row[1]);
     let new_id = 0;
-    if(new_ids_map.has(old_id)) {
-        new_id = new_ids_map.get(old_id);
+    if(new_ids_map.has(pos_lemma_combo)) {
+        new_id = new_ids_map.get(pos_lemma_combo);
     }
     else new_id = old_id;
 
@@ -307,7 +308,7 @@ async function readLemmasSpreadsheet() {
 
 
 async function generateCppLemlist() {
-  await readMapFile();
+  await readChuLemmasFile();
   await readLemmasSpreadsheet();
   //fs.appendFileSync(output_filename, cpp_lemma_list);
   fs.writeFileSync(output_filename, cpp_lemma_list);
