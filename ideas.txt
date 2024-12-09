@@ -6,3 +6,9 @@ Maybe a 3-way switch at the top that changes the whole front-end behaviour and d
 
 I need an LCS lemmas table which has columns for both the TOROT OCS and TOROT Old Russian forms of each lemma
     - For now, limit it to the OCS lemmas and include an LCS column that may be blank, my inflection-class, and maybe a root-column which I can base Autoreconstructions off.
+Don't need a POS field in the main text if I have it in the lemma-table
+
+The inflection-class needs to stored as an integer in the table and I should use numbers: 0 = non-inflecting, < 200 = nouns, > 200 = verbs.
+In a separate table I can store sensible English names for all the inflection-classes with their numerical keys. Probably should also group inflection-class numbers together so that, e.g. all a-stems are identifiable, all o-stems, all masculines etc. etc.
+
+I could use the extreme-cleaned Cyrillic version as something to base search off (i.e. extreme clean the search-terms as well)

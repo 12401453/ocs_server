@@ -235,7 +235,7 @@ read_stream2.on('error', () => {
   process.exit(-1);
 })
 
-const output_filename = "lemlist_2_test.h";
+const output_filename = "lemlist_2.h";
 
 let cpp_lemma_list = "std::set<Lemma> lemma_list = {\n";
 
