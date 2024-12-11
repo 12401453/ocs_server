@@ -54,7 +54,7 @@ function setLangId() {
   dict.display();
 }
 
-let page_tokno_arr = [];
+let page_toknos_arr = [];
 let current_pageno = 1;
 let dt_end = 0;
 
@@ -92,10 +92,12 @@ function selectText() {
           // para1.innerHTML = xhttp.responseText;
           //console.log(xhttp.response);
           para1.innerHTML = xhttp.response["html"];
-          page_tokno_arr = xhttp.response["pagenos"];
+          page_toknos_arr = xhttp.response["pagenos"];
           dt_end = xhttp.response["dt_end"];
 
-          if(page_tokno_arr.length > 0) {
+          current_pageno = 1;
+
+          if(page_toknos_arr.length > 0) {
             document.getElementById("pagenos").addEventListener('click', selectText_splitup);
             document.getElementById("pagenos").addEventListener('keydown', selectText_splitup);
           }
@@ -149,8 +151,9 @@ const selectText_splitup = (event) => {
         return;
       }
       if(new_pageno < 1) new_pageno = 1;
-      else if(new_pageno > page_tokno_arr.length) new_pageno = page_tokno_arr.length;
+      else if(new_pageno > page_toknos_arr.length) new_pageno = page_toknos_arr.length;
       pageno_box.value = new_pageno;
+      pageno_box.blur();
     }
     else return;
   }
@@ -159,7 +162,7 @@ const selectText_splitup = (event) => {
       new_pageno = current_pageno - 1;
       pageno_box.value = new_pageno;   
     }
-    else if(event.target.id == "pageno_rightarrow" && current_pageno < page_tokno_arr.length) {
+    else if(event.target.id == "pageno_rightarrow" && current_pageno < page_toknos_arr.length) {
       new_pageno = current_pageno + 1;
       pageno_box.value = new_pageno;   
     }
@@ -177,7 +180,7 @@ const selectText_splitup = (event) => {
   loadingbutton.id = 'loadingbutton';
   document.getElementById('spoofspan').after(loadingbutton);
 
-  const dt_start = page_tokno_arr[new_pageno - 1];
+  const dt_start = page_toknos_arr[new_pageno - 1];
 
   let textselect_value = document.getElementById('textselect').value;
   let post_data = "dt_start="+dt_start+"&dt_end="+dt_end+"&page_cur="+new_pageno;

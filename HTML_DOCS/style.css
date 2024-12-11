@@ -294,6 +294,7 @@ font-size: 23px;
   font-family: Bookerly;
   font-size: 21px;
   background-color: #071022;
+  user-select: none;
 }
 #pageno_box {
   width: 70px;
@@ -345,6 +346,7 @@ font-size: 23px;
   cursor: default;
   color: grey;
   font-family: Liberation_Serif;
+  user-select: none;
 }
 .nav_arrow:hover {
   background-color:#172136;
