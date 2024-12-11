@@ -271,8 +271,8 @@ int main () {
         sqlite3_exec(DB, sql_BEGIN, nullptr, nullptr, nullptr);
 
         sqlite3_exec(DB, "DROP TABLE IF EXISTS tagged_corpus;CREATE TABLE tagged_corpus (tokno INTEGER PRIMARY KEY, chu_word_torot TEXT, chu_word_normalised TEXT, morph_tag TEXT, lemma_id INTEGER, sentence_no INTEGER);CREATE INDEX lemma_id_index on tagged_corpus(lemma_id);CREATE INDEX sentence_id_index on tagged_corpus(sentence_id)", nullptr, nullptr, nullptr);
-        sqlite3_exec(DB, "DROP TABLE IF EXISTS lemmas;CREATE TABLE lemmas (lemma_id INTEGER PRIMARY KEY, pos INTEGER, lemma_lcs TEXT, lemma_ocs TEXT, stem_lcs TEXT, inflexion_class_id INTEGER)", nullptr, nullptr, nullptr);
-        sqlite3_exec(DB, "DROP TABLE IF EXISTS inflexion_class;CREATE TABLE inflexion_classes (inflexion_class_id INTEGER PRIMARY KEY, inflexion_class TEXT)", nullptr, nullptr, nullptr);
+        sqlite3_exec(DB, "DROP TABLE IF EXISTS lemmas;CREATE TABLE lemmas (lemma_id INTEGER PRIMARY KEY, pos INTEGER, lemma_lcs TEXT, lemma_ocs TEXT, stem_lcs TEXT, inflexion_class_id INTEGER);CREATE INDEX inflexion_class_index ON lemmas(inflexion_class_id) WHERE inflexion_class_id IS NOT NULL", nullptr, nullptr, nullptr);
+        sqlite3_exec(DB, "DROP TABLE IF EXISTS inflexion_classes;CREATE TABLE inflexion_classes (inflexion_class_id INTEGER PRIMARY KEY, inflexion_class_name TEXT)", nullptr, nullptr, nullptr);
         
         std::unordered_map<std::string, int> inflexion_class_map;
         std::unordered_map<std::string, int> lemma_id_map;
@@ -439,6 +439,17 @@ int main () {
             
             if(inflexion_class_id == 999999) sqlite3_bind_null(statement, 6);
             else sqlite3_bind_int(statement, 6, inflexion_class_id);
+            sqlite3_step(statement);
+            sqlite3_reset(statement);
+            sqlite3_clear_bindings(statement);
+        }
+        sqlite3_finalize(statement);
+
+        sql_text = "INSERT INTO inflexion_classes (inflexion_class_id, inflexion_class_name) VALUES (?, ?)";
+        sqlite3_prepare_v2(DB, sql_text, -1, &statement, nullptr);
+        for(const auto& pair : inflexion_class_map) {
+            sqlite3_bind_int(statement, 1, pair.second);
+            sqlite3_bind_text(statement, 2, pair.first.c_str(), -1, SQLITE_TRANSIENT);
             sqlite3_step(statement);
             sqlite3_reset(statement);
             sqlite3_clear_bindings(statement);

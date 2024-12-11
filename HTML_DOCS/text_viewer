@@ -41,7 +41,7 @@
 <div id="select_button">
   <label for="textselect">Choose text:</label>
   <select id="textselect" name="textselect" oninput="selectText()" style="width: 100px;">
-  <option value="0"></option>
+  <option value="0" data-lang_id="0"></option>
   <?php ?>
   </select></div>
   <br><br><br>
