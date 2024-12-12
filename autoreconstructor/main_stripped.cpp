@@ -357,7 +357,7 @@ std::string Reconstruct(std::string cyr_id, std::string morph_tag, int lemma_id)
   {
     Lemma lemma = *it; // retrieve the object stored in the memory address of the iterator
 
-    changeLemma_field(lemma, morph_tag, cyr_id); // pass object by reference to a function so I can change one of its members directly
+    changeLemma_field(lemma, morph_tag, deep_clean_Cyr(cyr_id)); // pass object by reference to a function so I can change one of its members directly
 
 
     lcs_reconstruction = Dejotate(lemma.lemma_form);
@@ -408,19 +408,19 @@ std::string Reconstruct(std::string text_line)
 
 }
 
-int main(int argc, char *argv[]) {
+// int main(int argc, char *argv[]) {
     
-  if(argc < 2) {
-      std::cout << "Need to supply a text file\n";
-      return 0;
-  }
-  std::string text_file = argv[1];
-  std::string input_line;
-  std::ifstream text_file_stream(text_file);
-  while(std::getline(text_file_stream, input_line)) {
-    std::cout << Reconstruct(input_line) << "\n"; 
-  }
-  text_file_stream.close();
+//   if(argc < 2) {
+//       std::cout << "Need to supply a text file\n";
+//       return 0;
+//   }
+//   std::string text_file = argv[1];
+//   std::string input_line;
+//   std::ifstream text_file_stream(text_file);
+//   while(std::getline(text_file_stream, input_line)) {
+//     std::cout << Reconstruct(input_line) << "\n"; 
+//   }
+//   text_file_stream.close();
 
-  return 0;
-}
+//   return 0;
+// }

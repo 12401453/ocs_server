@@ -5,6 +5,9 @@
 #include <fstream>
 #include <unordered_map>
 #include <unicode/unistr.h>
+#include <vector>
+
+#include "main_stripped.cpp"
 
 int conj_type_Trunc(std::string conj_type) {
 
@@ -256,61 +259,194 @@ std::unordered_map <std::string, int> pos_map = {
   {"X-", 27}
 };
 
+std::unordered_map <int, std::string> text_id_map = {
+  {1, "Treatise on the letters"},
+  {2, "Euchologium Sinaiticum"},
+  {3, "Kiev Missal"},
+  {4, "Codex Marianus"},
+  {5, "Psalterium Sinaiticum"},
+  {6, "Codex Suprasliensis"},
+  {7, "Vita Constantini"},
+  {8, "Vita Methodii"},
+  {9, "Codex Zographensis"}
+};
+
 int main () {
+    std::cout.setstate(std::ios_base::failbit);
     sqlite3* DB;
-    if(!sqlite3_open("chu_corpus.db", &DB)) {
+    if(!sqlite3_open("chu_corpus_fuller.db", &DB)) {
 
         sqlite3_stmt* statement;
 
-        std::ifstream chu_words_file("chu_words_full.csv");
+        std::ifstream chu_words_file("chu_words_full_with_titles.csv");
         std::ifstream lemma_spreadsheet("lemmas_with_text_occurence_gdrive.csv");
         std::ifstream chu_lemmas_file("chu_lemmas.csv");
+        std::ifstream chu_subtitles_file("chu_subtitles.csv");
+
+        std::string subtitles_line;
+        std::vector<std::vector<std::string>> subtitles_vector;
+        std::string text_id_str = "";
+        std::string subtitle_text = "";
+        std::vector<std::string> text_subtitles;
+        while(std::getline(chu_subtitles_file, subtitles_line)) {
+          
+          int sep_pos = subtitles_line.find('|');
+          if(text_id_str != subtitles_line.substr(0, sep_pos) && !text_subtitles.empty()) {
+            subtitles_vector.push_back(text_subtitles);
+            text_subtitles.clear();
+          }
+          subtitle_text = subtitles_line.substr(sep_pos + 1);
+          text_subtitles.push_back(subtitle_text);
+          text_id_str = subtitles_line.substr(0, sep_pos);
+        }
+        subtitles_vector.push_back(text_subtitles);
+
         const char* sql_BEGIN = "BEGIN IMMEDIATE";
         const char* sql_COMMIT = "COMMIT";
 
         sqlite3_exec(DB, sql_BEGIN, nullptr, nullptr, nullptr);
 
-        sqlite3_exec(DB, "DROP TABLE IF EXISTS tagged_corpus;CREATE TABLE tagged_corpus (tokno INTEGER PRIMARY KEY, chu_word_torot TEXT, chu_word_normalised TEXT, morph_tag TEXT, lemma_id INTEGER, sentence_no INTEGER);CREATE INDEX lemma_id_index on tagged_corpus(lemma_id);CREATE INDEX sentence_id_index on tagged_corpus(sentence_id)", nullptr, nullptr, nullptr);
+        sqlite3_exec(DB, "DROP TABLE IF EXISTS tagged_corpus;CREATE TABLE tagged_corpus (tokno INTEGER PRIMARY KEY, chu_word_torot TEXT, chu_word_normalised TEXT, morph_tag TEXT, lemma_id INTEGER, sentence_no INTEGER, presentation_before TEXT, presentation_after TEXT, autoreconstructed_lcs TEXT);CREATE INDEX lemma_id_index on tagged_corpus(lemma_id);CREATE INDEX sentence_id_index on tagged_corpus(sentence_id)", nullptr, nullptr, nullptr);
         sqlite3_exec(DB, "DROP TABLE IF EXISTS lemmas;CREATE TABLE lemmas (lemma_id INTEGER PRIMARY KEY, pos INTEGER, lemma_lcs TEXT, lemma_ocs TEXT, stem_lcs TEXT, inflexion_class_id INTEGER);CREATE INDEX inflexion_class_index ON lemmas(inflexion_class_id) WHERE inflexion_class_id IS NOT NULL", nullptr, nullptr, nullptr);
         sqlite3_exec(DB, "DROP TABLE IF EXISTS inflexion_classes;CREATE TABLE inflexion_classes (inflexion_class_id INTEGER PRIMARY KEY, inflexion_class_name TEXT)", nullptr, nullptr, nullptr);
+        sqlite3_exec(DB, "DROP TABLE IF EXISTS texts;CREATE TABLE texts (text_id INTEGER PRIMARY KEY, text_title TEXT, tokno_start INTEGER, tokno_end INTEGER)", nullptr, nullptr, nullptr);
+        sqlite3_exec(DB, "DROP TABLE IF EXISTS subtitles;CREATE TABLE subtitles (subtitle_id INTEGER PRIMARY KEY, subtitle_text TEXT, text_id INTEGER, tokno_start INTEGER, tokno_end INTEGER)", nullptr, nullptr, nullptr);
         
         std::unordered_map<std::string, int> inflexion_class_map;
         std::unordered_map<std::string, int> lemma_id_map;
 
-        const char *sql_text = "INSERT INTO tagged_corpus (chu_word_torot, morph_tag, chu_word_normalised, lemma_id, sentence_no) VALUES (?, ?, ?, ?, ?)";
+        const char *sql_text = "INSERT INTO tagged_corpus (chu_word_torot, chu_word_normalised, morph_tag, lemma_id, sentence_no, presentation_before, presentation_after, autoreconstructed_lcs) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+
+        const char* sql_text_table = "INSERT INTO texts (text_title, tokno_start, tokno_end) VALUES (?, ?, ?)";
+        const char* sql_subtitle_table = "INSERT INTO subtitles (subtitle_text, text_id, tokno_start, tokno_end) VALUES (?, ?, ?, ?)";
+
+        sqlite3_stmt* statement_texts;
+        sqlite3_stmt* statement_subtitles;
 
         sqlite3_prepare_v2(DB, sql_text, -1, &statement, nullptr);
-               
+        sqlite3_prepare_v2(DB, sql_text_table, -1, &statement_texts, nullptr);
+        sqlite3_prepare_v2(DB, sql_subtitle_table, -1, &statement_subtitles, nullptr);
+
+        int tokno_count = 1;
+        int current_main_title_id = 1;
+        int current_subtitle_id = 1;
+        int main_tokno_start = 1;
+        int main_tokno_end;
+        int subtitle_tokno_start = 1;
+        int subtitle_tokno_end;                
         std::string line;
         std::string field;
         int pos_key = 0;
         while(std::getline(chu_words_file, line)) {
             std::stringstream ss_line(line);
-            int parameter_no = 1;
+
+            std::string chu_word_torot, chu_word_normalised, morph_tag, presentation_before, presentation_after, autoreconstructed_lcs;
+            int lemma_id, sentence_no, main_title_id, subtitle_id;
+
+
             int row_no = 1;
-            while(std::getline(ss_line, field, ',')) {
+            while(std::getline(ss_line, field, '|')) {
                 switch(row_no) {
-                    case 2:
-                    //the POS will be stored in the lemmas-table and thus accessible from the lemma_id field
-                        parameter_no--;		
+                    case 1:
+                        chu_word_torot = field;	
+                        break;
+                    case 4:
+                        chu_word_normalised = field;
+                        break;
+                    case 3:
+                        morph_tag = field;
                         break;
                     case 5:
-                        sqlite3_bind_int(statement, parameter_no, std::stoi(field));
+                        std::cout << "stoi 01\n";
+                        lemma_id = std::stoi(field);
                         break;
                     case 6:
-                        sqlite3_bind_int(statement, parameter_no, std::stoi(field));
+                    std::cout << "stoi 02\n";
+                        sentence_no = std::stoi(field);
+                        break;
+                    case 7:
+                        presentation_before = field;
+                        break;
+                    case 8:
+                        presentation_after = field;
+                        break;
+                    case 9:
+                    std::cout << "stoi 03\n";
+                        main_title_id = std::stoi(field);
+                        break;
+                    case 10:
+                    std::cout << "stoi 04\n";
+                        subtitle_id = std::stoi(field);
                         break;
                     default:
-                        sqlite3_bind_text(statement, parameter_no, field.c_str(), -1, SQLITE_TRANSIENT); //SQLITE_STATIC doesnt work and makes every field get filled with some permutation of sentence_no
-		        }
+                        ;
+		            }
                 row_no++;
-                parameter_no++;
-            } 
+            }
+            autoreconstructed_lcs = Reconstruct(chu_word_torot, morph_tag, lemma_id);
+            if(autoreconstructed_lcs.empty()) sqlite3_bind_null(statement, 8);
+            else sqlite3_bind_text(statement, 8, autoreconstructed_lcs.c_str(), -1, SQLITE_TRANSIENT);
+
+            sqlite3_bind_int(statement, 4, lemma_id);
+            sqlite3_bind_int(statement, 5, sentence_no);
+            sqlite3_bind_text(statement, 1, chu_word_torot.c_str(), -1, SQLITE_TRANSIENT);
+            sqlite3_bind_text(statement, 2, chu_word_normalised.c_str(), -1, SQLITE_TRANSIENT);
+            sqlite3_bind_text(statement, 3, morph_tag.c_str(), -1, SQLITE_TRANSIENT);
+            sqlite3_bind_text(statement, 6, presentation_before.c_str(), -1, SQLITE_TRANSIENT);
+            sqlite3_bind_text(statement, 7, presentation_after.c_str(), -1, SQLITE_TRANSIENT);
+
             sqlite3_step(statement);
             sqlite3_reset(statement);
             sqlite3_clear_bindings(statement);
+
+            if(current_subtitle_id != subtitle_id || current_main_title_id < main_title_id) {
+              subtitle_tokno_end = tokno_count - 1;
+              
+              sqlite3_bind_text(statement_subtitles, 1, subtitles_vector[current_main_title_id - 1][current_subtitle_id - 1].c_str(), -1, SQLITE_TRANSIENT);
+              sqlite3_bind_int(statement_subtitles, 2, current_main_title_id); 
+              sqlite3_bind_int(statement_subtitles, 3, subtitle_tokno_start);
+              sqlite3_bind_int(statement_subtitles, 4, subtitle_tokno_end);
+
+              sqlite3_step(statement_subtitles);
+              sqlite3_reset(statement_subtitles);
+              sqlite3_clear_bindings(statement_subtitles);
+
+              current_subtitle_id = subtitle_id;
+              subtitle_tokno_start = tokno_count;
+            }
+            if(current_main_title_id < main_title_id) {
+              main_tokno_end = tokno_count - 1;
+              
+              sqlite3_bind_text(statement_texts, 1, text_id_map.at(current_main_title_id).c_str(), -1, SQLITE_TRANSIENT);
+              sqlite3_bind_int(statement_texts, 2, main_tokno_start);
+              sqlite3_bind_int(statement_texts, 3, main_tokno_end);
+
+              sqlite3_step(statement_texts);
+              sqlite3_reset(statement_texts);
+              sqlite3_clear_bindings(statement_texts);
+
+              current_main_title_id = main_title_id;
+              main_tokno_start = tokno_count;
+            }
+            tokno_count++;
         }
+        main_tokno_end = tokno_count - 1;
+        subtitle_tokno_end = tokno_count - 1;
+        sqlite3_bind_text(statement_subtitles, 1, subtitles_vector[current_main_title_id - 1][current_subtitle_id - 1].c_str(), -1, SQLITE_TRANSIENT);
+        sqlite3_bind_int(statement_subtitles, 2, current_main_title_id); 
+        sqlite3_bind_int(statement_subtitles, 3, subtitle_tokno_start);
+        sqlite3_bind_int(statement_subtitles, 4, subtitle_tokno_end);
+        sqlite3_step(statement_subtitles);
+
+        sqlite3_bind_text(statement_texts, 1, text_id_map.at(current_main_title_id).c_str(), -1, SQLITE_TRANSIENT);
+        sqlite3_bind_int(statement_texts, 2, main_tokno_start);
+        sqlite3_bind_int(statement_texts, 3, main_tokno_end);
+        sqlite3_step(statement_texts);
+
+
         sqlite3_finalize(statement);
+        sqlite3_finalize(statement_subtitles);
+        sqlite3_finalize(statement_texts);
 
         while(std::getline(chu_lemmas_file, line)) {
             std::stringstream ss_line(line);
@@ -320,6 +456,7 @@ int main () {
             while(std::getline(ss_line, field, ',')) {
                 switch(row_no){
                     case 1:
+                    std::cout << "stoi 05\n";
                         lemma_id = std::stoi(field);
                         break;
                     case 2:
@@ -358,6 +495,7 @@ int main () {
                         break;
                     case 2:
                     //assign first to the id used in my spreadsheet incase the lemma doesnt exist in the 2023 version of the torot files (which it definitely won't for my added ones, but also some may have been deleted since 2020)
+                    std::cout << "stoi 06\n";
                         lemma_id = std::stoi(field);
                         break;
                     case 3:
@@ -382,6 +520,7 @@ int main () {
                         inflexion_class = field;
                         break;
                     case 22:
+                    std::cout << "stoi 07\n";
                         verb_noun = std::stoi(field);
                         break;
                 }
@@ -459,6 +598,7 @@ int main () {
 
         chu_words_file.close();
         lemma_spreadsheet.close();
+        chu_subtitles_file.close();
 
         std::cout << sqlite3_exec(DB, sql_COMMIT, nullptr, nullptr, nullptr);
 
