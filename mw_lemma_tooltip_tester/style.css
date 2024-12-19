@@ -251,3 +251,13 @@ font-size: 23px;
   color: rgb(0 255 186);
   border-bottom: 2px solid rgb(0 255 186);
 }
+
+
+.pulsate {
+  animation: burn_orange 1.5s infinite;
+}
+@keyframes burn_orange {
+  0% { color: inherit;}
+  30% { color: red; }
+}
+
