@@ -274,11 +274,11 @@ std::unordered_map <int, std::string> text_id_map = {
 int main () {
     std::cout.setstate(std::ios_base::failbit);
     sqlite3* DB;
-    if(!sqlite3_open("chu_corpus_fuller.db", &DB)) {
+    if(!sqlite3_open("chu_corpus_untagged.db", &DB)) {
 
         sqlite3_stmt* statement;
 
-        std::ifstream chu_words_file("chu_words_full_with_titles.csv");
+        std::ifstream chu_words_file("chu_words_full_with_titles_untagged.csv");
         std::ifstream lemma_spreadsheet("lemmas_with_text_occurence_gdrive.csv");
         std::ifstream chu_lemmas_file("chu_lemmas.csv");
         std::ifstream chu_subtitles_file("chu_subtitles.csv");
@@ -306,7 +306,7 @@ int main () {
 
         sqlite3_exec(DB, sql_BEGIN, nullptr, nullptr, nullptr);
 
-        sqlite3_exec(DB, "DROP TABLE IF EXISTS tagged_corpus;CREATE TABLE tagged_corpus (tokno INTEGER PRIMARY KEY, chu_word_torot TEXT, chu_word_normalised TEXT, morph_tag TEXT, lemma_id INTEGER, sentence_no INTEGER, presentation_before TEXT, presentation_after TEXT, autoreconstructed_lcs TEXT);CREATE INDEX lemma_id_index on tagged_corpus(lemma_id);CREATE INDEX sentence_id_index on tagged_corpus(sentence_id)", nullptr, nullptr, nullptr);
+        sqlite3_exec(DB, "DROP TABLE IF EXISTS corpus;CREATE TABLE corpus (tokno INTEGER PRIMARY KEY, chu_word_torot TEXT, chu_word_normalised TEXT, morph_tag TEXT, lemma_id INTEGER, sentence_no INTEGER, presentation_before TEXT, presentation_after TEXT, autoreconstructed_lcs TEXT, inflexion_class_id INTEGER);CREATE INDEX lemma_id_index on corpus(lemma_id) WHERE lemma_id IS NOT NULL;CREATE INDEX sentence_id_index on corpus(sentence_id); CREATE INDEX inflexion_class_index ON corpus(inflexion_class_id) WHERE inflexion_class_id IS NOT NULL", nullptr, nullptr, nullptr);
         sqlite3_exec(DB, "DROP TABLE IF EXISTS lemmas;CREATE TABLE lemmas (lemma_id INTEGER PRIMARY KEY, pos INTEGER, lemma_lcs TEXT, lemma_ocs TEXT, stem_lcs TEXT, inflexion_class_id INTEGER);CREATE INDEX inflexion_class_index ON lemmas(inflexion_class_id) WHERE inflexion_class_id IS NOT NULL", nullptr, nullptr, nullptr);
         sqlite3_exec(DB, "DROP TABLE IF EXISTS inflexion_classes;CREATE TABLE inflexion_classes (inflexion_class_id INTEGER PRIMARY KEY, inflexion_class_name TEXT)", nullptr, nullptr, nullptr);
         sqlite3_exec(DB, "DROP TABLE IF EXISTS texts;CREATE TABLE texts (text_id INTEGER PRIMARY KEY, text_title TEXT, tokno_start INTEGER, tokno_end INTEGER)", nullptr, nullptr, nullptr);
@@ -315,7 +315,7 @@ int main () {
         std::unordered_map<std::string, int> inflexion_class_map;
         std::unordered_map<std::string, int> lemma_id_map;
 
-        const char *sql_text = "INSERT INTO tagged_corpus (chu_word_torot, chu_word_normalised, morph_tag, lemma_id, sentence_no, presentation_before, presentation_after, autoreconstructed_lcs) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        const char *sql_text = "INSERT INTO corpus (chu_word_torot, chu_word_normalised, morph_tag, lemma_id, sentence_no, presentation_before, presentation_after, autoreconstructed_lcs) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
         const char* sql_text_table = "INSERT INTO texts (text_title, tokno_start, tokno_end) VALUES (?, ?, ?)";
         const char* sql_subtitle_table = "INSERT INTO subtitles (subtitle_text, text_id, tokno_start, tokno_end) VALUES (?, ?, ?, ?)";
@@ -387,11 +387,13 @@ int main () {
             if(autoreconstructed_lcs.empty()) sqlite3_bind_null(statement, 8);
             else sqlite3_bind_text(statement, 8, autoreconstructed_lcs.c_str(), -1, SQLITE_TRANSIENT);
 
-            sqlite3_bind_int(statement, 4, lemma_id);
+            if(lemma_id > 0) sqlite3_bind_int(statement, 4, lemma_id);
+            else sqlite3_bind_null(statement, 4);
             sqlite3_bind_int(statement, 5, sentence_no);
             sqlite3_bind_text(statement, 1, chu_word_torot.c_str(), -1, SQLITE_TRANSIENT);
             sqlite3_bind_text(statement, 2, chu_word_normalised.c_str(), -1, SQLITE_TRANSIENT);
-            sqlite3_bind_text(statement, 3, morph_tag.c_str(), -1, SQLITE_TRANSIENT);
+            if(!morph_tag.empty()) sqlite3_bind_text(statement, 3, morph_tag.c_str(), -1, SQLITE_TRANSIENT);
+            else sqlite3_bind_null(statement, 3);
             sqlite3_bind_text(statement, 6, presentation_before.c_str(), -1, SQLITE_TRANSIENT);
             sqlite3_bind_text(statement, 7, presentation_after.c_str(), -1, SQLITE_TRANSIENT);
 
@@ -594,6 +596,24 @@ int main () {
             sqlite3_clear_bindings(statement);
         }
         sqlite3_finalize(statement);
+
+        const char* sql_select_lemma_text = "SELECT lemma_id, inflexion_class_id FROM lemmas WHERE inflexion_class_id IS NOT NULL";
+        sqlite3_stmt* stmt_select_lemma;
+        sqlite3_prepare_v2(DB, sql_select_lemma_text, -1, &stmt_select_lemma, nullptr);
+        const char* sql_update_infl_class_text = "UPDATE corpus SET inflexion_class_id = ? WHERE lemma_id = ?";
+        sqlite3_stmt* stmt_update_corpus;
+        sqlite3_prepare_v2(DB, sql_update_infl_class_text, -1, &stmt_update_corpus, nullptr);
+        while(sqlite3_step(statement) == SQLITE_ROW) {
+          int lemma_id = sqlite3_column_int(statement, 0);
+          int inflexion_class_id = sqlite3_column_int(statement, 1);
+          sqlite3_bind_int(stmt_update_corpus, 1, inflexion_class_id);
+          sqlite3_bind_int(stmt_update_corpus, 2, lemma_id);
+          sqlite3_step(stmt_update_corpus);
+          sqlite3_reset(stmt_update_corpus);
+          sqlite3_clear_bindings(stmt_update_corpus);
+        }
+        sqlite3_finalize(stmt_select_lemma);
+        sqlite3_finalize(stmt_update_corpus);
 
 
         chu_words_file.close();
