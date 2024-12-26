@@ -363,9 +363,30 @@ std::string Reconstruct(std::string cyr_id, std::string morph_tag, int lemma_id)
     lcs_reconstruction = Dejotate(lemma.lemma_form);
   }
   return lcs_reconstruction;
-
 }
-std::string Reconstruct(std::string text_line)
+
+std::array<std::string, 2> ReconstructMorphReplace(std::string cyr_id, std::string morph_tag, int lemma_id)
+{  
+  std::string lcs_reconstruction = "";
+  std::string lcs_morph_replace = "";
+  std::set<Lemma>::iterator it;
+
+  it = lemma_list.find(lemma_id);
+  if (it != lemma_list.end())
+  {
+    Lemma lemma = *it; // retrieve the object stored in the memory address of the iterator
+
+    changeLemma_field(lemma, morph_tag, deep_clean_Cyr(cyr_id)); // pass object by reference to a function so I can change one of its members directly
+
+    if(lcs_reconstruction.substr(0, 7) == "corrupt") lcs_reconstruction = "";
+    lcs_reconstruction = Dejotate(lemma.lemma_form);
+    lcs_morph_replace = Dejotate(lemma.morph_replace);
+  }
+  std::array<std::string, 2> result_array {lcs_reconstruction, lcs_morph_replace};
+  return result_array;
+}
+
+std::string ReconstructLine(std::string text_line)
 {  
   std::string cyr_id = "";
   std::string morph_tag = "";

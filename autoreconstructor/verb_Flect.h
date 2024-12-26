@@ -9,12 +9,12 @@ void verb_Flect(Lemma &lemma_ref, short int int_morph_tag[10], std::string cyr_i
   int outer_map_no = conj_type_enum(conj_type);
 
   // помѣнѫти vs помѧнѫти doublets
-  if (lemma_ref.lemma_id == 68352)
+  if (lemma_ref.lemma_id == 1957)
   {
     if (Sniff(cyr_id, "мѣн", 20))
       stem = "poměn";
   }
-  if (lemma_ref.lemma_id == 59280)
+  if (lemma_ref.lemma_id == 2300)
   {
     if (Sniff(cyr_id, "мѣн", 20))
       stem = "vъspoměn";
