@@ -34,24 +34,22 @@
 }
 );</script>
 
-<div id="main_text">    
-
-  <a href="add_texts"><div class="link-buttons">Add/remove texts</div></a><br>
-
-<div id="select_button">
-  <label for="textselect">Choose text:</label>
-  <select id="textselect" name="textselect" oninput="selectText()" style="width: 100px;">
-  <option value="0" data-lang_id="0"></option>
-  <?php ?>
-  </select></div>
-  <br><br><br>
-  <div id="tt_button" title="Shift+T">
-    <label for="tt_toggle">Tooltip previews</label>
-    <input type="checkbox" id="tt_toggle" name="tt_toggle" autocomplete="off" onclick="tt_type()">
-  </div><br>
-  <div id="tt_button"><label for="diffannot_toggle">Mark automatic annotations</label>
-    <input type="checkbox" id="diffannot_toggle" name="diffannot_toggle" autocomplete="off" onclick="differentiateAnnotations()" checked>
-  </div><br>  
+<div id="main_text">
+  
+  
+  <div id="text_labels_box">
+    <div id="textselect_labels" style="width: 20px;"></div>
+    <div id="textselect_box">
+      <select id="textselect" name="textselect" autocomplete="off" onchange="selectText()" style="width: 100px;">
+        <option value="0" data-lang_id="0"></option>
+        <?php ?>
+      </select>
+    
+      <select id="subtitle_select" name="chapselect" autocomplete="off">  
+      </select>
+    </div>
+  </div>
+  <br>
 <p1 id="p1">
 <?cky ?>
 </p1>

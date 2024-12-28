@@ -86,9 +86,6 @@ font-size: 23px;
 
 #select_button {
 
-  background-color: #071022;
-  border-style: solid;
-  border-radius: 2px;
   padding: 6px;
   z-index: 1;
   color: #cbd9f4;
@@ -138,25 +135,45 @@ font-size: 23px;
   color: #cbd9f4;
   font-family: Calibri;
   font-size: 18px;
+}
 
+#text_labels_box {
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: start;
+  margin-top: 20px;
+}
+#textselect_box {
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: space-between;
+  height: 61px;
 }
 
 #textselect, #langselect {
-  background-color: /* #172136; */ #071022;
- /* border-style: solid;
-  border-radius: 2px; 
-  padding: 3px;  */
+  border-radius: 5px;
   z-index: 1;
   color: #cbd9f4;
   font-family: Calibri;
+  padding: 5px;
   font-size: 18px;
   min-width: 100px;
-  max-width: 100%;
-} 
+  max-width: 300px;
+}
+#subtitle_select {
+  border-radius: 2px;
+  z-index: 1;
+  color: #cbd9f4;
+  font-family: Calibri;
+  padding: 3px;
+  font-size: 14px;
+  min-width: 80px;
+  max-width: 300px;
+}
 
 #hidden_select {
 
-  visibility: hidden; position: fixed; font-family: Calibri; font-size: 18px;
+  visibility: hidden; position: fixed; font-family: Calibri; font-size: 18px; padding: 5px;
 }
 
 #newtext {

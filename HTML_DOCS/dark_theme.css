@@ -24,7 +24,6 @@ a {
 }
 
 #select_button {
-  background-color: #071022;
   color: #cbd9f4;;
 }
 
@@ -49,7 +48,7 @@ a {
 
 }
 
-#textselect, #langselect {
+#textselect, #langselect, #subtitle_select {
   background-color: /* #172136; */ #071022;
   color: #cbd9f4;
 } 

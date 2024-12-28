@@ -93,9 +93,6 @@ a {
 
 #select_button {
 
-  background-color: #071022;
-  border-style: solid;
-  border-radius: 2px;
   padding: 4px;
   z-index: 1;
   color: #cbd9f4;
@@ -149,13 +146,11 @@ a {
 }
 
 #textselect, #langselect {
-  background-color: /* #172136; */ #071022;
- /* border-style: solid;
-  border-radius: 2px; 
-  padding: 3px;  */
+  border-radius: 3px;
   z-index: 1;
   color: #cbd9f4;
   font-family: Calibri;
+  padding: 3px;
   font-size: 13px;
   min-width: 40px;
   max-width: 100%;
@@ -164,7 +159,7 @@ a {
 
 #hidden_select {
 
-  visibility: hidden; position: fixed; font-family: Calibri; font-size: 13px;
+  visibility: hidden; position: fixed; font-family: Calibri; font-size: 13px; padding: 3px;
 }
 
 #newtext {

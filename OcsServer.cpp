@@ -265,7 +265,7 @@ int OcsServer::checkHeaderEnd(const char* msg) {
             else if(page_type == 1 && cookies_present && line.find("<?cky") != -1) void_retrieveText(m_cookies, ss_text); 
             else if(page_type == 1 && line.find("<?cky") != -1) ss_text << "<br><br><div id=\"textbody\"></div>\n";
             
-            //For some reason I do not understand, if you insert a <script> tag to declare the below JS variable outside of the script tag at the bottom, on Chrome Android the server very often will get stuck for absolutely ages on loading the Bookerly font file when you refresh the page, and the javascript engine will freeze for about 5-10seconds, but this never happens on Desktop. Thus I've had to make up another bullshit <?js tag to signal where to insert this C++-generated JS, and the only reason I'm inserting it server-side is because JS string functions are absolute dogshit and compared to my C-string parsing of the cookie text, doing it on the client by parsing the document.cookie string is ungodlily inefficient
+            //For some reason I do not understand, if you insert a <script> tag to declare the below JS variable outside of the script tag at the bottom, on Chrome Android the server very often will get stuck for absolutely ages on loading the Bookerly font file when you refresh the page, and the javascript engine will freeze for about 5-10seconds, but this never happens on Desktop. Thus I've had to make up another bullshit <?js tag to signal where to insert this C++-generated JS
             else if(page_type == 1 && cookies_present && line.find("<?js") != -1) {
                 ss_text << "let cookie_textselect = " << m_cookies[0] << ";\n";
                 ss_text << "page_toknos_arr = " << m_page_toknos_arr << ";\n";
@@ -1294,7 +1294,9 @@ bool OcsServer::retrieveText(std::string text_id[1], int clientSocket) {
     //text_title_utf8.findAndReplace("¬", "\'");
     //std::string text_title_str;
     //text_title_utf8.toUTF8String(text_title_str);
-    html << "<h1 id=\"title\">" << text_title << "</h1><br><div id=\"textbody\">&emsp;";
+    
+    //html << "<h1 id=\"title\">" << text_title << "</h1><br>
+    html << "<div id=\"textbody\">&emsp;";
     
   /*  else {
         html << "<h1 id=\"title\">" << sqlite3_column_text(statement, 2) << "</h1><br><div id=\"textbody\">&emsp;";
