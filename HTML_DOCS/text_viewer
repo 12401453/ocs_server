@@ -41,12 +41,11 @@
     <div id="textselect_labels" style="width: 20px;"></div>
     <div id="textselect_box">
       <select id="textselect" name="textselect" autocomplete="off" onchange="selectText()" style="width: 100px;">
-        <option value="0" data-lang_id="0"></option>
         <?php ?>
-      </select>
+      <!--</select>
     
       <select id="subtitle_select" name="chapselect" autocomplete="off">  
-      </select>
+      </select> -->
     </div>
   </div>
   <br>
@@ -65,37 +64,44 @@
 <script>
   <?js ?>
 const textselector = document.getElementById('textselect');
+const subtitleselector = document.getElementById('subtitle_select');
+
 
 const textselect_resize = (event) => {
   let dummyselect = document.createElement('select');
   let dummyoption = document.createElement('option');
 
-  dummyoption.textContent = event.target.options[event.target.selectedIndex].text;  //event.target is the <select> element; .options is a list of its options
-  // dummyselect.style.cssText += "visibility: hidden; position: fixed; font-family: Calibri; font-size: 18px;";
+  const clicked_select = event.target;
+  dummyoption.textContent = clicked_select.options[event.target.selectedIndex].text;  //event.target is the <select> element; .options is a list of its options
+
   dummyselect.id = 'hidden_select';
+  dummyselect.style.fontFamily = getComputedStyle(clicked_select)["font-family"];
+  dummyselect.style.fontSize = getComputedStyle(clicked_select)["font-size"];
+  dummyselect.style.padding = getComputedStyle(clicked_select)["padding"];
   dummyselect.appendChild(dummyoption);
-  event.target.after(dummyselect);//.after('') inserts stuff directly after the entire element, i.e. after its </> closing tag
+  clicked_select.after(dummyselect);//.after('') inserts stuff directly after the entire element, i.e. after its </> closing tag
   
   const dummywidth = dummyselect.getBoundingClientRect().width;
-  event.target.style.width = `${dummywidth}px`;
+  clicked_select.style.width = `${dummywidth}px`;
   
   dummyselect.remove();
 };
 
 textselector.addEventListener('input', textselect_resize);
 textselector.addEventListener('cookie_selection', textselect_resize);
+subtitleselector.addEventListener('input', textselect_resize);
+subtitleselector.addEventListener('cookie_selection', textselect_resize);
 
 window.onload = () => {
     if(cookie_textselect) {
-      let textselect = document.getElementById("textselect");
       let text_options = textselect.options;
       let textid_deleted = true;
       for(let i = 0; i < text_options.length; i++) {
         if(text_options[i].value == cookie_textselect){
             textid_deleted = false;
             text_options[i].selected = true;
-            textselect.dispatchEvent(new Event('cookie_selection'));
-            setLangId();
+            textselector.dispatchEvent(new Event('cookie_selection'));
+            //setLangId();
             break;
         }
       }
