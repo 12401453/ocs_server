@@ -92,30 +92,37 @@ textselector.addEventListener('cookie_selection', textselect_resize);
 subtitleselector.addEventListener('input', textselect_resize);
 subtitleselector.addEventListener('cookie_selection', textselect_resize);
 
+
+
 window.onload = () => {
-    if(cookie_textselect) {
-      let text_options = textselect.options;
-      let textid_deleted = true;
-      for(let i = 0; i < text_options.length; i++) {
-        if(text_options[i].value == cookie_textselect){
-            textid_deleted = false;
-            text_options[i].selected = true;
-            textselector.dispatchEvent(new Event('cookie_selection'));
-            //setLangId();
-            break;
-        }
-      }
-      if(textid_deleted == false) {
-      /*  let tt_btns = document.querySelectorAll('.tooltip');
-        tt_btns.forEach(tt_btn => {
-          tt_btn.onclick = showAnnotate;
-        });
-        document.querySelectorAll('.multiword').forEach(mw_btn => {
-            mw_btn.onclick = showMultiwordAnnotate;
-        }); */
-      } 
-      else console.log("cookie text has been deleted by another client");   
-    }
-    else console.log("no text_id cookie");
+  textselector.dispatchEvent(new Event('cookie_selection'));
+  subtitleselector.dispatchEvent(new Event('cookie_selection'));
 };
+
+// window.onload = () => {
+//     if(cookie_textselect) {
+//       let text_options = textselect.options;
+//       let textid_deleted = true;
+//       for(let i = 0; i < text_options.length; i++) {
+//         if(text_options[i].value == cookie_textselect){
+//             textid_deleted = false;
+//             text_options[i].selected = true;
+//             textselector.dispatchEvent(new Event('cookie_selection'));
+//             //setLangId();
+//             break;
+//         }
+//       }
+//       if(textid_deleted == false) {
+//       /*  let tt_btns = document.querySelectorAll('.tooltip');
+//         tt_btns.forEach(tt_btn => {
+//           tt_btn.onclick = showAnnotate;
+//         });
+//         document.querySelectorAll('.multiword').forEach(mw_btn => {
+//             mw_btn.onclick = showMultiwordAnnotate;
+//         }); */
+//       } 
+//       else console.log("cookie text has been deleted by another client");   
+//     }
+//     else console.log("no text_id cookie");
+// };
 </script>
