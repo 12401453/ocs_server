@@ -48,6 +48,7 @@ class OcsServer : public TcpListener {
         int getPostFields(const char* url);
         void handlePOSTedData(const char* post_data, int clientSocket);
         bool readCookie(std::string cookie[3], const char* msg);
+        void setCookies(std::ostringstream &http_response_ss);
 
         bool addText(std::string _POST[3], int clientSocket);
         bool addTextOldEnglish(std::string _POST[3], int clientSocket);
@@ -90,14 +91,16 @@ class OcsServer : public TcpListener {
         int                 m_total_post_bytes;
         int                 m_bytes_handled;
         bool                m_POST_continue;
-        char                m_url[50]; //only applies to POST urls; you can crash the server by sending it a POST request with a >50 char url but not by having long-named GETted resource amongst the HTML_DOCS
+        char                m_url[50]; //only applies to POST urls
         const char*         m_DB_path;
+        //these global cookies-related member-variables are not safe for the multithreaded TcpListener, because 2 incoming GET requests with different cookie-values will totally fuck up the reading and setting of these values. I need an actual proper strategy for making the server multi-threaded that isn't completely retarded
         std::string         m_cookies[3] {"1", "1", "1"};
+        std::string         m_cookie_names[3] {"text_id", "current_pageno", "subtitle_id"};
         bool                m_show_output;
 
         std::string         m_dict_cookies;
         
-        std::string m_page_toknos_arr {"[]"};
-        sqlite3_int64 m_dt_end;
-
+        std::string         m_page_toknos_arr {"[]"};
+        int                 m_pageno_count;
+        int m_sentences_per_page {30};
 };

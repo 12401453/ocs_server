@@ -49,7 +49,7 @@ a {
 
 }
 
-#textselect, #langselect {
+#textselect, #langselect, #subtitle_select {
   background-color: /* #f0c36dbd; */ #f0c36dbd;
   color: black;
 } 

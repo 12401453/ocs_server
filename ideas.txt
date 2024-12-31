@@ -12,3 +12,6 @@ The inflection-class needs to stored as an integer in the table and I should use
 In a separate table I can store sensible English names for all the inflection-classes with their numerical keys. Probably should also group inflection-class numbers together so that, e.g. all a-stems are identifiable, all o-stems, all masculines etc. etc.
 
 I could use the extreme-cleaned Cyrillic version as something to base search off (i.e. extreme clean the search-terms as well)
+
+
+Some of the Vitas in Suprasliensis are too long for me to want to display on one page (since loading-times will scale linearly with the amount of words, given how much auxiliary information I will be getting the server to wrap each word in), so my pagination-strategy will have to be: only display the page-number widget at the bottom if a sub-text is over a certain number of sentences: if it is then just display a page-number widget for that sub-text; the idea that we could have a page-number browser for the whole manuscript doesnt really work because then different sub-texts will end up getting displayed on the same page and I don't know what I'd make the subtext-dropdown menu display in cases like that. If you want a different sub-text you have to use the dropdown, and if a subtext is too long you can navigate around in it using the page-numbers.

@@ -58,13 +58,14 @@ let page_toknos_arr = [];
 let current_pageno = 1;
 let dt_end = 0;
 
-
+//DELETE
+let res_json = {};
 function selectText() {
   if(displayWordEditor.edit_mode) {
     displayWordEditor.stopEditing();
   }
   if(display_word != null) delAnnotate();
-  setLangId();  //not async safe, needs to change
+  //setLangId();  //not async safe, needs to change
 
   let loadingbutton = document.createElement('div');
   loadingbutton.innerHTML = "Loading...";
@@ -77,7 +78,7 @@ function selectText() {
   const httpRequest = (method, url) => {
 
      
-      let para1 = document.getElementById('p1');
+      const para1 = document.getElementById('p1');
 
       const xhttp = new XMLHttpRequest();
       xhttp.open(method, url, true);
@@ -89,15 +90,25 @@ function selectText() {
          
     
         if(xhttp.readyState == 4) {
-          // para1.innerHTML = xhttp.responseText;
-          //console.log(xhttp.response);
           para1.innerHTML = xhttp.response["html"];
           page_toknos_arr = xhttp.response["pagenos"];
-          dt_end = xhttp.response["dt_end"];
+          const subtitles_json = xhttp.response["subtitles_json"];
+
+          const subtitle_select = document.getElementById("subtitle_select");
+          subtitle_select.innerHTML = "";
+          for(const subtitle_id of Object.keys(subtitles_json)) {
+            const option = document.createElement("option");
+            option.value = subtitle_id;
+            option.dataset.tokno_start = subtitles_json[subtitle_id][0];
+            option.dataset.tokno_end = subtitles_json[subtitle_id][1];
+            option.textContent = subtitles_json[subtitle_id][2];
+            subtitle_select.append(option);
+          }
+          subtitle_select.dispatchEvent(new Event('cookie_selection'));
 
           current_pageno = 1;
 
-          if(page_toknos_arr.length > 0) {
+          if(page_toknos_arr.length > 1) {
             document.getElementById("pagenos").addEventListener('click', selectText_splitup);
             document.getElementById("pagenos").addEventListener('keydown', selectText_splitup);
           }
