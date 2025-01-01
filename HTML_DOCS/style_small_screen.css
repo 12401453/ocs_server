@@ -1,10 +1,12 @@
 
    
-   @font-face { font-family: LiberationSerif; src: url('LiberationSerif-Regular.ttf'); }
-   @font-face {font-family: Bookerly; src: url('Bookerly.ttf'); }
-   @font-face {font-family: PT_Serif; src: url('PTSerif-Regular.ttf'); }
-   @font-face {font-family: IBM_Plex_Sans; src: url('IBMPlexSans-Regular.ttf'); }
-   @font-face {font-family: Calibri; src: url('calibri.ttf'); }
+   @font-face { font-family: LiberationSerif; src: local('Liberation Serif, Regular') ,url('LiberationSerif-Regular.ttf'); }
+   @font-face {font-family: Bookerly; src: local('Bookerly') ,url('Bookerly.ttf'); }
+   @font-face {font-family: Bukyvede; src: local('Bukyvede') ,url('BukyVede-Regular.ttf'); }
+   @font-face {font-family: Monomakh; src: local('Monomakh') ,url('MonomakhUnicode.ttf'); }
+   @font-face {font-family: PT_Serif; src: local('PT Serif'), url('PTSerif-Regular.ttf'); }
+   @font-face {font-family: IBM_Plex_Sans; src: local('IBM Plex Sans'), url('IBMPlexSans-Regular.ttf'); }
+   @font-face {font-family: Calibri; src: local('Calibri'), url('calibri.ttf'); }
    @font-face {font-family: Menaion; src: local('Menaion'), url('Menaion.ttf'); }
 
 body {
@@ -12,7 +14,7 @@ body {
 }
   
 p1 {
-  font-family: Bookerly; color: #cbd9f4;
+  font-family: Menaion; color: #cbd9f4;
   max-width: 100%;
   align-self: stretch;
 }
@@ -69,7 +71,7 @@ a {
 }
 
 .chunk {
-  white-space: nowrap;
+  /* white-space: nowrap; */
 }
 #new_text{
  /* margin-left: 7.3%;
@@ -118,7 +120,7 @@ a {
   border-radius: 2px;
   background-color: #071022;
   color: #c71f1f;
-  font-family: Calibri;
+  font-family: IBM_PLEX_SANS;
   top: 1px;
   position:relative;
   font-size: 10px;
@@ -669,7 +671,7 @@ a {
 
 #toplinks-flexbox {
   display: flex;
-  flex-flow: row wrap;
+  flex-flow: row nowrap;
   justify-content: flex-start;
   font-family: Calibri;
   background-color: #172136;
@@ -704,4 +706,22 @@ a {
 .toplink-buttons.current:hover {
   background-color: #040a16;
   color: #cbd9f4;
+}
+#topbar_placefiller {
+  /* width: -webkit-fill-available; */
+  width: 100%;
+}
+#theme_switcher {
+  width: 20px;
+  opacity: 85%;
+  font-size: 16px;
+  padding: 4px;
+  text-align: center;
+  user-select: none;
+  border-top-right-radius: 5px;
+  border-left: 1px solid black;
+  cursor: pointer;
+}
+#theme_switcher:hover{
+  opacity: 100%;
 }

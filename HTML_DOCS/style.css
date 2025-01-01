@@ -693,7 +693,7 @@ border-bottom: 2px solid rgb(23, 33, 54, 0);
 
 #toplinks-flexbox {
   display: flex;
-  flex-flow: row wrap;
+  flex-flow: row nowrap;
   justify-content: flex-start;
   font-family: "IBM_PLEX_SANS";
   background-color: #172136;
@@ -728,6 +728,25 @@ border-bottom: 2px solid rgb(23, 33, 54, 0);
 .toplink-buttons.current:hover {
   background-color: #040a16;
   color: #cbd9f4;
+}
+
+#topbar_placefiller {
+  /* width: -webkit-fill-available; */
+  width: 100%;
+}
+#theme_switcher {
+  width: 30px;
+  opacity: 85%;
+  font-size: 21px;
+  padding: 6px;
+  text-align: center;
+  user-select: none;
+  border-top-right-radius: 5px;
+  border-left: 1px solid black;
+  cursor: pointer;
+}
+#theme_switcher:hover{
+  opacity: 100%;
 }
 
 #edit-letter {

@@ -178,7 +178,7 @@ color: #670202;
   background-color: #f0c36dbd;
 }
 .toplink-buttons.current {
-  background-color: #d59110;
+  background-color: #f1ad2e;
   color: black;
 }
 .toplink-buttons:hover {
@@ -186,8 +186,16 @@ color: #670202;
   color: black;
 }
 .toplink-buttons.current:hover {
-  background-color: #d59110;
+  background-color: #f1ad2e;
   color: black;
+}
+
+#theme_switcher {
+  background-color: #f1ad2e;
+  color: black;
+}
+#theme_switcher:hover {
+  background-color: #f1ad2e;
 }
 
 #edit-letter {

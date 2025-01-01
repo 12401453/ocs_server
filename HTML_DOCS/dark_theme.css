@@ -189,6 +189,14 @@ color: #cbd9f4;
   color: #cbd9f4;
 }
 
+#theme_switcher {
+  background-color: #040a16;
+  color: #cbd9f4;
+}
+#theme_switcher:hover {
+  background-color: #040a16;
+}
+
 #edit-letter {
   border-right: 1px solid #172136;
 }
