@@ -1312,16 +1312,16 @@ bool OcsServer::retrieveText(std::string _POST[1], int clientSocket) {
         sqlite3_bind_int(statement, 1, text_id);
         sqlite3_step(statement);
         int first_subtitle_id = sqlite3_column_int(statement, 0);
-        int subtitle_tokno_start = sqlite3_column_int(statement, 1);
-        int subtitle_tokno_end = sqlite3_column_int(statement, 2);
+        int first_tokno_start = sqlite3_column_int(statement, 1);
+        int first_tokno_end = sqlite3_column_int(statement, 2);
         std::string subtitle_text = (const char*)sqlite3_column_text(statement, 3);
 
         std::ostringstream subtitle_toknos_json;
-        subtitle_toknos_json<< "{\"" << first_subtitle_id << "\":[" << subtitle_tokno_start << "," << subtitle_tokno_end << ",\"" << escapeQuotes(subtitle_text) << "\"" << "],";
+        subtitle_toknos_json<< "{\"" << first_subtitle_id << "\":[" << first_tokno_start << "," << first_tokno_end << ",\"" << escapeQuotes(subtitle_text) << "\"" << "],";
         while(sqlite3_step(statement) == SQLITE_ROW) {
             int subtitle_id = sqlite3_column_int(statement, 0);
-            subtitle_tokno_start = sqlite3_column_int(statement, 1);
-            subtitle_tokno_end = sqlite3_column_int(statement, 2);
+            int subtitle_tokno_start = sqlite3_column_int(statement, 1);
+            int subtitle_tokno_end = sqlite3_column_int(statement, 2);
             subtitle_text = (const char*)sqlite3_column_text(statement, 3);
 
             subtitle_toknos_json << "\"" << subtitle_id << "\":[" << subtitle_tokno_start << "," << subtitle_tokno_end << ",\"" << escapeQuotes(subtitle_text) << "\"" << "],";
@@ -1331,40 +1331,28 @@ bool OcsServer::retrieveText(std::string _POST[1], int clientSocket) {
 
         sqlite3_finalize(statement);
 
-        sql_text = "SELECT tokno_start, tokno_end FROM subtitles WHERE subtitle_id = ?";
-        sqlite3_prepare_v2(DB, sql_text, -1, &statement, NULL);
-        sqlite3_bind_int(statement, 1, first_subtitle_id);
-        sqlite3_step(statement);
-
-        int tokno_start = sqlite3_column_int(statement, 0);
-        int tokno_end = sqlite3_column_int(statement, 1);
-        sqlite3_finalize(statement);
-
         sql_text = "SELECT sentence_no, tokno FROM corpus WHERE rowid >= ? AND rowid <= ? GROUP BY sentence_no";
         sqlite3_prepare_v2(DB, sql_text, -1, &statement, NULL);
-        sqlite3_bind_int(statement, 1, tokno_start);
-        sqlite3_bind_int(statement, 2, tokno_end);
+        sqlite3_bind_int(statement, 1, first_tokno_start);
+        sqlite3_bind_int(statement, 2, first_tokno_end);
 
-        std::vector<int> page_toknos_vec;
-        page_toknos_vec.reserve(16);
-        page_toknos_vec.push_back(tokno_start);
+        int first_page_toknos[2] {first_tokno_start, 0};
         //I don't know whether the sentence_nos are guaranteed to be contiguous so I have to count each row rather than just do "last - first" to get the total number of sentences
-        page_toknos_arr << "[" << tokno_start;
+        //the way I am doing this means it will break if you delete (or insert, but that's impossible anyway) a token from within a text
+        page_toknos_arr << "[" << first_tokno_start;
         while(sqlite3_step(statement) == SQLITE_ROW) {
             int sentence_no = sqlite3_column_int(statement, 0);
             int sentence_start_tokno = sqlite3_column_int(statement, 1);
             sentence_count++;
 
-            std::cout << "sentence_count:" << sentence_count << "; sentences_per_page: " << sentences_per_page << "\n";
-
             if(sentence_count % sentences_per_page == 0) {
                 page_toknos_arr << "," << sentence_start_tokno - 1 << "],[" << sentence_start_tokno;
-                page_toknos_vec.push_back(sentence_start_tokno);
+                if(pageno_count == 1) first_page_toknos[1] = sentence_start_tokno;
                 pageno_count++;
             }
         }
-        page_toknos_vec.push_back(tokno_end + 1);
-        page_toknos_arr << "," << tokno_end << "]]";
+        if(pageno_count == 1) first_page_toknos[1] = first_tokno_end + 1;
+        page_toknos_arr << "," << first_tokno_end << "]]";
         m_page_toknos_arr = page_toknos_arr.str();
         m_pageno_count = pageno_count;
         sqlite3_finalize(statement);
@@ -1373,8 +1361,8 @@ bool OcsServer::retrieveText(std::string _POST[1], int clientSocket) {
 
         sql_text = "SELECT chu_word_torot, presentation_before, presentation_after, sentence_no FROM corpus WHERE tokno >= ? AND tokno <= ?"; // OR text_word = '\n')";
         sqlite3_prepare_v2(DB, sql_text, -1, &statement, NULL);
-        sqlite3_bind_int(statement, 1, page_toknos_vec[0]);
-        sqlite3_bind_int(statement, 2, page_toknos_vec[1]);
+        sqlite3_bind_int(statement, 1, first_page_toknos[0]);
+        sqlite3_bind_int(statement, 2, first_page_toknos[1] - 1);
         const char* chu_word_torot;
         const char* presentation_before;
         const char* presentation_after;
