@@ -29,7 +29,7 @@ int TcpListener::init() {
 
     FD_SET(m_socket, &m_master);
 
-    printf("m_socket is: %d\n", m_socket);
+    //printf("m_socket is: %d\n", m_socket);
 
     return 0;
 
@@ -50,7 +50,7 @@ int TcpListener::run() {
         }
         //select() modifies the master_copy variable so it only includes those file-descriptors (sockets) which are ready for I/O, in this case reading, which means on the second-pass of this loop the listening-socket is yeeted from master_copy and only the client-socket remains
 
-        printf("%s\n", "select() has returned");
+        //printf("%s\n", "select() has returned");
         for(int i = 0; i < FD_SETSIZE; i++) {
             int sock = i;//master_copy.fd_array[i];
 
@@ -75,7 +75,7 @@ int TcpListener::run() {
                 }
             }
         }
-        printf("looping through fd_set master_copy is complete\n");
+        //printf("looping through fd_set master_copy is complete\n");
     }
     return 0;
 }
@@ -104,7 +104,7 @@ void TcpListener::onMessageReceived(int clientSocket, const char* msg, int lengt
 }
 
 void TcpListener::onClientConnected(int clientSocket) {
-    printf("Client-socket of number %d connected\n", clientSocket);
+    //printf("Client-socket of number %d connected\n", clientSocket);
 
     fd_set connection_sockets;
     FD_ZERO(&connection_sockets); //I don't want this to be listening for new connections, so I am not including the listening-socket in it
@@ -147,5 +147,5 @@ void TcpListener::onClientConnected(int clientSocket) {
 }
 
 void TcpListener::onClientDisconnected(int clientSocket) {
-    printf("Client-socket of number %d has disconnected\n", clientSocket);
+    //printf("Client-socket of number %d has disconnected\n", clientSocket);
 }
