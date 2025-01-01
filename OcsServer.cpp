@@ -336,7 +336,7 @@ void OcsServer::insertTextSelect(std::ostringstream &html) {
         else {
             m_cookies[0] = std::to_string(cookie_text_id);
         }
-        html << "</select><select id=\"subtitle_select\" name=\"chapselect\" autocomplete=\"off\">";
+        html << "</select><select id=\"subtitle_select\" name=\"chapselect\" autocomplete=\"off\" style=\"width: 150px;\">";
 
         sql_text = "SELECT subtitle_id, subtitle_text, tokno_start, tokno_end FROM subtitles WHERE text_id = ?";
         sqlite3_prepare_v2(DB, sql_text, -1, &statement, NULL);
@@ -668,6 +668,9 @@ void OcsServer::handlePOSTedData(const char* post_data, int clientSocket) {
     if(!strcmp(m_url, "/get_lang_id.php")) {
         bool php_func_success = getLangId(post_values, clientSocket);
     }
+    else if(!strcmp(m_url, "/retrieve_subtitle.php")) {
+        bool php_func_success = retrieveTextSubtitle(post_values, clientSocket);
+    }
     else if(!strcmp(m_url, "/retrieve_engword.php")) {
         bool php_func_success = retrieveEngword(post_values, clientSocket);
     }
@@ -689,8 +692,8 @@ void OcsServer::handlePOSTedData(const char* post_data, int clientSocket) {
     else if(!strcmp(m_url, "/retrieve_text.php")) {
         bool php_func_success = retrieveText(post_values, clientSocket);
     }
-    else if(!strcmp(m_url, "/retrieve_text_splitup.php")) {
-        bool php_func_success = retrieveTextSplitup(post_values, clientSocket);
+    else if(!strcmp(m_url, "/retrieve_text_pageno.php")) {
+        bool php_func_success = retrieveTextPageNo(post_values, clientSocket);
     }
     else if(!strcmp(m_url, "/delete_text.php")) {
         bool php_func_success = deleteText(post_values, clientSocket);
@@ -761,9 +764,10 @@ void OcsServer::setURL(const char* msg) {
 
 int OcsServer::getPostFields(const char* url) {
     if(!strcmp(url, "/update_db.php")) return 3;
+    else if(!strcmp(url, "/retrieve_subtitle.php")) return 2;
     else if(!strcmp(url, "/lemma_tooltip.php")) return 2;
     else if(!strcmp(url, "/retrieve_text.php")) return 1;
-    else if(!strcmp(url, "/retrieve_text_splitup.php")) return 3;
+    else if(!strcmp(url, "/retrieve_text_pageno.php")) return 2;
     else if(!strcmp(url, "/get_lang_id.php")) return 1;
     else if(!strcmp(url, "/pull_lemma.php")) return 4;
     else if(!strcmp(url, "/lemma_record.php")) return 8;
@@ -1289,6 +1293,37 @@ bool OcsServer::lemmaTooltips(std::string _POST[2], int clientSocket) {
     }
 }
 
+void OcsServer::writeTextBody(std::ostringstream &html, sqlite3* DB, int tokno_start, int tokno_end) {
+    const char* sql_text = "SELECT chu_word_torot, presentation_before, presentation_after, sentence_no FROM corpus WHERE tokno >= ? AND tokno <= ?";
+    sqlite3_stmt* statement;
+    sqlite3_prepare_v2(DB, sql_text, -1, &statement, NULL);
+    sqlite3_bind_int(statement, 1, tokno_start);
+    sqlite3_bind_int(statement, 2, tokno_end);
+    const char* chu_word_torot;
+    const char* presentation_before;
+    const char* presentation_after;
+    int sentence_number_previous = 0;
+    int sentence_no_current = 0;
+
+    html << "<br><div id=\"textbody\">";
+    while(sqlite3_step(statement) == SQLITE_ROW) {
+        chu_word_torot = (const char*)sqlite3_column_text(statement, 0);
+        presentation_before = (const char*)sqlite3_column_text(statement, 1);
+        presentation_after = (const char*)sqlite3_column_text(statement, 2);
+        sentence_no_current = sqlite3_column_int(statement, 3);
+
+        if(sentence_number_previous > 0 && sentence_no_current != sentence_number_previous) {
+            html << "  |  ";
+        }
+
+        html << "<span class=\"chunk\">" << presentation_before << "<span class=\"tooltip\" data-sentence_no=\"" << sentence_no_current << "\">" << chu_word_torot << "</span>" << presentation_after << "</span>";
+        sentence_number_previous = sentence_no_current;
+
+    };
+    sqlite3_finalize(statement);
+    html << "</div>"; 
+}
+
 bool OcsServer::retrieveText(std::string _POST[1], int clientSocket) {
 
     int sentences_per_page = m_sentences_per_page;
@@ -1330,7 +1365,7 @@ bool OcsServer::retrieveText(std::string _POST[1], int clientSocket) {
 
         sqlite3_finalize(statement);
 
-        sql_text = "SELECT sentence_no, tokno FROM corpus WHERE rowid >= ? AND rowid <= ? GROUP BY sentence_no";
+        sql_text = "SELECT sentence_no, tokno FROM corpus WHERE rowid >= ? AND rowid <= ? GROUP BY sentence_no ORDER BY tokno";
         sqlite3_prepare_v2(DB, sql_text, -1, &statement, NULL);
         sqlite3_bind_int(statement, 1, first_tokno_start);
         sqlite3_bind_int(statement, 2, first_tokno_end);
@@ -1376,7 +1411,7 @@ bool OcsServer::retrieveText(std::string _POST[1], int clientSocket) {
             presentation_after = (const char*)sqlite3_column_text(statement, 2);
             sentence_no_current = sqlite3_column_int(statement, 3);
 
-            if(sentence_number_previous > 0 && sentence_no_current > sentence_number_previous) {
+            if(sentence_number_previous > 0 && sentence_no_current != sentence_number_previous) {
                 html << "  |  ";
             }
 
@@ -1432,97 +1467,74 @@ bool OcsServer::retrieveTextSubtitle(std::string _POST[2], int clientSocket) {
     std::ostringstream page_toknos_arr;
     page_toknos_arr << "[";
     int pageno_count = 1;
-    int sentence_count = 0;
+    float sentence_count = 0;
 
     sqlite3* DB;
     sqlite3_stmt* statement;
 
     if(!sqlite3_open("chu.db", &DB)) {
 
-        int text_id = safeStrToInt(_POST[0]);
+        int tokno_start = safeStrToInt(_POST[0]);
+        int tokno_end = safeStrToInt(_POST[1]);
 
         const char *sql_text;
 
-        sql_text = "SELECT subtitle_id, tokno_start, tokno_end, subtitle_text FROM subtitles WHERE text_id = ?";
+        sql_text = "SELECT sentence_no, tokno FROM corpus WHERE rowid >= ? AND rowid <= ? GROUP BY sentence_no ORDER BY tokno";
         sqlite3_prepare_v2(DB, sql_text, -1, &statement, NULL);
-        sqlite3_bind_int(statement, 1, text_id);
-        sqlite3_step(statement);
-        int first_subtitle_id = sqlite3_column_int(statement, 0);
-        int first_tokno_start = sqlite3_column_int(statement, 1);
-        int first_tokno_end = sqlite3_column_int(statement, 2);
-        std::string subtitle_text = (const char*)sqlite3_column_text(statement, 3);
+        sqlite3_bind_int(statement, 1, tokno_start);
+        sqlite3_bind_int(statement, 2, tokno_end);
 
-        std::ostringstream subtitle_toknos_json;
-        subtitle_toknos_json<< "{\"" << first_subtitle_id << "\":[" << first_tokno_start << "," << first_tokno_end << ",\"" << escapeQuotes(subtitle_text) << "\"" << "],";
-        while(sqlite3_step(statement) == SQLITE_ROW) {
-            int subtitle_id = sqlite3_column_int(statement, 0);
-            int subtitle_tokno_start = sqlite3_column_int(statement, 1);
-            int subtitle_tokno_end = sqlite3_column_int(statement, 2);
-            subtitle_text = (const char*)sqlite3_column_text(statement, 3);
-
-            subtitle_toknos_json << "\"" << subtitle_id << "\":[" << subtitle_tokno_start << "," << subtitle_tokno_end << ",\"" << escapeQuotes(subtitle_text) << "\"" << "],";
-        }
-        subtitle_toknos_json.seekp(-1, std::ios_base::cur);
-        subtitle_toknos_json << "}";
-
-        sqlite3_finalize(statement);
-
-        sql_text = "SELECT sentence_no, tokno FROM corpus WHERE rowid >= ? AND rowid <= ? GROUP BY sentence_no";
-        sqlite3_prepare_v2(DB, sql_text, -1, &statement, NULL);
-        sqlite3_bind_int(statement, 1, first_tokno_start);
-        sqlite3_bind_int(statement, 2, first_tokno_end);
-
-        int first_page_toknos[2] {first_tokno_start, 0};
+        int first_page_toknos[2] {tokno_start, 0};
         //I don't know whether the sentence_nos are guaranteed to be contiguous so I have to count each row rather than just do "last - first" to get the total number of sentences
         //the way I am doing this means it will break if you delete (or insert, but that's impossible anyway) a token from within a text
-        page_toknos_arr << "[" << first_tokno_start;
+        page_toknos_arr << "[" << tokno_start;
         while(sqlite3_step(statement) == SQLITE_ROW) {
             int sentence_no = sqlite3_column_int(statement, 0);
             int sentence_start_tokno = sqlite3_column_int(statement, 1);
             sentence_count++;
-
-            if(sentence_count % sentences_per_page == 0) {
+            float quotient = trunc(sentence_count / (float)sentences_per_page);
+            int remainder = (int)((sentence_count - (float)sentences_per_page*quotient));
+            if(remainder == 0) {
                 page_toknos_arr << "," << sentence_start_tokno - 1 << "],[" << sentence_start_tokno;
                 if(pageno_count == 1) first_page_toknos[1] = sentence_start_tokno;
                 pageno_count++;
             }
         }
-        if(pageno_count == 1) first_page_toknos[1] = first_tokno_end + 1;
-        page_toknos_arr << "," << first_tokno_end << "]]";
+        if(pageno_count == 1) first_page_toknos[1] = tokno_end + 1;
+        page_toknos_arr << "," << tokno_end << "]]";
         m_page_toknos_arr = page_toknos_arr.str();
         m_pageno_count = pageno_count;
         sqlite3_finalize(statement);
 
-        m_cookies[1] = "1";
-
-        sql_text = "SELECT chu_word_torot, presentation_before, presentation_after, sentence_no FROM corpus WHERE tokno >= ? AND tokno <= ?"; // OR text_word = '\n')";
-        sqlite3_prepare_v2(DB, sql_text, -1, &statement, NULL);
-        sqlite3_bind_int(statement, 1, first_page_toknos[0]);
-        sqlite3_bind_int(statement, 2, first_page_toknos[1] - 1);
-        const char* chu_word_torot;
-        const char* presentation_before;
-        const char* presentation_after;
-        int sentence_number_previous = 0;
-        int sentence_no_current = 0;
-
         std::ostringstream html;
-        html << "<br><div id=\"textbody\">";
-        while(sqlite3_step(statement) == SQLITE_ROW) {
-            chu_word_torot = (const char*)sqlite3_column_text(statement, 0);
-            presentation_before = (const char*)sqlite3_column_text(statement, 1);
-            presentation_after = (const char*)sqlite3_column_text(statement, 2);
-            sentence_no_current = sqlite3_column_int(statement, 3);
+        writeTextBody(html, DB, first_page_toknos[0], first_page_toknos[1] - 1);
 
-            if(sentence_number_previous > 0 && sentence_no_current > sentence_number_previous) {
-                html << "  |  ";
-            }
+        // sql_text = "SELECT chu_word_torot, presentation_before, presentation_after, sentence_no FROM corpus WHERE tokno >= ? AND tokno <= ?";
+        // sqlite3_prepare_v2(DB, sql_text, -1, &statement, NULL);
+        // sqlite3_bind_int(statement, 1, first_page_toknos[0]);
+        // sqlite3_bind_int(statement, 2, first_page_toknos[1] - 1);
+        // const char* chu_word_torot;
+        // const char* presentation_before;
+        // const char* presentation_after;
+        // int sentence_number_previous = 0;
+        // int sentence_no_current = 0;
+        // html << "<br><div id=\"textbody\">";
+        // while(sqlite3_step(statement) == SQLITE_ROW) {
+        //     chu_word_torot = (const char*)sqlite3_column_text(statement, 0);
+        //     presentation_before = (const char*)sqlite3_column_text(statement, 1);
+        //     presentation_after = (const char*)sqlite3_column_text(statement, 2);
+        //     sentence_no_current = sqlite3_column_int(statement, 3);
 
-            html << "<span class=\"chunk\">" << presentation_before << "<span class=\"tooltip\" data-sentence_no=\"" << sentence_no_current << "\">" << chu_word_torot << "</span>" << presentation_after << "</span>";
-            sentence_number_previous = sentence_no_current;
+        //     if(sentence_number_previous > 0 && sentence_no_current > sentence_number_previous) {
+        //         html << "  |  ";
+        //     }
 
-        };
-        sqlite3_finalize(statement);
-        html << "</div>";       
+        //     html << "<span class=\"chunk\">" << presentation_before << "<span class=\"tooltip\" data-sentence_no=\"" << sentence_no_current << "\">" << chu_word_torot << "</span>" << presentation_after << "</span>";
+        //     sentence_number_previous = sentence_no_current;
+
+        // };
+        // sqlite3_finalize(statement);
+        // html << "</div>";       
 
         if(pageno_count > 1) {
             html << "<br><br><div id='pageno_footer'><div id=\"pagenos\">";
@@ -1542,14 +1554,11 @@ bool OcsServer::retrieveTextSubtitle(std::string _POST[2], int clientSocket) {
         std::cout << m_page_toknos_arr << "\n";
 
         std::stringstream json_response_ss;
-        json_response_ss << "{\"html\":\"" << escapeQuotes(html.str()) << "\",\"pagenos\":" << page_toknos_arr.str() << ",\"subtitles_json\":" << subtitle_toknos_json.str() << "}";
+        json_response_ss << "{\"html\":\"" << escapeQuotes(html.str()) << "\",\"pagenos\":" << page_toknos_arr.str() << "}";
 
         int content_length = json_response_ss.str().size();
         std::ostringstream post_response_ss;
-        post_response_ss << "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: " << content_length << "\r\n";
-        post_response_ss << "Set-Cookie: text_id=" << text_id << "; Max-Age=157680000\r\n";
-        post_response_ss << "Set-Cookie: subtitle_id=" << first_subtitle_id << "; Max-Age=157680000\r\n";
-        post_response_ss << "Set-Cookie: current_pageno=1; Max-Age=157680000\r\n\r\n" << json_response_ss.str();
+        post_response_ss << "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: " << content_length << "\r\n\r\n" << json_response_ss.str();
         int length = post_response_ss.str().size() + 1;
         sendToClient(clientSocket, post_response_ss.str().c_str(), length);
 
@@ -1563,128 +1572,61 @@ bool OcsServer::retrieveTextSubtitle(std::string _POST[2], int clientSocket) {
         return false;
     }
 }
+bool OcsServer::retrieveTextPageNo(std::string _POST[2], int clientSocket) {
 
-bool OcsServer::retrieveTextSplitup(std::string _POST[3], int clientSocket) {
-    UErrorCode status = U_ZERO_ERROR;
-    sqlite3 *DB;
-    sqlite3_stmt *statement;
+    sqlite3* DB;
+    sqlite3_stmt* statement;
 
-    std::ostringstream html;
+    if(!sqlite3_open("chu.db", &DB)) {
 
-    if(!sqlite3_open(m_DB_path, &DB)) {
+        int tokno_start = safeStrToInt(_POST[0]);
+        int tokno_end = safeStrToInt(_POST[1]);
 
-        int prep_code, run_code;
         const char *sql_text;
 
-        sqlite3_int64 dt_start = std::stol(_POST[0]);
-        sqlite3_int64 dt_end = std::stol(_POST[1]);
-        int page_cur = std::stoi(_POST[2]);
+        std::ostringstream html;
+        writeTextBody(html, DB, tokno_start, tokno_end);
 
-        if(page_cur == 1) {
-            html << "&emsp;";
-        }
+        // sql_text = "SELECT chu_word_torot, presentation_before, presentation_after, sentence_no FROM corpus WHERE tokno >= ? AND tokno <= ?";
+        // sqlite3_prepare_v2(DB, sql_text, -1, &statement, NULL);
+        // sqlite3_bind_int(statement, 1, first_page_toknos[0]);
+        // sqlite3_bind_int(statement, 2, first_page_toknos[1] - 1);
+        // const char* chu_word_torot;
+        // const char* presentation_before;
+        // const char* presentation_after;
+        // int sentence_number_previous = 0;
+        // int sentence_no_current = 0;
+        // html << "<br><div id=\"textbody\">";
+        // while(sqlite3_step(statement) == SQLITE_ROW) {
+        //     chu_word_torot = (const char*)sqlite3_column_text(statement, 0);
+        //     presentation_before = (const char*)sqlite3_column_text(statement, 1);
+        //     presentation_after = (const char*)sqlite3_column_text(statement, 2);
+        //     sentence_no_current = sqlite3_column_int(statement, 3);
 
-        sql_text = "SELECT * FROM display_text WHERE tokno >= ? AND tokno <= ?";
-        prep_code = sqlite3_prepare_v2(DB, sql_text, -1, &statement, NULL);
-        sqlite3_bind_int64(statement, 1, dt_start);
-        sqlite3_bind_int64(statement, 2, dt_end);
-        // run_code = sqlite3_step(statement);
+        //     if(sentence_number_previous > 0 && sentence_no_current > sentence_number_previous) {
+        //         html << "  |  ";
+        //     }
 
-        int chunk_count{1}; //I just need to make sure that the conditions needed to increment this number are the same in the code which writes out the HTML as they are in the code that works out where the page-breaks should be.
-        float words_per_page{750};
-        sqlite3_int64 tokno;
-        int space, word_engine_id, lemma_meaning_no, lemma_id;
+        //     html << "<span class=\"chunk\">" << presentation_before << "<span class=\"tooltip\" data-sentence_no=\"" << sentence_no_current << "\">" << chu_word_torot << "</span>" << presentation_after << "</span>";
+        //     sentence_number_previous = sentence_no_current;
 
-        sqlite3_stmt *stmt;
-        const char *sql_word_eng = "SELECT first_lemma_id FROM word_engine WHERE word_engine_id = ?";
-        sqlite3_prepare_v2(DB, sql_word_eng, -1, &stmt, NULL);
-        int first_lemma_id;
-        const char *text_word;
+        // };
+        // sqlite3_finalize(statement);
+        // html << "</div>";       
 
-        //bool newline = false;
-        //bool following_a_space = true;
-        html << "<span class=\"chunk\">";
-        while(sqlite3_step(statement) == SQLITE_ROW && chunk_count <= words_per_page) {
-            tokno = sqlite3_column_int64(statement, 0);
-            space = sqlite3_column_int(statement, 2);
-            word_engine_id = sqlite3_column_int(statement, 3);
-            text_word = (const char*)sqlite3_column_text(statement, 1);
-            
-
-            if(word_engine_id) {
-                lemma_id = sqlite3_column_int(statement, 5);
-                // lemma_meaning_no = sqlite3_column_int(statement, 4); //lemma_meaning_no is not used, probably should get rid
-                int multiword_id = sqlite3_column_int(statement, 6);
-                
-                sqlite3_bind_int(stmt, 1, word_engine_id);
-                sqlite3_step(stmt);
-                first_lemma_id = sqlite3_column_int(stmt, 0);
-                sqlite3_reset(stmt);
-
-                html <<  "<span data-word_engine_id=\"" << word_engine_id << "\" data-tokno=\"" << tokno << "\" class=\"tooltip";
-                if(lemma_id) {
-                    html << " lemma_set_unexplicit lemma_set";
-                }
-                else if(first_lemma_id) {
-                    html << " lemma_set_unexplicit";
-                }
-                if(multiword_id) {
-                    int multiword_count  = sqlite3_column_int(statement, 8);
-                    html << " multiword\" data-multiword=\"" << multiword_count;
-                }
-                html << "\">";
-            }
-            else {
-                //needed only for legacy texts - should alter the database manually to bring it in line with new addTexts() function really
-               /* if(!strcmp(text_word, "\n")) {
-                    text_word = "<br></span><span class=\"chunk\">";
-                    if(space == 0) chunk_count++;
-                } */
-                // ^^
-
-                /* else{
-                icu::UnicodeString textword_icu = text_word;
-                std::string textword_str;
-                if(c_strFind(text_word, "¬") != -1) {
-                    textword_icu.findAndReplace("¬", "'");
-                }
-                textword_icu.toUTF8String(textword_str);
-                text_word = textword_str.c_str();} */
-            }
-            html << text_word;
-            if(word_engine_id) {
-                html << "</span>";
-            }
-            
-            if(space > 0) {
-                if(space == 1) {
-                    html << "</span> <span class=\"chunk\">";
-                }
-                else {
-                    html << "</span>";
-                    for(int i = 1; i < space; i++) {
-                        html << "<br>";
-                    }
-                    html << "<span class=\"chunk\">";
-                }
-                chunk_count++;
-            }
-        }
-        sqlite3_finalize(statement);
-        sqlite3_finalize(stmt);
-        sqlite3_close(DB);
-        std::string content_str = html.str();
-        int content_length = content_str.size();
-
+        int content_length = html.str().size();
         std::ostringstream post_response_ss;
-        post_response_ss << "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: " << content_length << "\r\n" << "Set-Cookie: current_pageno=" << page_cur << "; Max-Age=157680000\r\n\r\n" << content_str;
+        post_response_ss << "HTTP/1.1 200 OK\r\nContent-Type: text/html;charset=UTF-8\r\nContent-Length: " << content_length << "\r\n\r\n" << html.str();
         int length = post_response_ss.str().size() + 1;
         sendToClient(clientSocket, post_response_ss.str().c_str(), length);
-        std::cout << "Sent text to client" << std::endl;
+
+        sqlite3_close(DB);
         return true;
+
     }
-    else {
-        std::cout << "Database connection failed on retrieveTextSplitup()\n";
+    else {       
+        
+        std::cout << "Database connection failed on retrieveTextSubtitle()<br><br>\n";
         return false;
     }
 }
@@ -1751,7 +1693,8 @@ void OcsServer::void_retrieveText(std::ostringstream &html) {
         int tokno_end = sqlite3_column_int(statement, 1);
         sqlite3_finalize(statement);
 
-        sql_text = "SELECT sentence_no, tokno FROM corpus WHERE rowid >= ? AND rowid <= ? GROUP BY sentence_no";
+        //the sentence_nos are not in any guaranteed order
+        sql_text = "SELECT sentence_no, tokno FROM corpus WHERE rowid >= ? AND rowid <= ? GROUP BY sentence_no ORDER BY tokno";
         sqlite3_prepare_v2(DB, sql_text, -1, &statement, NULL);
         sqlite3_bind_int(statement, 1, tokno_start);
         sqlite3_bind_int(statement, 2, tokno_end);
@@ -1802,7 +1745,7 @@ void OcsServer::void_retrieveText(std::ostringstream &html) {
             presentation_after = (const char*)sqlite3_column_text(statement, 2);
             sentence_no_current = sqlite3_column_int(statement, 3);
 
-            if(sentence_number_previous > 0 && sentence_no_current > sentence_number_previous) {
+            if(sentence_number_previous > 0 && sentence_no_current != sentence_number_previous) {
                 html << "  |  ";
             }
 

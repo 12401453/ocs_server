@@ -15,3 +15,5 @@ I could use the extreme-cleaned Cyrillic version as something to base search off
 
 
 Some of the Vitas in Suprasliensis are too long for me to want to display on one page (since loading-times will scale linearly with the amount of words, given how much auxiliary information I will be getting the server to wrap each word in), so my pagination-strategy will have to be: only display the page-number widget at the bottom if a sub-text is over a certain number of sentences: if it is then just display a page-number widget for that sub-text; the idea that we could have a page-number browser for the whole manuscript doesnt really work because then different sub-texts will end up getting displayed on the same page and I don't know what I'd make the subtext-dropdown menu display in cases like that. If you want a different sub-text you have to use the dropdown, and if a subtext is too long you can navigate around in it using the page-numbers.
+
+for some reason only 30 sentences get displayed on pg.1 of texts but subsequent pages have 31 sentences; it must be a bug in how the page_nos_arr array is built, but it isn't really very important

@@ -145,6 +145,7 @@ a {
   flex-flow: row nowrap;
   justify-content: start;
   margin-top: 20px;
+  margin-left: 2%;
   max-width: 50%;
 }
 #textselect_box {
@@ -156,7 +157,6 @@ a {
 #textselect, #langselect {
   border-radius: 4px;
   z-index: 1;
-  color: #cbd9f4;
   font-family: "IBM_PLEX_SANS";
   padding: 5px;
   font-size: 18px;
@@ -169,7 +169,6 @@ a {
 #subtitle_select {
   border-radius: 4px;
   z-index: 1;
-  color: #cbd9f4;
   font-family: "IBM_PLEX_SANS";
   padding: 5px;
   font-size: 18px;

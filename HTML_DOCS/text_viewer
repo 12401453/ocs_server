@@ -40,9 +40,8 @@
   
   
   <div id="text_labels_box">
-    <div id="textselect_labels" style="width: 20px;"></div>
     <div id="textselect_box">
-      <select id="textselect" name="textselect" autocomplete="off" onchange="selectText()" style="width: 100px;">
+      <select id="textselect" name="textselect" autocomplete="off" onchange="selectText()" style="width: 150px;">
         <?php ?>
       <!--</select>
     
@@ -93,6 +92,8 @@ textselector.addEventListener('input', textselect_resize);
 textselector.addEventListener('cookie_selection', textselect_resize);
 subtitleselector.addEventListener('input', textselect_resize);
 subtitleselector.addEventListener('cookie_selection', textselect_resize);
+
+subtitleselector.addEventListener('change', selectSubtitle);
 
 
 

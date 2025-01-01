@@ -148,17 +148,42 @@ a {
 
 }
 
+#text_labels_box {
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: start;
+  margin-top: 15px;
+  margin-left: 2%;
+  max-width: 50%;
+}
+#textselect_box {
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: start;
+}
+
 #textselect, #langselect {
   border-radius: 3px;
   z-index: 1;
-  color: #cbd9f4;
   font-family: Calibri;
+  padding: 3px;
+  font-size: 13px;
+  font-weight: bold;
+  min-width: 40px;
+  max-width: 100%;
+  margin-right: 7px;
+  margin-bottom: 4px;
+}
+#subtitle_select {
+  border-radius: 4px;
+  z-index: 1;
+  font-family: "IBM_PLEX_SANS";
   padding: 3px;
   font-size: 13px;
   min-width: 40px;
   max-width: 100%;
-
-} 
+  margin-bottom: 4px;
+}
 
 #hidden_select {
 

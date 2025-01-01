@@ -56,6 +56,7 @@ class OcsServer : public TcpListener {
         bool lemmaTooltipsMW(std::string _POST[3], int clientSocket);
         bool retrieveText(std::string text_id[1], int clientSocket);
         bool retrieveTextSubtitle(std::string text_id[2], int clientSocket);
+        bool retrieveTextPageNo(std::string text_id[2], int clientSocket);
         void void_retrieveText(std::ostringstream &html);
         bool retrieveTextSplitup(std::string _POST[3], int clientSocket);
         bool retrieveEngword(std::string _POST[3], int clientSocket);
@@ -86,6 +87,8 @@ class OcsServer : public TcpListener {
         std::string URIDecode(std::string &text);
         std::string htmlspecialchars(const std::string &innerHTML);
         std::string escapeQuotes(const std::string &quoteystring);
+
+        void writeTextBody(std::ostringstream& html, sqlite3* DB, int tokno_start, int tokno_end);
 
         const char*         m_post_data;
         std::string         m_post_data_incomplete;
