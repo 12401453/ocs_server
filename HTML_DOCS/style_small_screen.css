@@ -53,6 +53,7 @@ a {
 
 #textbody {
  font-size: 17px;
+ line-height: 150%;
 }
 
 #whole_text {
@@ -161,7 +162,7 @@ a {
 
 #hidden_select {
 
-  visibility: hidden; position: fixed; font-family: Calibri; font-size: 13px; padding: 3px;
+  visibility: hidden; position: fixed;
 }
 
 #newtext {

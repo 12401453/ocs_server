@@ -1291,7 +1291,6 @@ bool OcsServer::lemmaTooltips(std::string _POST[2], int clientSocket) {
 
 bool OcsServer::retrieveText(std::string _POST[1], int clientSocket) {
 
-
     int sentences_per_page = m_sentences_per_page;
     std::ostringstream page_toknos_arr;
     page_toknos_arr << "[";
@@ -1424,6 +1423,143 @@ bool OcsServer::retrieveText(std::string _POST[1], int clientSocket) {
     else {       
         
         std::cout << "Database connection failed on retrieveText()<br><br>\n";
+        return false;
+    }
+}
+bool OcsServer::retrieveTextSubtitle(std::string _POST[2], int clientSocket) {
+
+    int sentences_per_page = m_sentences_per_page;
+    std::ostringstream page_toknos_arr;
+    page_toknos_arr << "[";
+    int pageno_count = 1;
+    int sentence_count = 0;
+
+    sqlite3* DB;
+    sqlite3_stmt* statement;
+
+    if(!sqlite3_open("chu.db", &DB)) {
+
+        int text_id = safeStrToInt(_POST[0]);
+
+        const char *sql_text;
+
+        sql_text = "SELECT subtitle_id, tokno_start, tokno_end, subtitle_text FROM subtitles WHERE text_id = ?";
+        sqlite3_prepare_v2(DB, sql_text, -1, &statement, NULL);
+        sqlite3_bind_int(statement, 1, text_id);
+        sqlite3_step(statement);
+        int first_subtitle_id = sqlite3_column_int(statement, 0);
+        int first_tokno_start = sqlite3_column_int(statement, 1);
+        int first_tokno_end = sqlite3_column_int(statement, 2);
+        std::string subtitle_text = (const char*)sqlite3_column_text(statement, 3);
+
+        std::ostringstream subtitle_toknos_json;
+        subtitle_toknos_json<< "{\"" << first_subtitle_id << "\":[" << first_tokno_start << "," << first_tokno_end << ",\"" << escapeQuotes(subtitle_text) << "\"" << "],";
+        while(sqlite3_step(statement) == SQLITE_ROW) {
+            int subtitle_id = sqlite3_column_int(statement, 0);
+            int subtitle_tokno_start = sqlite3_column_int(statement, 1);
+            int subtitle_tokno_end = sqlite3_column_int(statement, 2);
+            subtitle_text = (const char*)sqlite3_column_text(statement, 3);
+
+            subtitle_toknos_json << "\"" << subtitle_id << "\":[" << subtitle_tokno_start << "," << subtitle_tokno_end << ",\"" << escapeQuotes(subtitle_text) << "\"" << "],";
+        }
+        subtitle_toknos_json.seekp(-1, std::ios_base::cur);
+        subtitle_toknos_json << "}";
+
+        sqlite3_finalize(statement);
+
+        sql_text = "SELECT sentence_no, tokno FROM corpus WHERE rowid >= ? AND rowid <= ? GROUP BY sentence_no";
+        sqlite3_prepare_v2(DB, sql_text, -1, &statement, NULL);
+        sqlite3_bind_int(statement, 1, first_tokno_start);
+        sqlite3_bind_int(statement, 2, first_tokno_end);
+
+        int first_page_toknos[2] {first_tokno_start, 0};
+        //I don't know whether the sentence_nos are guaranteed to be contiguous so I have to count each row rather than just do "last - first" to get the total number of sentences
+        //the way I am doing this means it will break if you delete (or insert, but that's impossible anyway) a token from within a text
+        page_toknos_arr << "[" << first_tokno_start;
+        while(sqlite3_step(statement) == SQLITE_ROW) {
+            int sentence_no = sqlite3_column_int(statement, 0);
+            int sentence_start_tokno = sqlite3_column_int(statement, 1);
+            sentence_count++;
+
+            if(sentence_count % sentences_per_page == 0) {
+                page_toknos_arr << "," << sentence_start_tokno - 1 << "],[" << sentence_start_tokno;
+                if(pageno_count == 1) first_page_toknos[1] = sentence_start_tokno;
+                pageno_count++;
+            }
+        }
+        if(pageno_count == 1) first_page_toknos[1] = first_tokno_end + 1;
+        page_toknos_arr << "," << first_tokno_end << "]]";
+        m_page_toknos_arr = page_toknos_arr.str();
+        m_pageno_count = pageno_count;
+        sqlite3_finalize(statement);
+
+        m_cookies[1] = "1";
+
+        sql_text = "SELECT chu_word_torot, presentation_before, presentation_after, sentence_no FROM corpus WHERE tokno >= ? AND tokno <= ?"; // OR text_word = '\n')";
+        sqlite3_prepare_v2(DB, sql_text, -1, &statement, NULL);
+        sqlite3_bind_int(statement, 1, first_page_toknos[0]);
+        sqlite3_bind_int(statement, 2, first_page_toknos[1] - 1);
+        const char* chu_word_torot;
+        const char* presentation_before;
+        const char* presentation_after;
+        int sentence_number_previous = 0;
+        int sentence_no_current = 0;
+
+        std::ostringstream html;
+        html << "<br><div id=\"textbody\">";
+        while(sqlite3_step(statement) == SQLITE_ROW) {
+            chu_word_torot = (const char*)sqlite3_column_text(statement, 0);
+            presentation_before = (const char*)sqlite3_column_text(statement, 1);
+            presentation_after = (const char*)sqlite3_column_text(statement, 2);
+            sentence_no_current = sqlite3_column_int(statement, 3);
+
+            if(sentence_number_previous > 0 && sentence_no_current > sentence_number_previous) {
+                html << "  |  ";
+            }
+
+            html << "<span class=\"chunk\">" << presentation_before << "<span class=\"tooltip\" data-sentence_no=\"" << sentence_no_current << "\">" << chu_word_torot << "</span>" << presentation_after << "</span>";
+            sentence_number_previous = sentence_no_current;
+
+        };
+        sqlite3_finalize(statement);
+        html << "</div>";       
+
+        if(pageno_count > 1) {
+            html << "<br><br><div id='pageno_footer'><div id=\"pagenos\">";
+            html << "<div id=\"pageno_leftarrow\" class=\"nav_arrow\">&lt;</div>";
+            html << "<textarea id=\"pageno_box\" spellcheck=\"false\" autocomplete=\"off\">";
+            html << "1";
+            html << "</textarea>";
+            html << "<div class=\"pageno_text\" style=\"width: 40px;\">of</div>";
+            html << "<div class=\"pageno_text\">" << pageno_count << "</div>";
+            
+            html << "<div id=\"pageno_rightarrow\" class=\"nav_arrow\">&gt;</div>";             
+            html << "</div></div>";
+        }
+        else {
+            html << "<br>";
+        }
+        std::cout << m_page_toknos_arr << "\n";
+
+        std::stringstream json_response_ss;
+        json_response_ss << "{\"html\":\"" << escapeQuotes(html.str()) << "\",\"pagenos\":" << page_toknos_arr.str() << ",\"subtitles_json\":" << subtitle_toknos_json.str() << "}";
+
+        int content_length = json_response_ss.str().size();
+        std::ostringstream post_response_ss;
+        post_response_ss << "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: " << content_length << "\r\n";
+        post_response_ss << "Set-Cookie: text_id=" << text_id << "; Max-Age=157680000\r\n";
+        post_response_ss << "Set-Cookie: subtitle_id=" << first_subtitle_id << "; Max-Age=157680000\r\n";
+        post_response_ss << "Set-Cookie: current_pageno=1; Max-Age=157680000\r\n\r\n" << json_response_ss.str();
+        int length = post_response_ss.str().size() + 1;
+        sendToClient(clientSocket, post_response_ss.str().c_str(), length);
+
+        sqlite3_close(DB);
+        return true;
+
+    }
+    else {       
+        
+        std::cout << "Database connection failed on retrieveTextSubtitle()<br><br>\n";
         return false;
     }
 }

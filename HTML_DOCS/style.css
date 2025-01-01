@@ -45,7 +45,8 @@ a {
   
 }
 #textbody {
-font-size: 23px;
+  font-size: 23px;
+  line-height: 150%;
 }
 
 #whole_text {

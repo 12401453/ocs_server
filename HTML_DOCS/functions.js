@@ -58,8 +58,6 @@ let page_toknos_arr = [];
 let current_pageno = 1;
 let dt_end = 0;
 
-//DELETE
-let res_json = {};
 function selectText() {
   if(displayWordEditor.edit_mode) {
     displayWordEditor.stopEditing();
@@ -137,6 +135,70 @@ function selectText() {
 }
 
   httpRequest("POST", "retrieve_text.php");
+
+}
+function selectSubtitle() {
+  if(displayWordEditor.edit_mode) {
+    displayWordEditor.stopEditing();
+  }
+  if(display_word != null) delAnnotate();
+  //setLangId();  //not async safe, needs to change
+
+  let loadingbutton = document.createElement('div');
+  loadingbutton.innerHTML = "Loading...";
+  loadingbutton.id = 'loadingbutton';
+  document.getElementById('spoofspan').after(loadingbutton);
+
+  let textselect_value = document.getElementById('textselect').value;
+  let post_data = "textselect="+textselect_value;
+  console.log(post_data);
+  const httpRequest = (method, url) => {
+
+     
+      const para1 = document.getElementById('p1');
+
+      const xhttp = new XMLHttpRequest();
+      xhttp.open(method, url, true);
+      xhttp.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+      xhttp.responseType = 'json';
+
+      xhttp.onreadystatechange = () => {
+      
+        if(xhttp.readyState == 4) {
+          para1.innerHTML = xhttp.response["html"];
+          page_toknos_arr = xhttp.response["pagenos"];
+
+          current_pageno = 1;
+
+          if(page_toknos_arr.length > 1) {
+            document.getElementById("pagenos").addEventListener('click', selectText_splitup);
+            document.getElementById("pagenos").addEventListener('keydown', selectText_splitup);
+          }
+         
+          document.getElementById("textbody").addEventListener('click', showAnnotate);
+
+          document.querySelectorAll('.multiword').forEach(mw => {
+            mw.addEventListener('click', showMultiwordAnnotate);
+            mw.addEventListener('mouseover', underlineMultiwords);
+            mw.addEventListener('mouseout', removeUnderlineMultiwords);
+          });
+          
+          if(tooltips_shown) {
+            lemmaTooltipMW();
+          }
+          document.getElementById("textselect").blur();
+          loadingbutton.remove();
+          
+
+        }
+     
+      }
+
+      xhttp.send(post_data);
+
+}
+
+  httpRequest("POST", "retrieve_subtitle.php");
 
 }
 
