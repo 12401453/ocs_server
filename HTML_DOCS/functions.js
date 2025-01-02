@@ -38,10 +38,11 @@ function selectText() {
   if(display_word != null) delAnnotate();
   //setLangId();  //not async safe, needs to change
 
-  let loadingbutton = document.createElement('div');
-  loadingbutton.innerHTML = "Loading...";
-  loadingbutton.id = 'loadingbutton';
-  document.getElementById('spoofspan').after(loadingbutton);
+  // let loadingbutton = document.createElement('div');
+  // loadingbutton.innerHTML = "Loading...";
+  // loadingbutton.id = 'loadingbutton';
+  // document.getElementById('spoofspan').after(loadingbutton);
+  showLoadingButton();
 
   let textselect_value = document.getElementById('textselect').value;
   let post_data = "textselect="+textselect_value;
@@ -93,8 +94,8 @@ function selectText() {
             lemmaTooltipMW();
           }
           document.getElementById("textselect").blur();
-          loadingbutton.remove();
-          
+          //loadingbutton.remove();
+          removeLoadingButton();
         }
      
       }
@@ -111,10 +112,12 @@ const selectSubtitle = (event) => {
   if(display_word != null) delAnnotate();
   //setLangId();  //not async safe, needs to change
 
-  let loadingbutton = document.createElement('div');
-  loadingbutton.innerHTML = "Loading...";
-  loadingbutton.id = 'loadingbutton';
-  document.getElementById('spoofspan').after(loadingbutton);
+  // let loadingbutton = document.createElement('div');
+  // loadingbutton.innerHTML = "Loading...";
+  // loadingbutton.id = 'loadingbutton';
+  // document.getElementById('spoofspan').after(loadingbutton);
+
+  showLoadingButton();
 
   const select_element = event.target;
   const tokno_start = select_element.options[select_element.selectedIndex].dataset.tokno_start;
@@ -158,8 +161,9 @@ const selectSubtitle = (event) => {
           if(tooltips_shown) {
             lemmaTooltipMW();
           }
-          document.getElementById("textselect").blur();
-          loadingbutton.remove();
+          document.getElementById("subtitle_select").blur();
+          //loadingbutton.remove();
+          removeLoadingButton();
           
 
         }
@@ -210,14 +214,22 @@ const convertMorphTag = (morph_tag) => {
   return morph_string.trim();
 };
 
+const load_spinner = document.createElement("div");
+load_spinner.id = "load_spinner";
+
 const showLoadingButton = () => {
-  let loadingbutton = document.createElement('div');
-  loadingbutton.innerHTML = "Loading...";
-  loadingbutton.id = 'loadingbutton';
-  document.getElementById('spoofspan').after(loadingbutton);
+  // let loadingbutton = document.createElement('div');
+  // loadingbutton.innerHTML = "Loading...";
+  // loadingbutton.id = 'loadingbutton';
+  // document.getElementById('spoofspan').after(loadingbutton);
+  
+  document.getElementById("textbody").style.opacity = "50%";
+  document.body.append(load_spinner);
 };
 const removeLoadingButton = () => {
-  document.getElementById("loadingbutton").remove();
+  //document.getElementById("loadingbutton").remove();
+  document.getElementById("textbody").style.opacity = "";
+  document.getElementById("load_spinner").remove();
 };
 
 const selectText_splitup = (event) => {
@@ -256,10 +268,11 @@ const selectText_splitup = (event) => {
   }
   if(display_word != null) delAnnotate();
 
-  let loadingbutton = document.createElement('div');
-  loadingbutton.innerHTML = "Loading...";
-  loadingbutton.id = 'loadingbutton';
-  document.getElementById('spoofspan').after(loadingbutton);
+  // let loadingbutton = document.createElement('div');
+  // loadingbutton.innerHTML = "Loading...";
+  // loadingbutton.id = 'loadingbutton';
+  // document.getElementById('spoofspan').after(loadingbutton);
+  showLoadingButton();
 
   const tokno_start = page_toknos_arr[new_pageno - 1][0];
   const tokno_end = page_toknos_arr[new_pageno - 1][1];
@@ -291,7 +304,8 @@ const selectText_splitup = (event) => {
           if(tooltips_shown) {
             lemmaTooltipMW();
           }
-          loadingbutton.remove();
+          //loadingbutton.remove();
+          removeLoadingButton();
           if(new_pageno > current_pageno) {
             document.getElementById("textselect").scrollIntoView();
           }

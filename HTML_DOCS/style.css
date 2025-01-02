@@ -11,11 +11,14 @@ html {
   overflow-y: scroll;
 }
 
-p1 {
-  font-family: Menaion; color: #cbd9f4;
-  max-width: 100%;
-  align-self: stretch;
+body {
+  margin: 0px;
+  padding: 0px;
+}
 
+#p1 {
+  font-family: Menaion;
+  max-width: 100%;
 }
 
 a {
@@ -51,6 +54,7 @@ a {
 #textbody {
   font-size: 23px;
   line-height: 150%;
+  position: relative;
 }
 
 #whole_text {
@@ -777,4 +781,28 @@ border-bottom: 2px solid rgb(23, 33, 54, 0);
   100% { 
     border-left: 1px solid #172136;
   }
+}
+
+/* OCS SERVER NEWER STUFF */
+#load_spinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border: 3px solid #cbd9f487;
+  border-radius: 50%;
+  border-top: 3px solid #071022;
+  border-top: 3px solid #071022;
+  width: 90px;
+  height: 90px;
+  -webkit-animation: spin 1s linear infinite; /* Safari */
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  0% { transform: translate(-50%, -50%) rotate(0deg); }
+  100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+@-webkit-keyframes spin {
+  0% { -webkit-transform: translate(-50%, -50%) rotate(0deg); }
+  100% { -webkit-transform: translate(-50%, -50%) rotate(360deg); }
 }

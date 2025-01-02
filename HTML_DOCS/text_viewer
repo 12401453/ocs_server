@@ -5,12 +5,12 @@
   
 
 <link href="style.css" rel="stylesheet" media="all and (min-width: 769px)" type="text/css">
-<link href="style_small_screen.css" rel="stylesheet" media="all and (max-width: 768px)" type="text/css">
+<link href="style_small_screen.css" rel="stylesheet" media="all and (max-width: 769px)" type="text/css">
 <link rel="stylesheet" type="text/css" href="lemma_set_unexplicit.css" id="lemma_set_style">
 <link rel="stylesheet" type="text/css" href="flexbox.css" id="flexbox_styles">
 <link href="dict.css" rel="stylesheet" type="text/css">
 <link href="dict_small_screens.css" rel="stylesheet" media="all and (max-width: 768px)" type="text/css">
-<link id="colour_theme" href="dark_theme.css" rel="stylesheet" media="all and (min-width: 769px)" type="text/css">
+<link id="colour_theme" href="dark_theme.css" rel="stylesheet" type="text/css">
 
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -25,7 +25,7 @@
   <div id="texts_link" class="toplink-buttons current">Texts</div>
   <a href="words"><div id="words_link" class="toplink-buttons">Words</div></a>
   <div id="topbar_placefiller"></div>
-  <img id="theme_switcher" src="moon-stars.svg" title="Switch to light theme"></img>
+  <img id="theme_switcher" src="moon-stars.svg" title="Switch to light theme" draggable="false"></img>
   <!--<div id="other_link" class="toplink-buttons">Other shit</div> -->
 </div>
 <script>document.getElementById("toplinks-flexbox").addEventListener('click', (event) => { 
@@ -50,9 +50,9 @@
     </div>
   </div>
   <br>
-<p1 id="p1">
+<div id="p1">
 <?cky ?>
-</p1>
+</div>
 
 </div>
 </div>

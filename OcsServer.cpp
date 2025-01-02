@@ -1390,33 +1390,36 @@ bool OcsServer::retrieveText(std::string _POST[1], int clientSocket) {
 
         m_cookies[1] = "1";
 
-        sql_text = "SELECT chu_word_torot, presentation_before, presentation_after, sentence_no FROM corpus WHERE tokno >= ? AND tokno <= ?"; // OR text_word = '\n')";
-        sqlite3_prepare_v2(DB, sql_text, -1, &statement, NULL);
-        sqlite3_bind_int(statement, 1, first_page_toknos[0]);
-        sqlite3_bind_int(statement, 2, first_page_toknos[1] - 1);
-        const char* chu_word_torot;
-        const char* presentation_before;
-        const char* presentation_after;
-        int sentence_number_previous = 0;
-        int sentence_no_current = 0;
-
         std::ostringstream html;
         html << "<br><div id=\"textbody\">";
-        while(sqlite3_step(statement) == SQLITE_ROW) {
-            chu_word_torot = (const char*)sqlite3_column_text(statement, 0);
-            presentation_before = (const char*)sqlite3_column_text(statement, 1);
-            presentation_after = (const char*)sqlite3_column_text(statement, 2);
-            sentence_no_current = sqlite3_column_int(statement, 3);
+        writeTextBody(html, DB, first_page_toknos[0], first_page_toknos[1] - 1);
 
-            if(sentence_number_previous > 0 && sentence_no_current != sentence_number_previous) {
-                html << "  |  ";
-            }
+        // sql_text = "SELECT chu_word_torot, presentation_before, presentation_after, sentence_no FROM corpus WHERE tokno >= ? AND tokno <= ?"; // OR text_word = '\n')";
+        // sqlite3_prepare_v2(DB, sql_text, -1, &statement, NULL);
+        // sqlite3_bind_int(statement, 1, first_page_toknos[0]);
+        // sqlite3_bind_int(statement, 2, first_page_toknos[1] - 1);
+        // const char* chu_word_torot;
+        // const char* presentation_before;
+        // const char* presentation_after;
+        // int sentence_number_previous = 0;
+        // int sentence_no_current = 0;
 
-            html << "<span class=\"chunk\">" << presentation_before << "<span class=\"tooltip\" data-sentence_no=\"" << sentence_no_current << "\">" << chu_word_torot << "</span>" << presentation_after << "</span>";
-            sentence_number_previous = sentence_no_current;
+        
+        // while(sqlite3_step(statement) == SQLITE_ROW) {
+        //     chu_word_torot = (const char*)sqlite3_column_text(statement, 0);
+        //     presentation_before = (const char*)sqlite3_column_text(statement, 1);
+        //     presentation_after = (const char*)sqlite3_column_text(statement, 2);
+        //     sentence_no_current = sqlite3_column_int(statement, 3);
 
-        };
-        sqlite3_finalize(statement);
+        //     if(sentence_number_previous > 0 && sentence_no_current != sentence_number_previous) {
+        //         html << "  |  ";
+        //     }
+
+        //     html << "<span class=\"chunk\">" << presentation_before << "<span class=\"tooltip\" data-sentence_no=\"" << sentence_no_current << "\">" << chu_word_torot << "</span>" << presentation_after << "</span>";
+        //     sentence_number_previous = sentence_no_current;
+
+        // };
+        // sqlite3_finalize(statement);
         html << "</div>";       
 
         if(pageno_count > 1) {
@@ -1727,32 +1730,34 @@ void OcsServer::void_retrieveText(std::ostringstream &html) {
         }
         m_cookies[1] = std::to_string(cookie_pageno);
 
-        sql_text = "SELECT chu_word_torot, presentation_before, presentation_after, sentence_no FROM corpus WHERE tokno >= ? AND tokno <= ?"; // OR text_word = '\n')";
-        sqlite3_prepare_v2(DB, sql_text, -1, &statement, NULL);
-        sqlite3_bind_int(statement, 1, page_toknos_vec[cookie_pageno - 1]);
-        sqlite3_bind_int(statement, 2, page_toknos_vec[cookie_pageno] - 1);
-        const char* chu_word_torot;
-        const char* presentation_before;
-        const char* presentation_after;
-        int sentence_number_previous = 0;
-        int sentence_no_current = 0;
-
         html << "<br><div id=\"textbody\">";
-        while(sqlite3_step(statement) == SQLITE_ROW) {
-            chu_word_torot = (const char*)sqlite3_column_text(statement, 0);
-            presentation_before = (const char*)sqlite3_column_text(statement, 1);
-            presentation_after = (const char*)sqlite3_column_text(statement, 2);
-            sentence_no_current = sqlite3_column_int(statement, 3);
+        writeTextBody(html, DB, page_toknos_vec[cookie_pageno - 1], page_toknos_vec[cookie_pageno] - 1);
 
-            if(sentence_number_previous > 0 && sentence_no_current != sentence_number_previous) {
-                html << "  |  ";
-            }
+        // sql_text = "SELECT chu_word_torot, presentation_before, presentation_after, sentence_no FROM corpus WHERE tokno >= ? AND tokno <= ?"; // OR text_word = '\n')";
+        // sqlite3_prepare_v2(DB, sql_text, -1, &statement, NULL);
+        // sqlite3_bind_int(statement, 1, page_toknos_vec[cookie_pageno - 1]);
+        // sqlite3_bind_int(statement, 2, page_toknos_vec[cookie_pageno] - 1);
+        // const char* chu_word_torot;
+        // const char* presentation_before;
+        // const char* presentation_after;
+        // int sentence_number_previous = 0;
+        // int sentence_no_current = 0;
 
-            html << "<span class=\"chunk\">" << presentation_before << "<span class=\"tooltip\" data-sentence_no=\"" << sentence_no_current << "\">" << chu_word_torot << "</span>" << presentation_after << "</span>";
-            sentence_number_previous = sentence_no_current;
+        // while(sqlite3_step(statement) == SQLITE_ROW) {
+        //     chu_word_torot = (const char*)sqlite3_column_text(statement, 0);
+        //     presentation_before = (const char*)sqlite3_column_text(statement, 1);
+        //     presentation_after = (const char*)sqlite3_column_text(statement, 2);
+        //     sentence_no_current = sqlite3_column_int(statement, 3);
 
-        };
-        sqlite3_finalize(statement);
+        //     if(sentence_number_previous > 0 && sentence_no_current != sentence_number_previous) {
+        //         html << "  |  ";
+        //     }
+
+        //     html << "<span class=\"chunk\">" << presentation_before << "<span class=\"tooltip\" data-sentence_no=\"" << sentence_no_current << "\">" << chu_word_torot << "</span>" << presentation_after << "</span>";
+        //     sentence_number_previous = sentence_no_current;
+
+        // };
+        // sqlite3_finalize(statement);
         html << "</div>";       
 
         if(m_pageno_count > 1) {
@@ -1800,7 +1805,9 @@ void OcsServer::sendBinaryFile(char* url_c_str, int clientSocket, const std::str
             std::cout << "Error reading fontfile size" << std::endl;
             return;
         }
-        std::string headers =  "HTTP/1.1 200 OK\r\nContent-Type: "+content_type+"\r\nContent-Length: "+ std::to_string(font_filesize) + "\r\n\r\n";
+        std::string headers =  "HTTP/1.1 200 OK\r\nContent-Type: "+content_type+"\r\nContent-Length: "+ std::to_string(font_filesize) + "\r\n";
+        if(content_type == "font/ttf") headers = headers + "Cache-Control: public, max-age=31536000, immutable\r\n";
+        headers = headers + "\r\n";
         int headers_size = headers.size();
         const char* headers_c_str = headers.c_str();
 

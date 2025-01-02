@@ -15,12 +15,12 @@ html {
 
 body {
   margin: 8px;
+  padding: 0px;
 }
   
-p1 {
-  font-family: Menaion; color: #cbd9f4;
+#p1 {
+  font-family: Menaion;
   max-width: 100%;
-  align-self: stretch;
 }
 
 a {
@@ -169,7 +169,7 @@ a {
 #textselect, #langselect {
   border-radius: 3px;
   z-index: 1;
-  font-family: Calibri;
+  font-family: IBM_PLEX_SANS;
   padding: 3px;
   font-size: 13px;
   font-weight: bold;
@@ -181,7 +181,7 @@ a {
 #subtitle_select {
   border-radius: 4px;
   z-index: 1;
-  font-family: "IBM_PLEX_SANS";
+  font-family: IBM_PLEX_SANS;
   padding: 3px;
   font-size: 13px;
   min-width: 40px;
@@ -703,7 +703,7 @@ a {
   display: flex;
   flex-flow: row nowrap;
   justify-content: flex-start;
-  font-family: Calibri;
+  font-family: IBM_PLEX_SANS;
   background-color: #172136;
   color: #cbd9f4a6;
   border-top-right-radius: 5px;
@@ -754,4 +754,28 @@ a {
 }
 #theme_switcher:hover{
   opacity: 100%;
+}
+
+
+#load_spinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border: 3px solid #cbd9f487;
+  border-radius: 50%;
+  border-top: 3px solid #071022;
+  border-top: 3px solid #071022;
+  width: 40px;
+  height: 40px;
+  -webkit-animation: spin 1s linear infinite; /* Safari */
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  0% { transform: translate(-50%, -50%) rotate(0deg); }
+  100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+@-webkit-keyframes spin {
+  0% { -webkit-transform: translate(-50%, -50%) rotate(0deg); }
+  100% { -webkit-transform: translate(-50%, -50%) rotate(360deg); }
 }
