@@ -17,33 +17,6 @@ function tt_type() {
 let lang_id = 0;
 let dict = Object.create(null);
 function setLangId() {
-  // let textselect_value = document.getElementById('textselect').value;
-  // let post_data = "textselect=" + textselect_value;
-  // const httpRequest = (method, url) => {
-
-  //   const xhttp = new XMLHttpRequest();
-  //   xhttp.open(method, url, true);
-  //   xhttp.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-  //   xhttp.setRequestHeader('Cache-Control', 'no-cache');
-
-  //   xhttp.onreadystatechange = () => {
-
-  //     if (xhttp.readyState == 4) {
-  //       lang_id = Number(xhttp.responseText);
-  //       //setWkLangName();
-  //       console.log(lang_id);
-  //       if(dict.bool_displayed == true) dict.remove();
-  //       dict = new Dictionary();
-  //       dict.display();
-  //     }
-
-  //   }
-
-  //   xhttp.send(post_data);
-
-  // }
-
-  // httpRequest("POST", "get_lang_id.php");
   const textSelect = document.getElementById('textselect');
   const selected_index = textSelect.selectedIndex;
 
@@ -75,7 +48,6 @@ function selectText() {
   console.log(post_data);
   const httpRequest = (method, url) => {
 
-     
       const para1 = document.getElementById('p1');
 
       const xhttp = new XMLHttpRequest();
@@ -84,8 +56,6 @@ function selectText() {
       xhttp.responseType = 'json';
 
       xhttp.onreadystatechange = () => {
-      
-         
     
         if(xhttp.readyState == 4) {
           para1.innerHTML = xhttp.response["html"];
@@ -125,17 +95,14 @@ function selectText() {
           document.getElementById("textselect").blur();
           loadingbutton.remove();
           
-
         }
      
       }
 
       xhttp.send(post_data);
-
-}
+  }
 
   httpRequest("POST", "retrieve_text.php");
-
 }
 const selectSubtitle = (event) => {
   if(displayWordEditor.edit_mode) {
@@ -200,12 +167,48 @@ const selectSubtitle = (event) => {
       }
 
       xhttp.send(post_data);
-
-}
+  }
 
   httpRequest("POST", "retrieve_subtitle.php");
-
 }
+
+const morph_tag_map = [
+  {1: "1st pers.", 2: "2nd pers.", 3:"3rd pers.", x:"??? pers."},
+  
+  {s:"sing.", d:"dual", p:"plural", x:"??? num."},
+  
+  {p:"present", i:"imperfect", r:"perfect", s:"resultative", a:"aorist", u:"past", l:"pluperfect", f:"future", t:"future perfect", x:"??? tense"},
+  
+  {i:"indicative", s:"subjunctive", m:"imperative", o:"optative", n:"infinitive", p:"participle", d:"gerund", g:"gerundive", u:"supine", x:"??? mood", y:"unspec. finiteness", e:"indic. or subj.", f:"indic. or imper.", h:"subj. or imper.", t:"finite"},
+
+  {a:"active", m:"middle", p:"passive", e:"middle or passive", x:"??? voice"},
+  
+  {m:"masc.", f:"fem.", n:"neut.", p:"masc./fem.", o:"masc./neut.", r:"fem./neut.", q:"masc./fem./neut.", x:"??? gender"},
+
+  {n:"nominative", a:"accusative", o:"oblique", g:"genitive", c:"gen./dat.", e:"acc./dat.", d:"dative", b:"ablative", i:"instrumental", l:"locative", v:"vocative", x:"??? case", z:"no case"},
+
+  {p:"positive", c:"comparative", s:"superlative", x:"??? degree", z:"no degree"},
+
+  {w:"weak", s:"strong", t:"weak/strong"},
+
+  {n:"non-inflecting", i:"inflecting"}  
+];
+
+const convertMorphTag = (morph_tag) => {
+  if(morph_tag[9] == "n") {
+    return "non-inflecting";
+  }
+
+  let morph_string = "";
+  for(let i = 0; i < 9; i++) {
+    const tag_char = morph_tag[i];
+    if(tag_char == "-") {
+      continue;
+    }
+    morph_string += morph_tag_map[i][tag_char] + " ";
+  }
+  return morph_string.trim();
+};
 
 const showLoadingButton = () => {
   let loadingbutton = document.createElement('div');
@@ -273,6 +276,7 @@ const selectText_splitup = (event) => {
       xhttp.onreadystatechange = () => {
       
         if(xhttp.readyState == 4) {
+
           textbody.innerHTML = xhttp.responseText;
           
           //document.getElementById("textbody").addEventListener('click', showAnnotate);
@@ -1922,24 +1926,6 @@ const differentiateAnnotations = function () {
   }
 
 };
-
-
-/*
-  window.addEventListener("keydown", event => {
-    if (event.repeat) {return;}
-    if (event.key == "c") {
-      document.getElementById("tt_styles").href = "tooltip_edit.css";
-    }
-  });
-
-  window.addEventListener("keyup", event => {
-    var spanDisplay = spoofspan.style.display;
-    if (event.key == "c") {
-
-      if(spanDisplay == 'inline') { document.getElementById("tt_styles").href = "tooltip_eng_style_2.css"; }
-      else { document.getElementById("tt_styles").href = "tooltip_none_style_2.css";}
-    }
-  }); */
 
 const keyboard_tt = (event) => {
   if(display_word != null || displayWordEditor.edit_mode) return;

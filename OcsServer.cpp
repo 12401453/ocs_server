@@ -1304,8 +1304,6 @@ void OcsServer::writeTextBody(std::ostringstream &html, sqlite3* DB, int tokno_s
     const char* presentation_after;
     int sentence_number_previous = 0;
     int sentence_no_current = 0;
-
-    html << "<br><div id=\"textbody\">";
     while(sqlite3_step(statement) == SQLITE_ROW) {
         chu_word_torot = (const char*)sqlite3_column_text(statement, 0);
         presentation_before = (const char*)sqlite3_column_text(statement, 1);
@@ -1321,7 +1319,6 @@ void OcsServer::writeTextBody(std::ostringstream &html, sqlite3* DB, int tokno_s
 
     };
     sqlite3_finalize(statement);
-    html << "</div>"; 
 }
 
 bool OcsServer::retrieveText(std::string _POST[1], int clientSocket) {
@@ -1372,7 +1369,7 @@ bool OcsServer::retrieveText(std::string _POST[1], int clientSocket) {
 
         int first_page_toknos[2] {first_tokno_start, 0};
         //I don't know whether the sentence_nos are guaranteed to be contiguous so I have to count each row rather than just do "last - first" to get the total number of sentences
-        //the way I am doing this means it will break if you delete (or insert, but that's impossible anyway) a token from within a text
+        //if tokens have been deleted the start or end of a text then the page_toknos values won't actually correspond to the start and end-toknos, but since it's using >= and <= it should still work. Insertion of tokens into a text is not possible at all with this structure of the corpus table; the whole text would have to be re-inserted and the texts and subtitles tables updated
         page_toknos_arr << "[" << first_tokno_start;
         while(sqlite3_step(statement) == SQLITE_ROW) {
             int sentence_no = sqlite3_column_int(statement, 0);
@@ -1507,7 +1504,9 @@ bool OcsServer::retrieveTextSubtitle(std::string _POST[2], int clientSocket) {
         sqlite3_finalize(statement);
 
         std::ostringstream html;
+        html << "<br><div id=\"textbody\">";
         writeTextBody(html, DB, first_page_toknos[0], first_page_toknos[1] - 1);
+        html << "</div>";
 
         // sql_text = "SELECT chu_word_torot, presentation_before, presentation_after, sentence_no FROM corpus WHERE tokno >= ? AND tokno <= ?";
         // sqlite3_prepare_v2(DB, sql_text, -1, &statement, NULL);

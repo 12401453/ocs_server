@@ -9,6 +9,10 @@
    @font-face {font-family: Calibri; src: local('Calibri'), url('calibri.ttf'); }
    @font-face {font-family: Menaion; src: local('Menaion'), url('Menaion.ttf'); }
 
+html {
+  overflow-y: scroll;
+}
+
 body {
   margin: 8px;
 }

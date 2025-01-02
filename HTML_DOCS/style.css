@@ -7,6 +7,10 @@
    @font-face {font-family: Calibri; src: local('Calibri'), url('calibri.ttf'); }
    @font-face {font-family: Menaion; src: local('Menaion'), url('Menaion.ttf'); }
 
+html {
+  overflow-y: scroll;
+}
+
 p1 {
   font-family: Menaion; color: #cbd9f4;
   max-width: 100%;
