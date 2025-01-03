@@ -158,12 +158,14 @@ a {
   justify-content: start;
   margin-top: 15px;
   margin-left: 2%;
-  max-width: 50%;
+  max-width: 97%;
 }
 #textselect_box {
   display: flex;
   flex-flow: row wrap;
   justify-content: start;
+  max-width: 100%;
+  
 }
 
 #textselect, #langselect {
@@ -758,7 +760,7 @@ a {
 
 
 #load_spinner {
-  position: absolute;
+  position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
@@ -778,4 +780,8 @@ a {
 @-webkit-keyframes spin {
   0% { -webkit-transform: translate(-50%, -50%) rotate(0deg); }
   100% { -webkit-transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+span[data-lemma_id="0"] {
+  opacity: 50%;
 }

@@ -932,7 +932,7 @@ const lemmaDelete = function () {
         delAnnotate();
 
         if(tooltips_shown) {
-          lemmaTooltip();
+          lemmaTooltipMW();
         }
       }
     }
@@ -956,21 +956,27 @@ const setLemmaTagSize = function () {
 };
 
 const lemmaTooltip = function () {
-  let lemma_tooltips = document.querySelectorAll('.lemma_tt');
-  lemma_tooltips.forEach(lemma_tooltip => {
-    lemma_tooltip.remove();
-  });
+  const page_lemma_ids_set = new Set();
+  for (const word of document.getElementsByClassName("tooltip")){
+    const word_lemma_id = Number(word.dataset.lemma_id);
+    if(word_lemma_id != 0) page_lemma_ids_set.add(word_lemma_id);
+  }
+  const page_lemma_ids = Array.from(page_lemma_ids_set).join(",");
+  // let lemma_tooltips = document.querySelectorAll('.lemma_tt');
+  // lemma_tooltips.forEach(lemma_tooltip => {
+  //   lemma_tooltip.remove();
+  // });
 
-  let lemma_set_words = document.querySelectorAll('.lemma_set_unexplicit');
-  let set_toknos = new Array();
-  let set_word_eng_ids = new Array();
-  lemma_set_words.forEach(lemma_set_word => {
-    let lemma_set_tokno = lemma_set_word.dataset.tokno;
-    let lemma_set_word_eng_id = lemma_set_word.dataset.word_engine_id;
-    set_toknos.push(lemma_set_tokno);
-    set_word_eng_ids.push(lemma_set_word_eng_id);
+  // let lemma_set_words = document.querySelectorAll('.lemma_set_unexplicit');
+  // let set_toknos = new Array();
+  // let set_word_eng_ids = new Array();
+  // lemma_set_words.forEach(lemma_set_word => {
+  //   let lemma_set_tokno = lemma_set_word.dataset.tokno;
+  //   let lemma_set_word_eng_id = lemma_set_word.dataset.word_engine_id;
+  //   set_toknos.push(lemma_set_tokno);
+  //   set_word_eng_ids.push(lemma_set_word_eng_id);
   
-  });
+  // });
 
   const httpRequest = (method, url) => {
 

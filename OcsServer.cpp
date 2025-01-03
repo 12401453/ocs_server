@@ -1294,7 +1294,7 @@ bool OcsServer::lemmaTooltips(std::string _POST[2], int clientSocket) {
 }
 
 void OcsServer::writeTextBody(std::ostringstream &html, sqlite3* DB, int tokno_start, int tokno_end) {
-    const char* sql_text = "SELECT chu_word_torot, presentation_before, presentation_after, sentence_no FROM corpus WHERE tokno >= ? AND tokno <= ?";
+    const char* sql_text = "SELECT chu_word_torot, presentation_before, presentation_after, sentence_no, lemma_id FROM corpus WHERE tokno >= ? AND tokno <= ?";
     sqlite3_stmt* statement;
     sqlite3_prepare_v2(DB, sql_text, -1, &statement, NULL);
     sqlite3_bind_int(statement, 1, tokno_start);
@@ -1302,6 +1302,7 @@ void OcsServer::writeTextBody(std::ostringstream &html, sqlite3* DB, int tokno_s
     const char* chu_word_torot;
     const char* presentation_before;
     const char* presentation_after;
+    int lemma_id = 0;
     int sentence_number_previous = 0;
     int sentence_no_current = 0;
     while(sqlite3_step(statement) == SQLITE_ROW) {
@@ -1309,12 +1310,13 @@ void OcsServer::writeTextBody(std::ostringstream &html, sqlite3* DB, int tokno_s
         presentation_before = (const char*)sqlite3_column_text(statement, 1);
         presentation_after = (const char*)sqlite3_column_text(statement, 2);
         sentence_no_current = sqlite3_column_int(statement, 3);
+        lemma_id = sqlite3_column_int(statement, 4);
 
         if(sentence_number_previous > 0 && sentence_no_current != sentence_number_previous) {
             html << "  |  ";
         }
 
-        html << "<span class=\"chunk\">" << presentation_before << "<span class=\"tooltip\" data-sentence_no=\"" << sentence_no_current << "\">" << chu_word_torot << "</span>" << presentation_after << "</span>";
+        html << "<span class=\"chunk\">" << presentation_before << "<span class=\"tooltip\" data-sentence_no=\"" << sentence_no_current << "\" data-lemma_id=\"" << lemma_id << "\">" << chu_word_torot << "</span>" << presentation_after << "</span>";
         sentence_number_previous = sentence_no_current;
 
     };
