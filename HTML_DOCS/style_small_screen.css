@@ -515,7 +515,7 @@ a {
       align-items: flex-start;
     }
   
-  .lemma_tag_tt {
+  #lemma_tag_tt {
     height:fit-content;
     width: fit-content;
    /* min-height: 20px; */

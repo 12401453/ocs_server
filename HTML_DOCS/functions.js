@@ -176,6 +176,36 @@ const selectSubtitle = (event) => {
   httpRequest("POST", "retrieve_subtitle.php");
 }
 
+const proiel_pos_map = {
+  1: [3, "adjective"],
+  2: [4, "adverb"],
+  3: [3, "article"],
+  4: [1, "cardinal number"],
+  5: [1, "common noun"],
+  6: [6, "conjunction"],
+  7: [3, "demonstrative pronoun"],
+  8: [1, "foreign word"],
+  9: [3, "indefinite pronoun"],
+  10: [7, "infinitive marker"],
+  11: [7, "interjection"],
+  12: [8, "interrogative adverb"],
+  13: [8, "interrogative pronoun"],
+  14: [3, "ordinal number"],
+  15: [1, "personal pronoun"],
+  16: [1, "personal reflexive pronoun"],
+  17: [3, "possessive pronoun"],
+  18: [3, "possessive reflexive pronoun"],
+  19: [5, "preposition"],
+  20: [1, "proper noun"],
+  21: [9, "quantifier"],
+  22: [1, "reciprocal pronoun"],
+  23: [4, "relative adverb"],
+  24: [1, "relative pronoun"],
+  25: [6, "subjunction"],
+  26: [2, "verb"],
+  27: [10, "unassigned"]
+};
+
 const morph_tag_map = [
   {1: "1st pers.", 2: "2nd pers.", 3:"3rd pers.", x:"??? pers."},
   
@@ -197,7 +227,6 @@ const morph_tag_map = [
 
   {n:"non-inflecting", i:"inflecting"}  
 ];
-
 const convertMorphTag = (morph_tag) => {
   if(morph_tag[9] == "n") {
     return "non-inflecting";
@@ -532,6 +561,19 @@ const part_pos_tt = '<span id="pos_tag_part_tt" class="pos_tag_tt" title="partic
 const ques_pos_tt = '<span id="pos_tag_ques_tt" class="pos_tag_tt" title="interrogative"></span>';
 
 const tt_pos_arr = {1: noun_pos_tt, 2: verb_pos_tt, 3: adj_pos_tt, 4: adverb_pos_tt, 5: prep_pos_tt, 6: conj_pos_tt, 7: part_pos_tt, 8: ques_pos_tt,};
+
+
+const noun_pos_tt_elem = document.createRange().createContextualFragment('<span id="pos_tag_noun_tt" class="pos_tag_tt" title="noun"></span>');
+const verb_pos_tt_elem = document.createRange().createContextualFragment('<span id="pos_tag_verb_tt" class="pos_tag_tt" title="verb"></span>');
+const adj_pos_tt_elem = document.createRange().createContextualFragment('<span id="pos_tag_adj_tt" class="pos_tag_tt" title="adjective"></span>');
+const adverb_pos_tt_elem = document.createRange().createContextualFragment('<span id="pos_tag_adverb_tt" class="pos_tag_tt" title="adverb"></span>');
+const prep_pos_tt_elem = document.createRange().createContextualFragment('<span id="pos_tag_prep_tt" class="pos_tag_tt" title="preposition"></span>');
+const conj_pos_tt_elem = document.createRange().createContextualFragment('<span id="pos_tag_conj_tt" class="pos_tag_tt" title="conjunction"></span>');
+const part_pos_tt_elem = document.createRange().createContextualFragment('<span id="pos_tag_part_tt" class="pos_tag_tt" title="particle/interjection"></span>');
+const ques_pos_tt_elem = document.createRange().createContextualFragment('<span id="pos_tag_ques_tt" class="pos_tag_tt" title="interrogative"></span>');
+const quant_pos_tt_elem = document.createRange().createContextualFragment('<span id="pos_tag_quant_tt" class="pos_tag_tt" title="quantifier"></span>');
+const unassigned_pos_tt_elem = document.createRange().createContextualFragment('<span id="pos_tag_unassigned_tt" class="pos_tag_tt" title="unassigned"></span>');
+const tt_pos_elements = [noun_pos_tt_elem, verb_pos_tt_elem, adj_pos_tt_elem, adverb_pos_tt_elem, prep_pos_tt_elem, conj_pos_tt_elem, part_pos_tt_elem, ques_pos_tt_elem, quant_pos_tt_elem, unassigned_pos_tt_elem];
 
 const smallscreen_annot_box_html = '<div id="annot_box"><div id="annot_topbar"><div id="close_button"><svg id="red_cross" xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="24" viewBox="0 0 24 24" width="24" focusable="false"><path fill-rule="evenodd" clip-rule="evenodd" d="M5.29289 5.29289C5.68342 4.90237 6.31658 4.90237 6.70711 5.29289L12 10.5858L17.2929 5.29289C17.6834 4.90237 18.3166 4.90237 18.7071 5.29289C19.0976 5.68342 19.0976 6.31658 18.7071 6.70711L13.4142 12L18.7071 17.2929C19.0976 17.6834 19.0976 18.3166 18.7071 18.7071C18.3166 19.0976 17.6834 19.0976 17.2929 18.7071L12 13.4142L6.70711 18.7071C6.31658 19.0976 5.68342 19.0976 5.29289 18.7071C4.90237 18.3166 4.90237 17.6834 5.29289 17.2929L10.5858 12L5.29289 6.70711C4.90237 6.31658 4.90237 5.68342 5.29289 5.29289Z"/></svg></div><span id="edit_button" title="Edit current text-word">Edit</span><span id="pos_tag_box"><span id="pos_tag_adj" class="pos_tag" title="adjective">adject.</span></span></div><div id="lemma_tag_row"><textarea id="lemma_tag" spellcheck="false">uigennemtrængelig</textarea></div><div id="annot"><div id="right_column"><div id="left_column"><span id="lemma_box" class="box">Lemma</span><span id="multiword_box" class="box">Multiword</span><span id="context_box" class="box" title="not yet implemented">Context translation</span><span id="morph_box" class="box" title="not yet implemented">Morphology</span><span id="accent_box" class="box" title="not yet implemented">Accentology</span></div><div id="right_body"><textarea id="lemma_textarea" autocomplete="off">impenetrable</textarea><div id="meaning_no_box"><div id="meaning_leftarrow" class="nav_arrow">&lt;</div><div id="meaning_no">Meaning <span id="number">1</span></div><div id="meaning_rightarrow" class="nav_arrow">&gt;</div></div></div><div id="right_footer"><div id="save_button">Save</div><div id="delete_lemma_button">Delete</div></div></div></div></div>';
 
@@ -957,31 +999,21 @@ const setLemmaTagSize = function () {
 
 const lemmaTooltip = function () {
   const page_lemma_ids_set = new Set();
+  const lemma_set_words = new Array();
   for (const word of document.getElementsByClassName("tooltip")){
-    const word_lemma_id = Number(word.dataset.lemma_id);
-    if(word_lemma_id != 0) page_lemma_ids_set.add(word_lemma_id);
+    const word_lemma_id = word.dataset.lemma_id;
+    if(word_lemma_id != "0") {
+      page_lemma_ids_set.add(word_lemma_id);
+      lemma_set_words.push(word);
+    }
   }
-  const page_lemma_ids = Array.from(page_lemma_ids_set).join(",");
-  // let lemma_tooltips = document.querySelectorAll('.lemma_tt');
-  // lemma_tooltips.forEach(lemma_tooltip => {
-  //   lemma_tooltip.remove();
-  // });
-
-  // let lemma_set_words = document.querySelectorAll('.lemma_set_unexplicit');
-  // let set_toknos = new Array();
-  // let set_word_eng_ids = new Array();
-  // lemma_set_words.forEach(lemma_set_word => {
-  //   let lemma_set_tokno = lemma_set_word.dataset.tokno;
-  //   let lemma_set_word_eng_id = lemma_set_word.dataset.word_engine_id;
-  //   set_toknos.push(lemma_set_tokno);
-  //   set_word_eng_ids.push(lemma_set_word_eng_id);
+  const page_lemma_ids_arr = Array.from(page_lemma_ids_set);
+  const page_lemma_ids_str = page_lemma_ids_arr.join(",");
   
-  // });
-
   const httpRequest = (method, url) => {
 
     // let send_data = toknos_POST_data;
-    let send_data = "toknos=" + set_toknos + "&word_eng_ids=" + set_word_eng_ids;
+    let send_data = "lemma_ids=" + page_lemma_ids_str;
     const xhttp = new XMLHttpRequest();
     xhttp.open(method, url, true);
     xhttp.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
@@ -990,23 +1022,27 @@ const lemmaTooltip = function () {
     xhttp.onload = () => {
       if(xhttp.readyState == 4) {
         tooltips_shown = true;
-        const json_lemma_transes = xhttp.response;
-       // console.log(json_lemma_transes);
-        if(json_lemma_transes == null) {
-         document.getElementById("tt_toggle").disabled = false;
-         return;
-        }
-        let i = 0;
-        lemma_set_words.forEach(lemma_set_word => {
-          const json_pos = Number(json_lemma_transes[i].pos);
+        const pos_array = xhttp.response[0];
+        const lemma_ocs_array = xhttp.response[1];
 
-          let lemma_tt_box = '<span class="lemma_tt" onclick="event.stopPropagation()"><span id="tt_top"><div class="lemma_tag_tt">'+json_lemma_transes[i].lemma_form+'</div><span id="pos_tag_box_tt">'+tt_pos_arr[json_pos]+'</span></span><span id="tt_mid"><div id="tt_meaning">'+json_lemma_transes[i].lemma_trans+'</div></span><span id="tt_bottom"></span></span>';
+        const lemma_tt_box_elem = document.createRange().createContextualFragment('<span class="lemma_tt" onclick="event.stopPropagation()"><span id="tt_top"><div id="lemma_tag_tt"></div><span id="pos_tag_box_tt"></span></span><span id="tt_mid"><div id="tt_meaning"></div></span><span id="tt_bottom"></span></span>');
 
-          lemma_set_word.innerHTML = lemma_set_word.innerHTML + lemma_tt_box;
-          i++;
-        });
-        document.getElementById("tt_toggle").disabled = false;
-        setTimeout(ttPosition, 200);
+        // page_lemma_ids_arr.forEach((lemma_id, i) => {
+        //   const json_pos = Number(json_lemma_transes[i].pos);
+        //   lemma_tt_box_elem.getElementById("lemma_tag_tt").textContent = json_lemma_transes[i].tt_title;
+        //   lemma_tt_box_elem.getElementById("pos_tag_box_tt").append = tt_pos_elements[Number(json_lemma_transes[i].pos) - 1];
+        //   lemma_tt_box_elem.getElementById("tt_meaning").textContent = json_lemma_transes[i].tt_contents;
+
+        //   document.querySelectorAll(`'data-lemma_id='${lemma_id}'`).forEach(lemma_word => {
+        //     lemma_word.append(lemma_tt_box_elem);
+        //   });
+          
+        //   i++;
+        // });
+        // document.getElementById("tt_toggle").disabled = false;
+        // setTimeout(ttPosition, 200);
+        console.log(pos_array);
+        console.log(lemma_ocs_array);
       }
 
     }

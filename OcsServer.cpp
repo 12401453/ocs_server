@@ -428,7 +428,7 @@ void OcsServer::buildPOSTedData(const char* msg, bool headers_present, int lengt
         int content_length_start = c_strFind(msg, "Content-Length:") + 16;
         
         int cl_figures = 0;
-        char next_nl;
+        char next_nl = 'c';
         while(next_nl != '\x0d') {
             next_nl = msg[content_length_start + cl_figures];
             cl_figures++;
@@ -765,7 +765,7 @@ void OcsServer::setURL(const char* msg) {
 int OcsServer::getPostFields(const char* url) {
     if(!strcmp(url, "/update_db.php")) return 3;
     else if(!strcmp(url, "/retrieve_subtitle.php")) return 2;
-    else if(!strcmp(url, "/lemma_tooltip.php")) return 2;
+    else if(!strcmp(url, "/lemma_tooltip.php")) return 1;
     else if(!strcmp(url, "/retrieve_text.php")) return 1;
     else if(!strcmp(url, "/retrieve_text_pageno.php")) return 2;
     else if(!strcmp(url, "/get_lang_id.php")) return 1;
@@ -1137,153 +1137,81 @@ bool OcsServer::deleteText(std::string _POST[1], int clientSocket) {
     }  
 }
 
-bool OcsServer::lemmaTooltips(std::string _POST[2], int clientSocket) {
+bool OcsServer::lemmaTooltips(std::string _POST[1], int clientSocket) {
     sqlite3* DB;    
 
     if(!sqlite3_open(m_DB_path, &DB)) {
 
-        sqlite3_stmt* statement1;
-        sqlite3_stmt* statement2;
-        sqlite3_stmt* statement3; 
-        sqlite3_stmt* statement4;      
+        sqlite3_stmt* statement1;     
 
-        int tooltip_count = 1;
-        //word_engine_id's are generally going to be smaller than toknos so more efficient to iterate through them
-        for(auto i = _POST[1].begin(), nd=_POST[1].end(); i < nd; i++) {
+        int lemma_ids_count = 1;
+        for(auto i = _POST[0].begin(), nd=_POST[0].end(); i < nd; i++) {
             char c = (*i);
-            if(c == ',') tooltip_count++;
+            if(c == ',') lemma_ids_count++;
         }
 
-        std::vector<sqlite3_int64> toknos;
-        std::vector<int> word_engine_ids;
+        std::vector<int> lemma_ids;
+        lemma_ids.reserve(lemma_ids_count); 
 
-        toknos.reserve(tooltip_count); 
-        word_engine_ids.reserve(tooltip_count);
-
-        std::string tokno_str = "";
+        std::string lemma_id_str = "";
         for(auto i = _POST[0].begin(), nd=_POST[0].end(); i < nd; i++) {
             char c = (*i);
             if(c == ',') {
-                sqlite3_int64 tokno = std::stol(tokno_str);
-                toknos.emplace_back(tokno);
-                tokno_str = "";
+                int lemma_id = safeStrToInt(lemma_id_str);
+                lemma_ids.emplace_back(lemma_id);
+                lemma_id_str = "";
                 continue;
             }
-            tokno_str += c;
+            lemma_id_str += c;
             if(nd - 1 == i) {
-                sqlite3_int64 tokno = std::stol(tokno_str);
-                toknos.emplace_back(tokno);
-            }
-        }
-        std::string word_engine_id_str = "";
-        for(auto i = _POST[1].begin(), nd=_POST[1].end(); i < nd; i++) {
-            char c = (*i);
-            if(c == ',') {
-                int word_engine_id = std::stoi(word_engine_id_str);
-                word_engine_ids.emplace_back(word_engine_id);
-                word_engine_id_str = "";
-                continue;
-            }
-            word_engine_id_str += c;
-            if(nd - 1 == i) {
-                int word_engine_id = std::stoi(word_engine_id_str);
-                word_engine_ids.emplace_back(word_engine_id);
+                int lemma_id = safeStrToInt(lemma_id_str);
+                lemma_ids.emplace_back(lemma_id);
             }
         }
 
-        const char* sql_text1 = "SELECT lemma_id, lemma_meaning_no FROM display_text WHERE tokno = ?";
-        const char* sql_text2 = "SELECT first_lemma_id FROM word_engine WHERE word_engine_id = ?";
-        const char* sql_text3 = "SELECT lemma, eng_trans1, eng_trans2, eng_trans3, eng_trans4, eng_trans5, eng_trans6, eng_trans7, eng_trans8, eng_trans9, eng_trans10, pos FROM lemmas WHERE lemma_id = ?";
+        const char* sql_text1 = "SELECT pos, lemma_ocs FROM lemmas WHERE lemma_id = ?";
         sqlite3_prepare_v2(DB, sql_text1, -1, &statement1, NULL);
-        sqlite3_prepare_v2(DB, sql_text2, -1, &statement2, NULL);
-        sqlite3_prepare_v2(DB, sql_text3, -1, &statement3, NULL);
 
-        std::string lemma_form = "";
-        std::string lemma_trans = "";
+        std::string lemma_ocs = "";
         short int pos = 1;
 
-
-        std::ostringstream json;
-        json << "[";
-
+        std::ostringstream pos_array;
+        pos_array << "[";
+        std::ostringstream lemma_ocs_array;
+        lemma_ocs_array << "[";
         int x = 0;
-        for(const sqlite3_int64 &tokno : toknos) {
+        for(const int &lemma_id : lemma_ids) {
 
-            sqlite3_bind_int64(statement1, 1, tokno);
+            sqlite3_bind_int(statement1, 1, lemma_id);
+            std::cout << "lemma_id: " << lemma_id << "\n";
             sqlite3_step(statement1);
-            int lemma_id = sqlite3_column_int(statement1, 0);
- 
-            if(lemma_id) {
-                short int lemma_meaning_no = sqlite3_column_int(statement1, 1);
-                std::string sql_text4_str = "SELECT lemma, eng_trans"+std::to_string(lemma_meaning_no)+", pos FROM lemmas WHERE lemma_id = "+std::to_string(lemma_id); 
-                sqlite3_prepare_v2(DB, sql_text4_str.c_str(), -1, &statement4, NULL);
-                sqlite3_step(statement4);
+            pos = sqlite3_column_int(statement1, 0);
+            const char* lemma_ocs = (const char*)sqlite3_column_text(statement1, 1);
 
-                const unsigned char* lemma_rawsql = sqlite3_column_text(statement4, 0);
-                if(lemma_rawsql != nullptr) {
-                    lemma_form = (const char*)lemma_rawsql;
-                }
-                else lemma_form = "";
-                const unsigned char* lemma_trans_rawsql = sqlite3_column_text(statement4, 1);
-                if(lemma_trans_rawsql != nullptr) {
-                    lemma_trans = (const char*)lemma_trans_rawsql;
-                }
-                else lemma_trans = "";
-                pos = sqlite3_column_int(statement4, 2);
+            std::cout << "pos: " << pos << "; lemma_ocs: " << lemma_ocs << "\n";
+            
+            lemma_ocs_array << lemma_ocs << ',';
+            pos_array << pos << ',';
 
-                std::cout << "lemma_form: " << lemma_form << ", lemma_trans: " << lemma_trans << ", pos: " << pos << std::endl;
-                //sqlite3_reset(statement1);
-                sqlite3_finalize(statement4);
-            }
-            else {
-                sqlite3_bind_int(statement2, 1, word_engine_ids[x]);
-                sqlite3_step(statement2);
-                lemma_id = sqlite3_column_int(statement2, 0);
-                std::cout << "lemma_id: " << lemma_id << std::endl;
-                sqlite3_reset(statement2);
-
-                sqlite3_bind_int(statement3, 1, lemma_id);
-                sqlite3_step(statement3);
-                const unsigned char* lemma_rawsql = sqlite3_column_text(statement3, 0);
-                if(lemma_rawsql != nullptr) {
-                    lemma_form = (const char*)lemma_rawsql;
-                }
-                else lemma_form = "";
-
-                lemma_trans = "";
-                for(int i = 1; i < 11; i++) {
-                    const unsigned char* lemma_trans_rawsql = sqlite3_column_text(statement3, i);
-                    if(lemma_trans_rawsql != nullptr) {
-                        lemma_trans = (const char*)lemma_trans_rawsql;
-                        break;
-                    }
-                }
-                pos = sqlite3_column_int(statement3, 11);
-                sqlite3_reset(statement3);
-                std::cout << "lemma_form: " << lemma_form << ", lemma_trans: " << lemma_trans << ", pos: " << pos << std::endl;     
-            }
-            //I'm sure these need to be htmlspecialchars()'d as well/instead (as that escapes quotes with html codes)
-            json << "{\"lemma_form\":\"" << htmlspecialchars(lemma_form) << "\",\"lemma_trans\":\"" << htmlspecialchars(lemma_trans) << "\",\"pos\":\"" << pos << "\"}";
-            x++;
-            if(x != tooltip_count) {
-                json << ",";
-            } //for some reason the browser only recognises the response as JSON if there is no trailing comma
             sqlite3_reset(statement1);
+            sqlite3_clear_bindings(statement1);
         } 
         sqlite3_finalize(statement1);
-        sqlite3_finalize(statement2);
-        sqlite3_finalize(statement3);
+        lemma_ocs_array.seekp(-1, std::ios_base::cur);
+        pos_array.seekp(-1, std::ios_base::cur);       
 
-        sqlite3_close(DB);
+        pos_array << "]";
+        lemma_ocs_array << "]";
 
-        json << "]";
-        int content_length = json.str().size();
+        std::string json_str = "[" + pos_array.str() + "," + escapeQuotes(lemma_ocs_array.str()) + "]";
+        int content_length = json_str.size();
 
         std::ostringstream post_response;
-        post_response << "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: " << content_length << "\r\n\r\n" << json.str();
+        post_response << "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: " << content_length << "\r\n\r\n" << json_str;
 
         int length = post_response.str().size() + 1;
         sendToClient(clientSocket, post_response.str().c_str(), length);
+        sqlite3_close(DB);
        
         return true;
     }
@@ -1294,7 +1222,7 @@ bool OcsServer::lemmaTooltips(std::string _POST[2], int clientSocket) {
 }
 
 void OcsServer::writeTextBody(std::ostringstream &html, sqlite3* DB, int tokno_start, int tokno_end) {
-    const char* sql_text = "SELECT chu_word_torot, presentation_before, presentation_after, sentence_no, lemma_id FROM corpus WHERE tokno >= ? AND tokno <= ?";
+    const char* sql_text = "SELECT chu_word_torot, presentation_before, presentation_after, sentence_no, lemma_id, morph_tag FROM corpus WHERE tokno >= ? AND tokno <= ?";
     sqlite3_stmt* statement;
     sqlite3_prepare_v2(DB, sql_text, -1, &statement, NULL);
     sqlite3_bind_int(statement, 1, tokno_start);
@@ -1302,6 +1230,7 @@ void OcsServer::writeTextBody(std::ostringstream &html, sqlite3* DB, int tokno_s
     const char* chu_word_torot;
     const char* presentation_before;
     const char* presentation_after;
+    const char* morph_tag;
     int lemma_id = 0;
     int sentence_number_previous = 0;
     int sentence_no_current = 0;
@@ -1311,12 +1240,18 @@ void OcsServer::writeTextBody(std::ostringstream &html, sqlite3* DB, int tokno_s
         presentation_after = (const char*)sqlite3_column_text(statement, 2);
         sentence_no_current = sqlite3_column_int(statement, 3);
         lemma_id = sqlite3_column_int(statement, 4);
+        if(sqlite3_column_type(statement, 5) == SQLITE_NULL) morph_tag = "";
+        else morph_tag = (const char*)sqlite3_column_text(statement, 5);
 
         if(sentence_number_previous > 0 && sentence_no_current != sentence_number_previous) {
             html << "  |  ";
         }
 
-        html << "<span class=\"chunk\">" << presentation_before << "<span class=\"tooltip\" data-sentence_no=\"" << sentence_no_current << "\" data-lemma_id=\"" << lemma_id << "\">" << chu_word_torot << "</span>" << presentation_after << "</span>";
+        html << "<span class=\"chunk\">" << presentation_before << "<span class=\"tooltip\" data-sentence_no=\"" << sentence_no_current << "\" data-lemma_id=\"" << lemma_id << "\""; 
+        if(lemma_id > 0) {
+            html << " data-morph_tag=\"" << morph_tag << "\"";
+        }
+        html << ">" << chu_word_torot << "</span>" << presentation_after << "</span>";
         sentence_number_previous = sentence_no_current;
 
     };
