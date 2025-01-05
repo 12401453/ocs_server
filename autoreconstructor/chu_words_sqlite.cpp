@@ -272,7 +272,7 @@ std::unordered_map <int, std::string> text_id_map = {
 };
 
 int main () {
-    std::cout.setstate(std::ios_base::failbit);
+    //std::cout.setstate(std::ios_base::failbit);
     sqlite3* DB;
     if(!sqlite3_open("chu_corpus_untagged.db", &DB)) {
 
@@ -357,11 +357,11 @@ int main () {
                         morph_tag = field;
                         break;
                     case 5:
-                        std::cout << "stoi 01\n";
+                        //std::cout << "stoi 01\n";
                         lemma_id = std::stoi(field);
                         break;
                     case 6:
-                    std::cout << "stoi 02\n";
+                        //std::cout << "stoi 02\n";
                         sentence_no = std::stoi(field);
                         break;
                     case 7:
@@ -371,11 +371,11 @@ int main () {
                         presentation_after = field;
                         break;
                     case 9:
-                    std::cout << "stoi 03\n";
+                        //std::cout << "stoi 03\n";
                         main_title_id = std::stoi(field);
                         break;
                     case 10:
-                    std::cout << "stoi 04\n";
+                        //std::cout << "stoi 04\n";
                         subtitle_id = std::stoi(field);
                         break;
                     default:
@@ -459,6 +459,7 @@ int main () {
         sqlite3_finalize(statement_subtitles);
         sqlite3_finalize(statement_texts);
 
+
         while(std::getline(chu_lemmas_file, line)) {
             std::stringstream ss_line(line);
             int row_no = 1;
@@ -467,7 +468,7 @@ int main () {
             while(std::getline(ss_line, field, ',')) {
                 switch(row_no){
                     case 1:
-                    std::cout << "stoi 05\n";
+                        //std::cout << "stoi 05\n";
                         lemma_id = std::stoi(field);
                         break;
                     case 2:
@@ -489,6 +490,7 @@ int main () {
         int verb_class_count = 1;
         int noun_class_count = 1;
 
+        //this is going to miss out lemmas which are in the corpus but not in my lemmas_spreadsheet, e.g. the adjective видимъ from Supr. (8162)
         while(std::getline(lemma_spreadsheet, line)) {
             std::stringstream ss_line(line);
             int parameter_no = 1;
@@ -506,12 +508,13 @@ int main () {
                         break;
                     case 2:
                     //assign first to the id used in my spreadsheet incase the lemma doesnt exist in the 2023 version of the torot files (which it definitely won't for my added ones, but also some may have been deleted since 2020)
-                    std::cout << "stoi 06\n";
+                        //std::cout << "stoi 06\n";
                         lemma_id = std::stoi(field);
                         break;
                     case 3:
                         if(pos_map.contains(field)) {
-                            pos = pos_map.at(field);                        }
+                            pos = pos_map.at(field);                        
+                        }
                         else pos = 0;
                         pos_lemma_combo = field + pos_lemma_combo;
                         break;
@@ -531,13 +534,16 @@ int main () {
                         inflexion_class = field;
                         break;
                     case 22:
-                    std::cout << "stoi 07\n";
+                        //std::cout << "stoi 07\n";
                         verb_noun = std::stoi(field);
                         break;
                 }
                 row_no++;
             }
-            if(lemma_id_map.contains(pos_lemma_combo)) lemma_id = lemma_id_map.at(pos_lemma_combo);
+            if(lemma_id_map.contains(pos_lemma_combo)) {
+              lemma_id = lemma_id_map.at(pos_lemma_combo);
+              lemma_id_map.erase(pos_lemma_combo);
+            }
             sqlite3_bind_int(statement, 1, lemma_id);
             sqlite3_bind_int(statement, 2, pos);
             sqlite3_bind_text(statement, 3, lemma_lcs.c_str(), -1, SQLITE_TRANSIENT);
@@ -592,6 +598,30 @@ int main () {
             sqlite3_step(statement);
             sqlite3_reset(statement);
             sqlite3_clear_bindings(statement);
+        }
+        
+
+        for(const auto leftover_lemma_map_entry : lemma_id_map) {
+          std::string leftover_pos_lemma_combo = leftover_lemma_map_entry.first;
+          int leftover_lemma_id = leftover_lemma_map_entry.second;
+
+          std::string leftover_pos_tag = leftover_pos_lemma_combo.substr(0, 2);
+          std::cout << "leftover_pos_tag: " << leftover_pos_tag << " ";
+          int leftover_pos = pos_map.at(leftover_pos_tag);
+          std::string leftover_lemma_ocs = leftover_pos_lemma_combo.substr(2, leftover_pos_lemma_combo.length() - 2);
+          std::cout << " " << leftover_lemma_ocs<< "\n";
+
+          sqlite3_bind_int(statement, 1, leftover_lemma_id);
+          sqlite3_bind_int(statement, 2, leftover_pos);
+          sqlite3_bind_null(statement, 3);
+          sqlite3_bind_text(statement, 4, leftover_lemma_ocs.c_str(), -1, SQLITE_TRANSIENT);
+          sqlite3_bind_null(statement, 5);
+          sqlite3_bind_null(statement, 6);
+
+          sqlite3_step(statement);
+          sqlite3_reset(statement);
+          sqlite3_clear_bindings(statement);
+          
         }
         sqlite3_finalize(statement);
 

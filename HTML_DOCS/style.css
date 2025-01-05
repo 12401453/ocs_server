@@ -7,6 +7,20 @@
    @font-face {font-family: Calibri; src: local('Calibri'), url('calibri.ttf'); }
    @font-face {font-family: Menaion; src: local('Menaion'), url('Menaion.ttf'); }
 
+:root {
+    --cyr-font-family: Menaion;
+    --cyr-font-size: 23px;
+    --cyr-letter-spacing: 0px;
+    
+    --glag-font-family: Bukyvede;
+    --glag-font-size: 28px;
+    --glag-letter-spacing: 2px;
+
+    --chunk-font-family: var(--cyr-font-family);
+    --chunk-font-size: var(--cyr-font-size);
+    --chunk-letter-spacing: var(--cyr-letter-spacing);
+}
+
 html {
   overflow-y: scroll;
 }
@@ -47,14 +61,17 @@ a {
   align-items: flex-start;
   background-color: #172136;
   padding: 10px;
+  padding-bottom: 0px;
   border-bottom-left-radius: 5px;
   border-bottom-right-radius: 5px;
   
 }
 #textbody {
-  font-size: 23px;
   line-height: 150%;
-  position: relative;
+  
+  font-family: var(--chunk-font-family);
+  font-size: var(--chunk-font-size);
+  letter-spacing: var(--chunk-letter-spacing);
 }
 
 #whole_text {
@@ -74,7 +91,7 @@ a {
 }
 
 .chunk {
-  /*white-space: nowrap; */
+  
 }
 #new_text{
   margin-left: 7.3%;
@@ -296,9 +313,11 @@ a {
   width: fit-content;
   min-height: 13px;
   /* min-width: 155px; */
-  border-radius: 6px;
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
   background-color: #040a16;
   border: 1px solid black;
+  border-bottom: none;
 }
 
 .pageno {
@@ -321,6 +340,7 @@ a {
   text-align: center;
   resize: none;
   border: 1px solid #040a16;
+  border-bottom: none;
   box-sizing: border-box;
   color: #cbd9f4a6;
   font-family: Bookerly;
@@ -337,6 +357,7 @@ a {
   overflow: hidden;
   resize: none;
   border: 1px solid #040a16;
+  border-bottom: none;
   box-sizing: border-box;
 
   color: #cbd9f4;
@@ -353,7 +374,6 @@ a {
   width: 35px;
 
   border-top-left-radius: 5px; /* 1px less than the parent box because of the border */
-  border-bottom-left-radius: 5px;
 
   text-align: center;
   display: flex;
@@ -366,8 +386,7 @@ a {
   width: 35px;
 
   border-top-right-radius: 5px; /* 1px less than the parent box because of the border */
-  border-bottom-right-radius: 5px;
-
+ 
   text-align: center;
   display: flex;
   align-items: center;
@@ -481,38 +500,43 @@ border-bottom: 2px solid rgb(23, 33, 54, 0);
   
   
 .tooltip .lemma_tt, .tooltip_selected .lemma_tt, .tooltip .mw_tt, .tooltip_selected .mw_tt {
-    visibility: hidden;
-    /* width: 170px; */
-    min-width: 170px;
-    max-width: 250px;
-    height: fit-content;
-    background-color: #071022;
-    color: #cbd9f4;
-    text-align: center;
-    border-radius: 6px;
-    border: solid 1px black;
+  visibility: hidden;
+  /* width: 170px; */
+  min-width: 170px;
+  max-width: 250px;
+  height: fit-content;
+  background-color: #071022;
+  color: #cbd9f4;
+  text-align: center;
+  border-radius: 6px;
+  border: solid 1px black;
 
-    position: absolute;
-    z-index: 1;
-    bottom: 100%;
-    left: 50%;
-    margin-left: -85px;
+  position: absolute;
+  z-index: 1;
+  bottom: 100%;
+  left: 50%;
+  margin-left: -85px;
+  /* transform: translateX(-50%); */
+
+  letter-spacing: 0px;
+
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: space-between;
+  align-items: stretch;
+  flex-grow: 0;
+  cursor: default;
   
-    display: flex;
-    flex-flow: column nowrap;
-    justify-content: space-between;
-    align-items: stretch;
-    flex-grow: 0;
-    cursor: default;
-    word-break: break-word;
-  }
+  /* word-break: break-word; */
+  width: fit-content;
+}
 
-  #tt_top {
-    display: flex;
-    flex-flow: row nowrap;
-    justify-content: space-between;
-    align-items: flex-start;
-  }
+#tt_top {
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: space-between;
+  align-items: flex-start;
+}
 
 #lemma_tag_tt {
   height:fit-content;
@@ -525,14 +549,16 @@ border-bottom: 2px solid rgb(23, 33, 54, 0);
 
   box-sizing: border-box;
 
-  font-size: 15px;
-  font-family: Bookerly;
-  color: #cbd9f4;
+  font-size: 18px;
+  font-family: Menaion;
+  line-height: 100%;
+
+  letter-spacing: var(--chunk-letter-spacing);
+  font-family: var(--chunk-font-family);
 
   border-bottom-right-radius: 6px;
   border-top-left-radius: 5px;
   padding: 5px;
-  background-color: #040a16;
   border: 1px solid black;
   border-left: none;
   border-top: none;
@@ -559,10 +585,10 @@ border-bottom: 2px solid rgb(23, 33, 54, 0);
   border: 1px solid black;;
 
   font-family: 'IBM_PLEX_SANS';
-  font-size: 15px;
+  font-size: 14px;
   text-align: center;
   white-space: normal;
-  
+  line-height: 115%;
   min-height: 10px;
   max-height: 200px;
   overflow-y: auto;

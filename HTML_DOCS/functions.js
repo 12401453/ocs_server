@@ -31,17 +31,25 @@ let page_toknos_arr = [];
 let current_pageno = 1;
 let dt_end = 0;
 
+const updateFont = (textselect_value) => {
+  if(textselect_value == 1 || textselect_value == 6 || textselect_value == 7 || textselect_value == 8) {
+    document.documentElement.style.setProperty("--chunk-font-family", "var(--cyr-font-family)");
+    document.documentElement.style.setProperty("--chunk-font-size", "var(--cyr-font-size)");
+    document.documentElement.style.setProperty("--chunk-letter-spacing", "var(--cyr-letter-spacing)");
+  }
+  else {
+    document.documentElement.style.setProperty("--chunk-font-family", "var(--glag-font-family)");
+    document.documentElement.style.setProperty("--chunk-font-size", "var(--glag-font-size)");
+    document.documentElement.style.setProperty("--chunk-letter-spacing", "var(--glag-letter-spacing)");
+  }
+};
+
 function selectText() {
   if(displayWordEditor.edit_mode) {
     displayWordEditor.stopEditing();
   }
   if(display_word != null) delAnnotate();
-  //setLangId();  //not async safe, needs to change
 
-  // let loadingbutton = document.createElement('div');
-  // loadingbutton.innerHTML = "Loading...";
-  // loadingbutton.id = 'loadingbutton';
-  // document.getElementById('spoofspan').after(loadingbutton);
   showLoadingButton();
 
   let textselect_value = document.getElementById('textselect').value;
@@ -62,6 +70,8 @@ function selectText() {
           para1.innerHTML = xhttp.response["html"];
           page_toknos_arr = xhttp.response["pagenos"];
           const subtitles_json = xhttp.response["subtitles_json"];
+
+          updateFont(textselect_value);
 
           const subtitle_select = document.getElementById("subtitle_select");
           subtitle_select.innerHTML = "";
@@ -91,7 +101,6 @@ function selectText() {
           });
           
           if(tooltips_shown) {
-            lemmaTooltipMW();
           }
           document.getElementById("textselect").blur();
           //loadingbutton.remove();
@@ -141,6 +150,8 @@ const selectSubtitle = (event) => {
           para1.innerHTML = xhttp.response["html"];
           page_toknos_arr = xhttp.response["pagenos"];
 
+          //updateFont(document.getElementById("textselect").value);
+
           document.cookie = "subtitle_id="+selected_subtitle_id+";max-age=157680000";
           current_pageno = 1;
           document.cookie = "current_pageno="+current_pageno+";max-age=157680000";
@@ -159,7 +170,7 @@ const selectSubtitle = (event) => {
           });
           
           if(tooltips_shown) {
-            lemmaTooltipMW();
+            //lemmaTooltipMW();
           }
           document.getElementById("subtitle_select").blur();
           //loadingbutton.remove();
@@ -331,7 +342,7 @@ const selectText_splitup = (event) => {
           });
    
           if(tooltips_shown) {
-            lemmaTooltipMW();
+            //lemmaTooltipMW();
           }
           //loadingbutton.remove();
           removeLoadingButton();
@@ -559,8 +570,10 @@ const prep_pos_tt = '<span id="pos_tag_prep_tt" class="pos_tag_tt" title="prepos
 const conj_pos_tt = '<span id="pos_tag_conj_tt" class="pos_tag_tt" title="conjunction"></span>';
 const part_pos_tt = '<span id="pos_tag_part_tt" class="pos_tag_tt" title="particle/interjection"></span>';
 const ques_pos_tt = '<span id="pos_tag_ques_tt" class="pos_tag_tt" title="interrogative"></span>';
+const quant_pos_tt_elem = '<span id="pos_tag_quant_tt" class="pos_tag_tt" title="quantifier"></span>';
+const unassigned_pos_tt_elem = '<span id="pos_tag_unassigned_tt" class="pos_tag_tt" title="unassigned"></span>';
 
-const tt_pos_arr = {1: noun_pos_tt, 2: verb_pos_tt, 3: adj_pos_tt, 4: adverb_pos_tt, 5: prep_pos_tt, 6: conj_pos_tt, 7: part_pos_tt, 8: ques_pos_tt,};
+const tt_pos_arr = {1: noun_pos_tt, 2: verb_pos_tt, 3: adj_pos_tt, 4: adverb_pos_tt, 5: prep_pos_tt, 6: conj_pos_tt, 7: part_pos_tt, 8: ques_pos_tt, 9: quant_pos_tt_elem, 10: unassigned_pos_tt_elem};
 
 
 const noun_pos_tt_elem = document.createRange().createContextualFragment('<span id="pos_tag_noun_tt" class="pos_tag_tt" title="noun"></span>');
@@ -571,9 +584,9 @@ const prep_pos_tt_elem = document.createRange().createContextualFragment('<span 
 const conj_pos_tt_elem = document.createRange().createContextualFragment('<span id="pos_tag_conj_tt" class="pos_tag_tt" title="conjunction"></span>');
 const part_pos_tt_elem = document.createRange().createContextualFragment('<span id="pos_tag_part_tt" class="pos_tag_tt" title="particle/interjection"></span>');
 const ques_pos_tt_elem = document.createRange().createContextualFragment('<span id="pos_tag_ques_tt" class="pos_tag_tt" title="interrogative"></span>');
-const quant_pos_tt_elem = document.createRange().createContextualFragment('<span id="pos_tag_quant_tt" class="pos_tag_tt" title="quantifier"></span>');
-const unassigned_pos_tt_elem = document.createRange().createContextualFragment('<span id="pos_tag_unassigned_tt" class="pos_tag_tt" title="unassigned"></span>');
-const tt_pos_elements = [noun_pos_tt_elem, verb_pos_tt_elem, adj_pos_tt_elem, adverb_pos_tt_elem, prep_pos_tt_elem, conj_pos_tt_elem, part_pos_tt_elem, ques_pos_tt_elem, quant_pos_tt_elem, unassigned_pos_tt_elem];
+// const quant_pos_tt_elem = document.createRange().createContextualFragment('<span id="pos_tag_quant_tt" class="pos_tag_tt" title="quantifier"></span>');
+// const unassigned_pos_tt_elem = document.createRange().createContextualFragment('<span id="pos_tag_unassigned_tt" class="pos_tag_tt" title="unassigned"></span>');
+// const tt_pos_elements = [noun_pos_tt_elem, verb_pos_tt_elem, adj_pos_tt_elem, adverb_pos_tt_elem, prep_pos_tt_elem, conj_pos_tt_elem, part_pos_tt_elem, ques_pos_tt_elem, quant_pos_tt_elem, unassigned_pos_tt_elem];
 
 const smallscreen_annot_box_html = '<div id="annot_box"><div id="annot_topbar"><div id="close_button"><svg id="red_cross" xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="24" viewBox="0 0 24 24" width="24" focusable="false"><path fill-rule="evenodd" clip-rule="evenodd" d="M5.29289 5.29289C5.68342 4.90237 6.31658 4.90237 6.70711 5.29289L12 10.5858L17.2929 5.29289C17.6834 4.90237 18.3166 4.90237 18.7071 5.29289C19.0976 5.68342 19.0976 6.31658 18.7071 6.70711L13.4142 12L18.7071 17.2929C19.0976 17.6834 19.0976 18.3166 18.7071 18.7071C18.3166 19.0976 17.6834 19.0976 17.2929 18.7071L12 13.4142L6.70711 18.7071C6.31658 19.0976 5.68342 19.0976 5.29289 18.7071C4.90237 18.3166 4.90237 17.6834 5.29289 17.2929L10.5858 12L5.29289 6.70711C4.90237 6.31658 4.90237 5.68342 5.29289 5.29289Z"/></svg></div><span id="edit_button" title="Edit current text-word">Edit</span><span id="pos_tag_box"><span id="pos_tag_adj" class="pos_tag" title="adjective">adject.</span></span></div><div id="lemma_tag_row"><textarea id="lemma_tag" spellcheck="false">uigennemtrængelig</textarea></div><div id="annot"><div id="right_column"><div id="left_column"><span id="lemma_box" class="box">Lemma</span><span id="multiword_box" class="box">Multiword</span><span id="context_box" class="box" title="not yet implemented">Context translation</span><span id="morph_box" class="box" title="not yet implemented">Morphology</span><span id="accent_box" class="box" title="not yet implemented">Accentology</span></div><div id="right_body"><textarea id="lemma_textarea" autocomplete="off">impenetrable</textarea><div id="meaning_no_box"><div id="meaning_leftarrow" class="nav_arrow">&lt;</div><div id="meaning_no">Meaning <span id="number">1</span></div><div id="meaning_rightarrow" class="nav_arrow">&gt;</div></div></div><div id="right_footer"><div id="save_button">Save</div><div id="delete_lemma_button">Delete</div></div></div></div></div>';
 
@@ -1008,6 +1021,7 @@ const lemmaTooltip = function () {
     }
   }
   const page_lemma_ids_arr = Array.from(page_lemma_ids_set);
+  if(page_lemma_ids_arr.length == 0) return;
   const page_lemma_ids_str = page_lemma_ids_arr.join(",");
   
   const httpRequest = (method, url) => {
@@ -1023,26 +1037,27 @@ const lemmaTooltip = function () {
       if(xhttp.readyState == 4) {
         tooltips_shown = true;
         const pos_array = xhttp.response[0];
-        const lemma_ocs_array = xhttp.response[1];
+        const lemma_ocs_array = xhttp.response[1];        
+        // console.log(pos_array);
+        // console.log(lemma_ocs_array);
 
-        const lemma_tt_box_elem = document.createRange().createContextualFragment('<span class="lemma_tt" onclick="event.stopPropagation()"><span id="tt_top"><div id="lemma_tag_tt"></div><span id="pos_tag_box_tt"></span></span><span id="tt_mid"><div id="tt_meaning"></div></span><span id="tt_bottom"></span></span>');
-
-        // page_lemma_ids_arr.forEach((lemma_id, i) => {
-        //   const json_pos = Number(json_lemma_transes[i].pos);
-        //   lemma_tt_box_elem.getElementById("lemma_tag_tt").textContent = json_lemma_transes[i].tt_title;
-        //   lemma_tt_box_elem.getElementById("pos_tag_box_tt").append = tt_pos_elements[Number(json_lemma_transes[i].pos) - 1];
-        //   lemma_tt_box_elem.getElementById("tt_meaning").textContent = json_lemma_transes[i].tt_contents;
-
-        //   document.querySelectorAll(`'data-lemma_id='${lemma_id}'`).forEach(lemma_word => {
-        //     lemma_word.append(lemma_tt_box_elem);
-        //   });
+        page_lemma_ids_arr.forEach((lemma_id, i) => {
+          let tt_box_string = '<span class="lemma_tt" onclick="event.stopPropagation()"><span id="tt_top"><div id="lemma_tag_tt">';
+          tt_box_string += lemma_ocs_array[i] + '</div><span id="pos_tag_box_tt">';
+          tt_box_string += tt_pos_arr[proiel_pos_map[pos_array[i]][0]] + '</span></span><span id="tt_mid"><div id="tt_meaning">';
           
-        //   i++;
-        // });
+          document.querySelectorAll(`[data-lemma_id="${lemma_id}"]`).forEach(lemma_word => {
+            const finished_string = tt_box_string + convertMorphTag(lemma_word.dataset.morph_tag) + '</div></span><span id="tt_bottom"></span></span>'; 
+            const tt_fragment = document.createRange().createContextualFragment(finished_string);
+            tt_fragment.getElementById("pos_tag_box_tt").firstChild.title = proiel_pos_map[pos_array[i]][1];
+            lemma_word.append(tt_fragment);
+          });
+          
+          i++;
+        });
         // document.getElementById("tt_toggle").disabled = false;
-        // setTimeout(ttPosition, 200);
-        console.log(pos_array);
-        console.log(lemma_ocs_array);
+        setTimeout(ttPosition, 200);
+        
       }
 
     }
@@ -2540,3 +2555,161 @@ class DisplayWordEditor {
 
 }
 const displayWordEditor = new DisplayWordEditor();
+
+
+const glag_map = new Map([
+  ["а", "ⰰ"],
+  ["б", "ⰱ"],
+  ["ц", "ⱌ"],
+  ["г", "ⰳ"],
+  ["д", "ⰴ"],
+  ["е", "ⰵ"],
+  ["ж", "ⰶ"],
+  ["ѕ", "ⰷ"],
+  ["з", "ⰸ"],
+  ["і", "ⰹ"],
+  ["ꙇ", "ⰺ"],
+  ["и", "ⰻ"],
+  ["ꙉ", "ⰼ"],
+  ["к", "ⰽ"],
+  ["л", "ⰾ"],
+  ["м", "ⰿ"],
+  ["н", "ⱀ"],
+  ["о", "ⱁ"],
+  ["п", "ⱂ"],
+  ["р", "ⱃ"],
+  ["с", "ⱄ"],
+  ["т", "ⱅ"],
+  ["ѹ", "ⱆ"],
+  ["ф", "ⱇ"],
+  ["х", "ⱈ"],
+  ["ч", "ⱍ"],
+  ["ш", "ⱎ"],
+  ["ъ", "ⱏ"],
+  ["ь", "ⱐ"],
+  ["ѣ", "ⱑ"],
+  ["ю", "ⱓ"],
+  ["ѫ", "ⱘ"],
+  ["ѭ", "ⱙ"],
+  ["в", "ⰲ"],
+  ["щ", "ⱋ"],
+  ["ѵ", "ⱛ"],
+  ["ѡ", "ⱉ"],
+  ["ѳ", "ⱚ"],
+  ["ѧ", "ⱔ"],
+  ["ѩ", "ⱗ"],
+  ["ꙙ", "ⱕ"],
+  ["А", "Ⰰ"],
+  ["Б", "Ⰱ"],
+  ["Ц", "Ⱌ"],
+  ["Г", "Ⰳ"],
+  ["Д", "Ⰴ"],
+  ["Е", "Ⰵ"],
+  ["Ж", "Ⰶ"],
+  ["Ѕ", "Ⰷ"],
+  ["З", "Ⰸ"],
+  ["І", "Ⰹ"],
+  ["Ꙇ", "Ⰺ"],
+  ["И", "Ⰻ"],
+  ["Ꙉ", "Ⰼ"],
+  ["К", "Ⰽ"],
+  ["Л", "Ⰾ"],
+  ["М", "Ⰿ"],
+  ["Н", "Ⱀ"],
+  ["О", "Ⱁ"],
+  ["П", "Ⱂ"],
+  ["Р", "Ⱃ"],
+  ["С", "Ⱄ"],
+  ["Т", "Ⱅ"],
+  ["Ѹ", "Ⱆ"],
+  ["Ф", "Ⱇ"],
+  ["Х", "Ⱈ"],
+  ["Ч", "Ⱍ"],
+  ["Ш", "Ⱎ"],
+  ["Ъ", "Ⱏ"],
+  ["Ь", "Ⱐ"],
+  ["Ѣ", "Ⱑ"],
+  ["Ю", "Ⱓ"],
+  ["Ѫ", "Ⱘ"],
+  ["Ѭ", "Ⱙ"],
+  ["В", "Ⰲ"],
+  ["Щ", "Ⱋ"],
+  ["Ѵ", "Ⱛ"],
+  ["Ѡ", "Ⱉ"],
+  ["Ѳ", "Ⱚ"],
+  ["Ѧ", "Ⱔ"],
+  ["Ѩ", "Ⱗ"],
+  ["Ꙙ", "Ⱕ"]
+]);
+const cyr_glag_clean_map = new Map([
+  ["о҄у", "ѹ҄"],
+  ["о͑у", "ѹ҅"],
+  ["ꙑ", "ъі"],
+  ["Оу", "Ѹ"],
+  ["ОУ", "Ѹ"],
+  ["оу", "ѹ"],
+  ["о̑у", "ѹ̂"],
+  ["A", "А"],
+  ["O", "О"],
+  ["E", "Е"],
+  ["C", "С"],
+  ["a", "а"],
+  ["o", "о"],
+  ["e", "е"],
+  ["c", "с"],
+  ["ы", "ьі"],
+  ["У", "Ѵ"],
+  ["Ꙃ", "Ѕ"],
+  ["Ћ", "Ꙉ"],
+  ["у", "ѵ"],
+  ["ꙃ", "ѕ"],
+  ["ћ", "ꙉ"],
+  ["Ⱕ", "Ꙙ"],
+  ["Я", "Ꙗ"],
+  ["ⱕ", "ꙙ"],
+  ["я", "ꙗ"],
+  ["Ҍ", "Ѣ"],
+  ["ҍ", "ѣ"],
+  ["Ї", "Ꙇ"],
+  ["ї", "ꙇ"],
+  ["X", "Х"],
+  ["x", "х"]
+]);
+
+const original_cyr_forms = new Array();
+const cyrToGlag = (str) => {
+  const cyr_map_iter = cyr_glag_clean_map.entries();
+  for(const cyr_entry of cyr_map_iter) {
+    str = str.replaceAll(cyr_entry[0], cyr_entry[1]);
+  }
+  const glag_map_iter = glag_map.entries();
+  for(const glag_entry of glag_map_iter) {
+    str = str.replaceAll(glag_entry[0], glag_entry[1]);
+  }
+  return str;
+};
+
+const convertToGlag = () => {
+  original_cyr_forms.length = 0;
+  document.querySelectorAll(".tooltip").forEach(tt => {
+    const cyr_form = tt.firstChild.textContent
+    original_cyr_forms.push(cyr_form);
+    tt.firstChild.textContent = cyrToGlag(cyr_form);
+  });
+  ttPosition();
+};
+const convertToCyr = () => {
+  document.querySelectorAll(".tooltip").forEach((tt, i) => tt.firstChild.textContent = original_cyr_forms[i]);
+  ttPosition();
+};
+
+
+const lcsPageSearch = (query) => {
+  //const regex = new RegExp(`/${query}/u`);
+  document.querySelectorAll("[data-lcs_recon]").forEach(reconstructed_word => {
+    //if(regex.test(reconstructed_word.dataset.lcs_recon))
+    if(reconstructed_word.dataset.lcs_recon.includes(query)) {
+      reconstructed_word.style.color = "orange";
+    }
+  })
+};

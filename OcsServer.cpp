@@ -1139,8 +1139,8 @@ bool OcsServer::deleteText(std::string _POST[1], int clientSocket) {
 
 bool OcsServer::lemmaTooltips(std::string _POST[1], int clientSocket) {
     sqlite3* DB;    
-
-    if(!sqlite3_open(m_DB_path, &DB)) {
+    
+    if(!sqlite3_open("chu.db", &DB)) {
 
         sqlite3_stmt* statement1;     
 
@@ -1149,6 +1149,8 @@ bool OcsServer::lemmaTooltips(std::string _POST[1], int clientSocket) {
             char c = (*i);
             if(c == ',') lemma_ids_count++;
         }
+
+        
 
         std::vector<int> lemma_ids;
         lemma_ids.reserve(lemma_ids_count); 
@@ -1168,42 +1170,45 @@ bool OcsServer::lemmaTooltips(std::string _POST[1], int clientSocket) {
                 lemma_ids.emplace_back(lemma_id);
             }
         }
+        
 
         const char* sql_text1 = "SELECT pos, lemma_ocs FROM lemmas WHERE lemma_id = ?";
         sqlite3_prepare_v2(DB, sql_text1, -1, &statement1, NULL);
 
         std::string lemma_ocs = "";
         short int pos = 1;
+        //const char* lemma_ocs;
 
         std::ostringstream pos_array;
         pos_array << "[";
         std::ostringstream lemma_ocs_array;
         lemma_ocs_array << "[";
-        int x = 0;
+        
+   
         for(const int &lemma_id : lemma_ids) {
-
             sqlite3_bind_int(statement1, 1, lemma_id);
-            std::cout << "lemma_id: " << lemma_id << "\n";
             sqlite3_step(statement1);
             pos = sqlite3_column_int(statement1, 0);
-            const char* lemma_ocs = (const char*)sqlite3_column_text(statement1, 1);
+            lemma_ocs = (const char*)sqlite3_column_text(statement1, 1);
 
             std::cout << "pos: " << pos << "; lemma_ocs: " << lemma_ocs << "\n";
-            
-            lemma_ocs_array << lemma_ocs << ',';
+
+            lemma_ocs_array << "\"" << htmlspecialchars(lemma_ocs) << "\"" << ',';
             pos_array << pos << ',';
 
             sqlite3_reset(statement1);
             sqlite3_clear_bindings(statement1);
-        } 
-        sqlite3_finalize(statement1);
+        }
+        std::cout << "before finalize\n";
+        std::cout << "sqlite_finalzie code: "<< sqlite3_finalize(statement1) << "\n";
+        
         lemma_ocs_array.seekp(-1, std::ios_base::cur);
         pos_array.seekp(-1, std::ios_base::cur);       
 
         pos_array << "]";
         lemma_ocs_array << "]";
 
-        std::string json_str = "[" + pos_array.str() + "," + escapeQuotes(lemma_ocs_array.str()) + "]";
+        std::string json_str = "[" + pos_array.str() + "," + lemma_ocs_array.str() + "]";
         int content_length = json_str.size();
 
         std::ostringstream post_response;
@@ -1222,7 +1227,7 @@ bool OcsServer::lemmaTooltips(std::string _POST[1], int clientSocket) {
 }
 
 void OcsServer::writeTextBody(std::ostringstream &html, sqlite3* DB, int tokno_start, int tokno_end) {
-    const char* sql_text = "SELECT chu_word_torot, presentation_before, presentation_after, sentence_no, lemma_id, morph_tag FROM corpus WHERE tokno >= ? AND tokno <= ?";
+    const char* sql_text = "SELECT chu_word_torot, presentation_before, presentation_after, sentence_no, lemma_id, morph_tag, autoreconstructed_lcs FROM corpus WHERE tokno >= ? AND tokno <= ?";
     sqlite3_stmt* statement;
     sqlite3_prepare_v2(DB, sql_text, -1, &statement, NULL);
     sqlite3_bind_int(statement, 1, tokno_start);
@@ -1231,6 +1236,7 @@ void OcsServer::writeTextBody(std::ostringstream &html, sqlite3* DB, int tokno_s
     const char* presentation_before;
     const char* presentation_after;
     const char* morph_tag;
+    std::string autoreconstructed_lcs;
     int lemma_id = 0;
     int sentence_number_previous = 0;
     int sentence_no_current = 0;
@@ -1242,6 +1248,8 @@ void OcsServer::writeTextBody(std::ostringstream &html, sqlite3* DB, int tokno_s
         lemma_id = sqlite3_column_int(statement, 4);
         if(sqlite3_column_type(statement, 5) == SQLITE_NULL) morph_tag = "";
         else morph_tag = (const char*)sqlite3_column_text(statement, 5);
+        if(sqlite3_column_type(statement, 6) == SQLITE_NULL) autoreconstructed_lcs = "";
+        else autoreconstructed_lcs = (const char*)sqlite3_column_text(statement, 6);
 
         if(sentence_number_previous > 0 && sentence_no_current != sentence_number_previous) {
             html << "  |  ";
@@ -1251,8 +1259,12 @@ void OcsServer::writeTextBody(std::ostringstream &html, sqlite3* DB, int tokno_s
         if(lemma_id > 0) {
             html << " data-morph_tag=\"" << morph_tag << "\"";
         }
+        if(!autoreconstructed_lcs.empty()) {
+            html << " data-lcs_recon=\"" << autoreconstructed_lcs << "\"";
+        }
         html << ">" << chu_word_torot << "</span>" << presentation_after << "</span>";
         sentence_number_previous = sentence_no_current;
+        autoreconstructed_lcs.clear();
 
     };
     sqlite3_finalize(statement);

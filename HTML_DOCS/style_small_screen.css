@@ -1,13 +1,27 @@
 
    
-   @font-face { font-family: LiberationSerif; src: local('Liberation Serif, Regular') ,url('LiberationSerif-Regular.ttf'); }
-   @font-face {font-family: Bookerly; src: local('Bookerly') ,url('Bookerly.ttf'); }
-   @font-face {font-family: Bukyvede; src: local('Bukyvede') ,url('BukyVede-Regular.ttf'); }
-   @font-face {font-family: Monomakh; src: local('Monomakh') ,url('MonomakhUnicode.ttf'); }
-   @font-face {font-family: PT_Serif; src: local('PT Serif'), url('PTSerif-Regular.ttf'); }
-   @font-face {font-family: IBM_Plex_Sans; src: local('IBM Plex Sans'), url('IBMPlexSans-Regular.ttf'); }
-   @font-face {font-family: Calibri; src: local('Calibri'), url('calibri.ttf'); }
-   @font-face {font-family: Menaion; src: local('Menaion'), url('Menaion.ttf'); }
+@font-face { font-family: LiberationSerif; src: local('Liberation Serif, Regular') ,url('LiberationSerif-Regular.ttf'); }
+@font-face {font-family: Bookerly; src: local('Bookerly') ,url('Bookerly.ttf'); }
+@font-face {font-family: Bukyvede; src: local('Bukyvede') ,url('BukyVede-Regular.ttf'); }
+@font-face {font-family: Monomakh; src: local('Monomakh') ,url('MonomakhUnicode.ttf'); }
+@font-face {font-family: PT_Serif; src: local('PT Serif'), url('PTSerif-Regular.ttf'); }
+@font-face {font-family: IBM_Plex_Sans; src: local('IBM Plex Sans'), url('IBMPlexSans-Regular.ttf'); }
+@font-face {font-family: Calibri; src: local('Calibri'), url('calibri.ttf'); }
+@font-face {font-family: Menaion; src: local('Menaion'), url('Menaion.ttf'); }
+
+:root {
+  --cyr-font-family: Menaion;
+  --cyr-font-size: 17px;
+  --cyr-letter-spacing: 0px;
+  
+  --glag-font-family: Bukyvede;
+  --glag-font-size: 20px;
+  --glag-letter-spacing: 2px;
+
+  --chunk-font-family: var(--cyr-font-family);
+  --chunk-font-size: var(--cyr-font-size);
+  --chunk-letter-spacing: var(--cyr-letter-spacing);
+}
 
 html {
   overflow-y: scroll;
@@ -50,14 +64,18 @@ a {
   margin-bottom: 25px; */
   background-color: #172136;
   padding: 10px;
+  padding-bottom: 0px;
   border-bottom-left-radius: 5px;
   border-bottom-right-radius: 5px;
   
 }
 
 #textbody {
- font-size: 17px;
- line-height: 150%;
+  line-height: 150%;
+  
+  font-family: var(--chunk-font-family);
+  font-size: var(--chunk-font-size);
+  letter-spacing: var(--chunk-letter-spacing);
 }
 
 #whole_text {
@@ -76,7 +94,7 @@ a {
 }
 
 .chunk {
-  /* white-space: nowrap; */
+  
 }
 #new_text{
  /* margin-left: 7.3%;
@@ -298,9 +316,11 @@ a {
   width: fit-content;
   min-height: 13px;
   /* min-width: 155px; */
-  border-radius: 6px;
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
   background-color: #040a16;
   border: 1px solid black;
+  border-bottom: none;
 }
 
 .pageno {
@@ -323,6 +343,7 @@ a {
   text-align: center;
   resize: none;
   border: 1px solid #040a16;
+  border-bottom: none;
   box-sizing: border-box;
   color: #cbd9f4a6;
   font-family: Bookerly;
@@ -339,6 +360,7 @@ a {
   overflow: hidden;
   resize: none;
   border: 1px solid #040a16;
+  border-bottom: none;
   box-sizing: border-box;
 
   color: #cbd9f4;
@@ -355,7 +377,6 @@ a {
   width: 26px;
 
   border-top-left-radius: 5px; /* 1px less than the parent box because of the border */
-  border-bottom-left-radius: 5px;
 
   text-align: center;
   display: flex;
@@ -368,7 +389,6 @@ a {
   width: 26px;
 
   border-top-right-radius: 5px; /* 1px less than the parent box because of the border */
-  border-bottom-right-radius: 5px;
 
   text-align: center;
   display: flex;
@@ -482,29 +502,34 @@ a {
   
   .tooltip .lemma_tt, .tooltip_selected .lemma_tt, .tooltip .mw_tt, .tooltip_selected .mw_tt {
   
-      visibility: hidden;
-      width: 125px;
-      height: fit-content;
-      background-color: #071022;
-      color: #cbd9f4;
-      text-align: center;
-      border-radius: 6px;
-      border: solid 1px black;
-  
-      position: absolute;
-      z-index: 1;
-      bottom: 100%;
-      left: 50%;
-      margin-left: -62.5px;
-    
-      display: flex;
-      flex-flow: column nowrap;
-      justify-content: space-between;
-      align-items: stretch;
-      flex-grow: 0;
-      cursor: default;
-  
-      word-break: break-word;
+    visibility: hidden;
+    min-width: 125px;
+    max-width: 140px;
+    height: fit-content;
+    background-color: #071022;
+    color: #cbd9f4;
+    text-align: center;
+    border-radius: 6px;
+    border: solid 1px black;
+
+    position: absolute;
+    z-index: 1;
+    bottom: 100%;
+    left: 50%;
+    margin-left: -62.5px;
+    /*I can't use transform: translateX(-50%) to centre the small-screen tooltips, because the function to prevent them going off-screen overrides this value and applies a transform style directly to each element*/
+
+    letter-spacing: 0px;
+
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: space-between;
+    align-items: stretch;
+    flex-grow: 0;
+    cursor: default;
+
+    /* word-break: break-word; */
+    width: fit-content;
     
     }
   
@@ -526,14 +551,13 @@ a {
   
     box-sizing: border-box;
   
-    font-size: 11px;
-    font-family: Bookerly;
-    color: #cbd9f4;
+    font-size: 13px;
+    font-family: Menaion;
+    line-height: 100%;
   
     border-bottom-right-radius: 6px;
     border-top-left-radius: 5px;
     padding: 3px;
-    background-color: #040a16;
     border: 1px solid black;
     border-left: none;
     border-top: none;
@@ -555,7 +579,6 @@ a {
   
     padding: 3px;
     flex: 1;
-    color: #cbd9f4;
     border-radius: 4px;
     border: 1px solid black;;
   
@@ -563,7 +586,7 @@ a {
     font-size: 11px;
     text-align: center;
     white-space: normal;
-    
+    line-height: 115%;
     min-height: 10px;
     max-height: 147px;
     overflow-y: auto;

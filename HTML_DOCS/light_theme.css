@@ -155,19 +155,33 @@ color: #670202;
 } 
   
   
-.tooltip .lemma_tt, .tooltip_selected .lemma_tt, .tooltip .mw_tt, .tooltip_selected .mw_tt {
-    background-color: #d59110;
+/* .tooltip .lemma_tt, .tooltip_selected .lemma_tt, .tooltip .mw_tt, .tooltip_selected .mw_tt {
+    background-color: #f0c36d;
     color: black;
   }
 
-.lemma_tag_tt {
+#lemma_tag_tt {
   color: black;
-  background-color: #ac7000;
+  background-color: #ffdfa3;
 }
 
 #tt_meaning {
-  background-color: #ac7000;
+  background-color: white;
   color: black;
+} */
+.tooltip .lemma_tt, .tooltip_selected .lemma_tt, .tooltip .mw_tt, .tooltip_selected .mw_tt {
+  background-color: #071022;
+  color: #cbd9f4;
+}
+
+#lemma_tag_tt {
+color: #cbd9f4;
+background-color: #040a16;
+}
+
+#tt_meaning {
+background-color: #040a16;
+color: #cbd9f4;
 }
 
 #toplinks-flexbox {
