@@ -218,3 +218,11 @@ color: #cbd9f4;
     border-left: 1px solid #172136;
   }
 }
+
+.pulsate {
+  animation: burn_orange 1s infinite;
+}
+@keyframes burn_orange {
+  50% { color: rgb(0 255 186); }
+  100% { color: #cbd9f4; }
+}

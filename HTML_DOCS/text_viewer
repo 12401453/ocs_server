@@ -59,6 +59,7 @@
 <span id="spoofspan" style="display: inline;"></span>
 <span id="spoofspan2"><span id="hidden_lemma_tag"></span></span>
 <script src="functions.js"></script>
+<script src="LCS_to_OCS.js"></script>
 <script src="dict_class.js"></script>
 </body>
 </html>

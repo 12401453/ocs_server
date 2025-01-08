@@ -187,35 +187,35 @@ const selectSubtitle = (event) => {
   httpRequest("POST", "retrieve_subtitle.php");
 }
 
-const proiel_pos_map = {
-  1: [3, "adjective"],
-  2: [4, "adverb"],
-  3: [3, "article"],
-  4: [1, "cardinal number"],
-  5: [1, "common noun"],
-  6: [6, "conjunction"],
-  7: [3, "demonstrative pronoun"],
-  8: [1, "foreign word"],
-  9: [3, "indefinite pronoun"],
-  10: [7, "infinitive marker"],
-  11: [7, "interjection"],
-  12: [8, "interrogative adverb"],
-  13: [8, "interrogative pronoun"],
-  14: [3, "ordinal number"],
-  15: [1, "personal pronoun"],
-  16: [1, "personal reflexive pronoun"],
-  17: [3, "possessive pronoun"],
-  18: [3, "possessive reflexive pronoun"],
-  19: [5, "preposition"],
-  20: [1, "proper noun"],
-  21: [9, "quantifier"],
-  22: [1, "reciprocal pronoun"],
-  23: [4, "relative adverb"],
-  24: [1, "relative pronoun"],
-  25: [6, "subjunction"],
-  26: [2, "verb"],
-  27: [10, "unassigned"]
-};
+const proiel_pos_map = [
+  [3, "adjective"],
+  [4, "adverb"],
+  [3, "article"],
+  [1, "cardinal number"],
+  [1, "common noun"],
+  [6, "conjunction"],
+  [3, "demonstrative pronoun"],
+  [1, "foreign word"],
+  [3, "indefinite pronoun"],
+  [7, "infinitive marker"],
+  [7, "interjection"],
+  [8, "interrogative adverb"],
+  [8, "interrogative pronoun"],
+  [3, "ordinal number"],
+  [1, "personal pronoun"],
+  [1, "personal reflexive pronoun"],
+  [3, "possessive pronoun"],
+  [3, "possessive reflexive pronoun"],
+  [5, "preposition"],
+  [1, "proper noun"],
+  [9, "quantifier"],
+  [1, "reciprocal pronoun"],
+  [4, "relative adverb"],
+  [1, "relative pronoun"],
+  [6, "subjunction"],
+  [2, "verb"],
+  [10, "unassigned"]
+];
 
 const morph_tag_map = [
   {1: "1st pers.", 2: "2nd pers.", 3:"3rd pers.", x:"??? pers."},
@@ -1011,6 +1011,8 @@ const setLemmaTagSize = function () {
 };
 
 const lemmaTooltip = function () {
+  document.querySelectorAll(".lemma_tt").forEach(lemma_tt => lemma_tt.remove());
+  
   const page_lemma_ids_set = new Set();
   const lemma_set_words = new Array();
   for (const word of document.getElementsByClassName("tooltip")){
@@ -1044,12 +1046,12 @@ const lemmaTooltip = function () {
         page_lemma_ids_arr.forEach((lemma_id, i) => {
           let tt_box_string = '<span class="lemma_tt" onclick="event.stopPropagation()"><span id="tt_top"><div id="lemma_tag_tt">';
           tt_box_string += lemma_ocs_array[i] + '</div><span id="pos_tag_box_tt">';
-          tt_box_string += tt_pos_arr[proiel_pos_map[pos_array[i]][0]] + '</span></span><span id="tt_mid"><div id="tt_meaning">';
+          tt_box_string += tt_pos_arr[proiel_pos_map[pos_array[i] - 1][0]] + '</span></span><span id="tt_mid"><div id="tt_meaning">';
           
           document.querySelectorAll(`[data-lemma_id="${lemma_id}"]`).forEach(lemma_word => {
             const finished_string = tt_box_string + convertMorphTag(lemma_word.dataset.morph_tag) + '</div></span><span id="tt_bottom"></span></span>'; 
             const tt_fragment = document.createRange().createContextualFragment(finished_string);
-            tt_fragment.getElementById("pos_tag_box_tt").firstChild.title = proiel_pos_map[pos_array[i]][1];
+            tt_fragment.getElementById("pos_tag_box_tt").firstChild.title = proiel_pos_map[pos_array[i] - 1][1];
             lemma_word.append(tt_fragment);
           });
           
@@ -2705,11 +2707,38 @@ const convertToCyr = () => {
 
 
 const lcsPageSearch = (query) => {
+  query = query.replaceAll("ŕ̥", "W").replaceAll("r̥", "X").replaceAll("ĺ̥", "Y").replaceAll("l̥", "Z");
+  resetLcsPageSearch();
   //const regex = new RegExp(`/${query}/u`);
   document.querySelectorAll("[data-lcs_recon]").forEach(reconstructed_word => {
     //if(regex.test(reconstructed_word.dataset.lcs_recon))
-    if(reconstructed_word.dataset.lcs_recon.includes(query)) {
-      reconstructed_word.style.color = "orange";
+    if(reconstructed_word.dataset.lcs_recon.replaceAll("ŕ̥", "W").replaceAll("r̥", "X").replaceAll("ĺ̥", "Y").replaceAll("l̥", "Z").includes(query)) {
+      reconstructed_word.classList.add("pulsate");
     }
   })
+};
+const resetLcsPageSearch = () => {
+  document.querySelectorAll(".pulsate").forEach(elem => elem.classList.remove("pulsate"));
+};
+
+const lcsTooltip = function () {
+
+  document.querySelectorAll(".lemma_tt").forEach(lemma_tt => lemma_tt.remove());
+  
+  const lcs_words = document.querySelectorAll("[data-lcs_recon]");
+
+  lcs_words.forEach(lcs_word => {
+    lcs_word.style.color = "pink";
+    const lcs_recon = lcs_word.dataset.lcs_recon;
+    let tt_box_string = '<span class="lemma_tt" onclick="event.stopPropagation()"><span id="tt_top"><div id="lemma_tag_tt">';
+    tt_box_string += convertToOCS(lcs_recon) + '</div><span id="pos_tag_box_tt">';
+    tt_box_string += '<span id="pos_tag_unassigned_tt" class="pos_tag_tt" title="unassigned"></span>' + '</span></span><span id="tt_mid"><div id="tt_meaning">';
+    tt_box_string +=  lcs_recon + '</div></span><span id="tt_bottom"></span></span>';
+    
+    lcs_word.append(document.createRange().createContextualFragment(tt_box_string));
+  });
+  setTimeout(ttPosition, 200);
+        
+    
+
 };

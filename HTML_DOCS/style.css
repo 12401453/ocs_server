@@ -837,3 +837,11 @@ border-bottom: 2px solid rgb(23, 33, 54, 0);
 span[data-lemma_id="0"] {
   opacity: 50%;
 }
+
+.pulsate {
+  animation: burn_orange 1s infinite;
+}
+@keyframes burn_orange {
+  50% { color: rgb(0 255 186); }
+  100% { color: #cbd9f4; }
+}
