@@ -105,7 +105,7 @@ color: #670202;
 }
 
 .tooltip:hover {
-  color: rgb(255 115 205);
+  color: red;
 }
 
 .multiword {

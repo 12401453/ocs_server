@@ -21,6 +21,8 @@
   --chunk-font-family: var(--cyr-font-family);
   --chunk-font-size: var(--cyr-font-size);
   --chunk-letter-spacing: var(--cyr-letter-spacing);
+
+  --no-lcs-opacity: 1.0;
 }
 
 html {
@@ -805,7 +807,11 @@ a {
   100% { -webkit-transform: translate(-50%, -50%) rotate(360deg); }
 }
 
-span[data-lemma_id="0"] {
+.tooltip:not([data-lcs_recon]) {
+  opacity: var(--no-lcs-opacity);
+}
+
+.tooltip[data-lemma_id="0"] {
   opacity: 50%;
 }
 

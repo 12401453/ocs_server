@@ -44,6 +44,10 @@ const updateFont = (textselect_value) => {
   }
 };
 
+const app_state = {
+  annotation_mode: "none"
+}
+
 function selectText() {
   if(displayWordEditor.edit_mode) {
     displayWordEditor.stopEditing();
@@ -104,7 +108,10 @@ function selectText() {
           }
           document.getElementById("textselect").blur();
           //loadingbutton.remove();
+
           removeLoadingButton();
+
+          applyTooltips();
         }
      
       }
@@ -175,6 +182,8 @@ const selectSubtitle = (event) => {
           document.getElementById("subtitle_select").blur();
           //loadingbutton.remove();
           removeLoadingButton();
+
+          applyTooltips();
           
 
         }
@@ -351,6 +360,8 @@ const selectText_splitup = (event) => {
           }
           current_pageno = new_pageno;
           document.cookie = "current_pageno="+current_pageno+";max-age=157680000";
+
+          applyTooltips();
         }
      
       }
@@ -2662,7 +2673,17 @@ const resetLcsPageSearch = () => {
   document.querySelectorAll(".pulsate").forEach(elem => elem.classList.remove("pulsate"));
 };
 
+const btn_load_spinner = document.createElement("div");
+btn_load_spinner.id = "btn_load_spinner";
+
 const lemmaTooltip = function () {
+
+  const torot_btn = document.getElementById("torot_mode");
+  torot_btn.append(btn_load_spinner);
+
+  removeTooltips();
+  
+
   document.querySelectorAll(".lemma_tt").forEach(lemma_tt => lemma_tt.remove());
   
   const page_lemma_ids_set = new Set();
@@ -2675,7 +2696,13 @@ const lemmaTooltip = function () {
     }
   }
   const page_lemma_ids_arr = Array.from(page_lemma_ids_set);
-  if(page_lemma_ids_arr.length == 0) return;
+  if(page_lemma_ids_arr.length == 0) {
+    document.getElementById("lcs_mode").classList.remove("active");
+    torot_btn.classList.add("active");
+    torot_btn.removeChild(btn_load_spinner);
+    app_state.annotation_mode = "torot";
+    return;
+  }
   const page_lemma_ids_str = page_lemma_ids_arr.join(",");
   
   const httpRequest = (method, url) => {
@@ -2709,8 +2736,13 @@ const lemmaTooltip = function () {
           
           i++;
         });
+
+        document.getElementById("lcs_mode").classList.remove("active");
+        torot_btn.classList.add("active");
+        torot_btn.removeChild(btn_load_spinner);
         // document.getElementById("tt_toggle").disabled = false;
         setTimeout(ttPosition, 200);
+        app_state.annotation_mode = "torot";
         
       }
 
@@ -2723,12 +2755,14 @@ const lemmaTooltip = function () {
 
 const lcsTooltip = function () {
 
-  document.querySelectorAll(".lemma_tt").forEach(lemma_tt => lemma_tt.remove());
+  removeTooltips();
+  
+  document.documentElement.style.setProperty("--no-lcs-opacity", "0.7");
   
   const lcs_words = document.querySelectorAll("[data-lcs_recon]");
 
   lcs_words.forEach(lcs_word => {
-    lcs_word.style.color = "pink";
+    
     const lcs_recon = lcs_word.dataset.lcs_recon;
     const inflexion_class_id = lcs_word.dataset.inflexion;
     let tt_box_string = '<span class="lemma_tt" onclick="event.stopPropagation()"><span id="tt_top"><div id="lemma_tag_tt">';
@@ -2738,20 +2772,52 @@ const lcsTooltip = function () {
     
     lcs_word.append(document.createRange().createContextualFragment(tt_box_string));
   });
+  document.getElementById("lcs_mode").classList.add("active");
   setTimeout(ttPosition, 200);
+  app_state.annotation_mode = "lcs";
         
 };
 
 const removeTooltips = () => {
+  document.querySelectorAll(".lemma_tt").forEach(lemma_tt => lemma_tt.remove());
+  document.documentElement.style.setProperty("--no-lcs-opacity", "1.0");
+  app_state.annotation_mode = "none";
+};
 
+const applyTooltips = () => {
+  switch(app_state.annotation_mode) {
+    case "torot":
+      lemmaTooltip();
+      break;
+    case "lcs":
+      lcsTooltip();
+      break;
+    default:
+
+  }
 };
 
 document.getElementById("annotation_mode_box").addEventListener('click', (event) => {
   const annotation_button = event.target;
-  if(annotation_button.id == "torot_mode" && annotation_button.classList.contains("active")) {
-    lemmaTooltip();
+  if(annotation_button.id == "torot_mode") {
+    if(annotation_button.classList.contains("active")) {
+      annotation_button.classList.remove("active");
+      removeTooltips();
+    }
+    else {
+      //event.currentTarget.querySelectorAll(".annotation_mode").forEach(button => button.classList.remove("active"));
+      lemmaTooltip();
+    }
   }
-  else if(annotation_button.id == "lcs_mode" && annotation_button.classList.contains("active")) {
-    lcsTooltip();
+  else if(annotation_button.id == "lcs_mode") {
+    if(annotation_button.classList.contains("active")) {
+      annotation_button.classList.remove("active");
+      removeTooltips();
+    }
+    else {
+      event.currentTarget.querySelectorAll(".annotation_mode").forEach(button => button.classList.remove("active"));
+      lcsTooltip();
+    }
+    
   }
 });
