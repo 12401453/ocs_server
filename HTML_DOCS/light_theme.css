@@ -243,3 +243,11 @@ color: #cbd9f4;
   50% { color: orange; }
   100% { color: #670202; }
 }
+
+.annotation_mode {
+  background-color: #f0c36dbd;
+  color: black;
+}
+.annotation_mode.active {
+  background-color: #f1ad2e;
+}

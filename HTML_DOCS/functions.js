@@ -1010,65 +1010,6 @@ const setLemmaTagSize = function () {
   lemma_tag.style.height = new_height;
 };
 
-const lemmaTooltip = function () {
-  document.querySelectorAll(".lemma_tt").forEach(lemma_tt => lemma_tt.remove());
-  
-  const page_lemma_ids_set = new Set();
-  const lemma_set_words = new Array();
-  for (const word of document.getElementsByClassName("tooltip")){
-    const word_lemma_id = word.dataset.lemma_id;
-    if(word_lemma_id != "0") {
-      page_lemma_ids_set.add(word_lemma_id);
-      lemma_set_words.push(word);
-    }
-  }
-  const page_lemma_ids_arr = Array.from(page_lemma_ids_set);
-  if(page_lemma_ids_arr.length == 0) return;
-  const page_lemma_ids_str = page_lemma_ids_arr.join(",");
-  
-  const httpRequest = (method, url) => {
-
-    // let send_data = toknos_POST_data;
-    let send_data = "lemma_ids=" + page_lemma_ids_str;
-    const xhttp = new XMLHttpRequest();
-    xhttp.open(method, url, true);
-    xhttp.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-    xhttp.responseType = 'json';
-
-    xhttp.onload = () => {
-      if(xhttp.readyState == 4) {
-        tooltips_shown = true;
-        const pos_array = xhttp.response[0];
-        const lemma_ocs_array = xhttp.response[1];        
-        // console.log(pos_array);
-        // console.log(lemma_ocs_array);
-
-        page_lemma_ids_arr.forEach((lemma_id, i) => {
-          let tt_box_string = '<span class="lemma_tt" onclick="event.stopPropagation()"><span id="tt_top"><div id="lemma_tag_tt">';
-          tt_box_string += lemma_ocs_array[i] + '</div><span id="pos_tag_box_tt">';
-          tt_box_string += tt_pos_arr[proiel_pos_map[pos_array[i] - 1][0]] + '</span></span><span id="tt_mid"><div id="tt_meaning">';
-          
-          document.querySelectorAll(`[data-lemma_id="${lemma_id}"]`).forEach(lemma_word => {
-            const finished_string = tt_box_string + convertMorphTag(lemma_word.dataset.morph_tag) + '</div></span><span id="tt_bottom"></span></span>'; 
-            const tt_fragment = document.createRange().createContextualFragment(finished_string);
-            tt_fragment.getElementById("pos_tag_box_tt").firstChild.title = proiel_pos_map[pos_array[i] - 1][1];
-            lemma_word.append(tt_fragment);
-          });
-          
-          i++;
-        });
-        // document.getElementById("tt_toggle").disabled = false;
-        setTimeout(ttPosition, 200);
-        
-      }
-
-    }
-    xhttp.send(send_data);
-  };
-  httpRequest("POST", "lemma_tooltip.php");
-
-};
-
 const lemmaTooltipMW = function () {
   let lemma_tooltips = document.querySelectorAll('.lemma_tt, .mw_tt');
   lemma_tooltips.forEach(lemma_tooltip => {
@@ -2721,6 +2662,65 @@ const resetLcsPageSearch = () => {
   document.querySelectorAll(".pulsate").forEach(elem => elem.classList.remove("pulsate"));
 };
 
+const lemmaTooltip = function () {
+  document.querySelectorAll(".lemma_tt").forEach(lemma_tt => lemma_tt.remove());
+  
+  const page_lemma_ids_set = new Set();
+  const lemma_set_words = new Array();
+  for (const word of document.getElementsByClassName("tooltip")){
+    const word_lemma_id = word.dataset.lemma_id;
+    if(word_lemma_id != "0") {
+      page_lemma_ids_set.add(word_lemma_id);
+      lemma_set_words.push(word);
+    }
+  }
+  const page_lemma_ids_arr = Array.from(page_lemma_ids_set);
+  if(page_lemma_ids_arr.length == 0) return;
+  const page_lemma_ids_str = page_lemma_ids_arr.join(",");
+  
+  const httpRequest = (method, url) => {
+
+    // let send_data = toknos_POST_data;
+    let send_data = "lemma_ids=" + page_lemma_ids_str;
+    const xhttp = new XMLHttpRequest();
+    xhttp.open(method, url, true);
+    xhttp.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+    xhttp.responseType = 'json';
+
+    xhttp.onload = () => {
+      if(xhttp.readyState == 4) {
+        tooltips_shown = true;
+        const pos_array = xhttp.response[0];
+        const lemma_ocs_array = xhttp.response[1];        
+        // console.log(pos_array);
+        // console.log(lemma_ocs_array);
+
+        page_lemma_ids_arr.forEach((lemma_id, i) => {
+          let tt_box_string = '<span class="lemma_tt" onclick="event.stopPropagation()"><span id="tt_top"><div id="lemma_tag_tt">';
+          tt_box_string += lemma_ocs_array[i] + '</div><span id="pos_tag_box_tt">';
+          tt_box_string += tt_pos_arr[proiel_pos_map[pos_array[i] - 1][0]] + '</span></span><span id="tt_mid"><div id="tt_meaning">';
+          
+          document.querySelectorAll(`[data-lemma_id="${lemma_id}"]`).forEach(lemma_word => {
+            const finished_string = tt_box_string + convertMorphTag(lemma_word.dataset.morph_tag) + '</div></span><span id="tt_bottom"></span></span>'; 
+            const tt_fragment = document.createRange().createContextualFragment(finished_string);
+            tt_fragment.getElementById("pos_tag_box_tt").firstChild.title = proiel_pos_map[pos_array[i] - 1][1];
+            lemma_word.append(tt_fragment);
+          });
+          
+          i++;
+        });
+        // document.getElementById("tt_toggle").disabled = false;
+        setTimeout(ttPosition, 200);
+        
+      }
+
+    }
+    xhttp.send(send_data);
+  };
+  httpRequest("POST", "lemma_tooltip.php");
+
+};
+
 const lcsTooltip = function () {
 
   document.querySelectorAll(".lemma_tt").forEach(lemma_tt => lemma_tt.remove());
@@ -2730,8 +2730,9 @@ const lcsTooltip = function () {
   lcs_words.forEach(lcs_word => {
     lcs_word.style.color = "pink";
     const lcs_recon = lcs_word.dataset.lcs_recon;
+    const inflexion_class_id = lcs_word.dataset.inflexion;
     let tt_box_string = '<span class="lemma_tt" onclick="event.stopPropagation()"><span id="tt_top"><div id="lemma_tag_tt">';
-    tt_box_string += convertToOCS(lcs_recon) + '</div><span id="pos_tag_box_tt">';
+    tt_box_string += convertToOCS(lcs_recon, inflexion_class_id) + '</div><span id="pos_tag_box_tt">';
     tt_box_string += '<span id="pos_tag_unassigned_tt" class="pos_tag_tt" title="unassigned"></span>' + '</span></span><span id="tt_mid"><div id="tt_meaning">';
     tt_box_string +=  lcs_recon + '</div></span><span id="tt_bottom"></span></span>';
     

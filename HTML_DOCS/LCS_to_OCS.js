@@ -158,7 +158,7 @@ const mappings = {
   'ŕ' : 'р҄',
 }
 
-const convertToOCS = (lcs_word) => {
+const convertToOCS = (lcs_word, inflexion_class_id) => {
 
   lcs_word = yeetTlDl(lcs_word);
 
@@ -177,7 +177,7 @@ const convertToOCS = (lcs_word) => {
     lcs_word = lcs_word.slice(0, PV2_pos) + PV2_map.get(PV2_cons) + lcs_word.slice(PV2_pos + 1);
     PV2_pos = lcs_word.search(PV2_regex);
   }
-  lcs_word = applyPV3(lcs_word);
+  if(inflexion_class_id == 1013 || inflexion_class_id == 1029 || inflexion_class_id == 1036 || inflexion_class_id == 1057) lcs_word = applyPV3(lcs_word);
 
   lcs_word = simplifyLongAdj(lcs_word);
 

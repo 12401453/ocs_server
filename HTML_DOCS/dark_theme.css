@@ -226,3 +226,11 @@ color: #cbd9f4;
   50% { color: rgb(0 255 186); }
   100% { color: #cbd9f4; }
 }
+
+.annotation_mode {
+  background-color: #181f2e;
+  color: #cbd9f4;
+}
+.annotation_mode.active {
+  background-color: #071022;
+}

@@ -808,3 +808,46 @@ a {
 span[data-lemma_id="0"] {
   opacity: 50%;
 }
+
+#annotation_mode_box {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+}
+.annotation_mode {
+  border-radius: 32px;
+  border: 1px solid black;
+  border: 2px solid black;
+  min-width: 54px;
+  padding: 2px;
+  padding-left: 4px;
+  padding-right: 4px;
+  font-size: 13px;
+  user-select: none;
+  /* background-color: #181f2e;
+  color: #cbd9f4; */
+  font-family: IBM_Plex_Sans;
+  text-align: center;
+  opacity: 0.6;
+  cursor: pointer;
+  position: relative;
+}
+.annotation_mode.active {
+  opacity: 1.0;
+  /* background-color: #071022; */
+}
+
+#btn_load_spinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border: 3px solid #cbd9f487;
+  border-radius: 50%;
+  border-top: 3px solid #071022;
+  border-top: 3px solid #071022;
+  width: 15px;
+  height: 15px;
+  -webkit-animation: spin 1s linear infinite; /* Safari */
+  animation: spin 1s linear infinite;
+}

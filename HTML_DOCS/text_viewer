@@ -50,9 +50,13 @@
     </div>
   </div>
   <br>
-<div id="p1">
+  <div id="annotation_mode_box">
+    <div id="torot_mode" class="annotation_mode">TOROT</div>
+    <div id="phonology_mode" class="annotation_mode">LCS</div> 
+  </div>
+  <div id="p1">
 <?cky ?>
-</div>
+  </div>
 
 </div>
 </div>
