@@ -2740,6 +2740,18 @@ const lcsTooltip = function () {
   });
   setTimeout(ttPosition, 200);
         
-    
+};
+
+const removeTooltips = () => {
 
 };
+
+document.getElementById("annotation_mode_box").addEventListener('click', (event) => {
+  const annotation_button = event.target;
+  if(annotation_button.id == "torot_mode" && annotation_button.classList.contains("active")) {
+    lemmaTooltip();
+  }
+  else if(annotation_button.id == "lcs_mode" && annotation_button.classList.contains("active")) {
+    lcsTooltip();
+  }
+});
