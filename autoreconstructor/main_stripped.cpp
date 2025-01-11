@@ -378,7 +378,7 @@ std::array<std::string, 2> ReconstructMorphReplace(std::string cyr_id, std::stri
 
     changeLemma_field(lemma, morph_tag, deep_clean_Cyr(cyr_id)); // pass object by reference to a function so I can change one of its members directly
 
-    if(lcs_reconstruction.substr(0, 7) != "corrupt"){
+    if(lemma.lemma_form.substr(0, 7) != "corrupt"){
       lcs_reconstruction = Dejotate(lemma.lemma_form);
       lcs_morph_replace = Dejotate(lemma.morph_replace);
     }

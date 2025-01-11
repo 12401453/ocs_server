@@ -1,7 +1,7 @@
 const dl_tl_regex = /[dt][ĺl][^̥]/;
 const ORT_regex = /[eo][rl]([tŕrpsšdfgћђklĺzžxčvbnńmǯ\+]|$)/
 const PV2_regex = /[kgx]v?(?:[ěęeiь]|ŕ̥|ĺ̥)/;
-const PV3_regex = /[ьi][kgx][auǫ]/;
+const PV3_regex = /[ьię][kgx][auǫ]/;
 const tense_jer_regex = /[ьъ]j[Ǟeiьęǫu]/;
 
 const PV2_map = new Map();
