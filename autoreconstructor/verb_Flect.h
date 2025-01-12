@@ -267,7 +267,7 @@ void verb_Flect(Lemma &lemma_ref, short int int_morph_tag[10], std::string cyr_i
         }
       }
 
-      // jǞxati checks
+      // jǢxati checks
       if (outer_map_no == 4001)
       {
         if (row_no == 6 && Sniff(cyr_id, "та", 2))

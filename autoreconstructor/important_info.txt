@@ -1,4 +1,0 @@
-The lemma_spreadsheet still contains some conjugated reconstructions which came from the manually-reconstructed texts; I must've just imported them all over wholesale to ease the reconstruction of the lemmas, but none of these would get used by the Autoreconstructor because their verb_noun column is still 99. However they still get put into my new sqlite lemmas table, albeit with NULL as the value in the inflexion_class_id column which specifies that they aren't ready for use yet
-
-
-SQL to get all of the occurrences of an inflexion-class from the corpus: `SELECT * FROM tagged_corpus WHERE lemma_id IN (SELECT lemma_id FROM lemmas WHERE inflexion_class_id = 1029) ORDER BY tokno;`

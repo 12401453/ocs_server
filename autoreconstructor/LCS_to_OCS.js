@@ -18,8 +18,8 @@ const input_file = readline.createInterface({input: read_stream});
 const dl_tl_regex = /[dt][ĺl][^̥]/;
 const ORT_regex = /[eo][rl]([tŕrpsšdfgћђklĺzžxčvbnńmǯ\+]|$)/
 const PV2_regex = /[kgx]v?(?:[ěęeiь]|ŕ̥|ĺ̥)/;
-const PV3_regex = /[ьi][kgx][auǫ]/;
-const tense_jer_regex = /[ьъ]j[Ǟeiьęǫu]/;
+const PV3_regex = /[ьię][kgx][auǫ]/;
+const tense_jer_regex = /[ьъ]j[Ǣeiьęǫu]/;
 
 const PV2_map = new Map();
 PV2_map.set('k', 'c');
@@ -67,13 +67,13 @@ const long_adj_map = {
   'omajima' : 'ъіима',
   'emajima' : 'иима',
   'amajima' : 'ъіима',
-  'Ǟmajima' : 'иима',
+  'Ǣmajima' : 'иима',
   'amъjimъ' : 'ъіимъ',
-  'Ǟmъjimъ' : 'иимъ',
+  'Ǣmъjimъ' : 'иимъ',
   'axъjixъ' : 'ъіихъ',
-  'Ǟxъjixъ' : 'иихъ',
+  'Ǣxъjixъ' : 'иихъ',
   'amijimi' : 'ъіими',
-  'Ǟmijimi' : 'иими'
+  'Ǣmijimi' : 'иими'
 }
 
 const simplifyLongAdj = (lcs_form) => {
@@ -86,11 +86,11 @@ const simplifyLongAdj = (lcs_form) => {
 const mappings = {
   'sš' : 'ш',  
   'bv' : 'б',
-  'ŕǞ' : 'рꙗ',
-  'ńǞ' : 'нꙗ',
-  'ĺǞ' : 'лꙗ',
+  'ŕǢ' : 'рꙗ',
+  'ńǢ' : 'нꙗ',
+  'ĺǢ' : 'лꙗ',
   'śa' : 'сꙗ',
-  'jǞ' : 'ꙗ',
+  'jǢ' : 'ꙗ',
   'ŕu' : 'рю',
   'ńu' : 'ню',
   'ĺu' : 'лю',
@@ -154,7 +154,7 @@ const mappings = {
   'č' : 'ч',
   'š' : 'ш',
   'ž' : 'ж',
-  'Ǟ' : 'а',
+  'Ǣ' : 'а',
   'a' : 'а',
   'e' : 'е',
   'ę' : 'ѧ',

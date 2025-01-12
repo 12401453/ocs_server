@@ -162,15 +162,15 @@ void class_I_clean(std::string &verb, bool imperative)
       break;
     case 24:
       str1.assign("gě");
-      str2.assign("žǞ");
+      str2.assign("žǢ");
       break;
     case 25:
       str1.assign("xě");
-      str2.assign("šǞ");
+      str2.assign("šǢ");
       break;
     case 26:
       str1.assign("kě");
-      str2.assign("čǞ");
+      str2.assign("čǢ");
       break;
     case 27:
       str1.assign("ge");
@@ -187,20 +187,20 @@ void class_I_clean(std::string &verb, bool imperative)
       break;
     case 30:
       str1.assign("žě");
-      str2.assign("žǞ");
+      str2.assign("žǢ");
       break;
     case 31:
       str1.assign("šě");
-      str2.assign("šǞ");
+      str2.assign("šǢ");
       break;
 
     case 32:
       str1.assign("čě");
-      str2.assign("čǞ");
+      str2.assign("čǢ");
       break;
     case 33:
       str1.assign("jě");
-      str2.assign("jǞ");
+      str2.assign("jǢ");
       break;
     case 34:
       str1.assign("vt");
@@ -479,19 +479,19 @@ void class_3_clean(std::string &verb)
     {
     case 0:
       str1.assign("žě");
-      str2.assign("žǞ");
+      str2.assign("žǢ");
       break;
     case 1:
       str1.assign("šě");
-      str2.assign("šǞ");
+      str2.assign("šǢ");
       break;
     case 2:
       str1.assign("čě");
-      str2.assign("čǞ");
+      str2.assign("čǢ");
       break;
     case 3:
       str1.assign("jě");
-      str2.assign("jǞ");
+      str2.assign("jǢ");
       break;
     }
 

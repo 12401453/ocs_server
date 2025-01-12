@@ -77,15 +77,15 @@ void PV1_long_e(std::string &noun)
 
     case 0:
       str1.assign("gě");
-      str2.assign("žǞ");
+      str2.assign("žǢ");
       break;
     case 1:
       str1.assign("kě");
-      str2.assign("čǞ");
+      str2.assign("čǢ");
       break;
     case 2:
       str1.assign("xě");
-      str2.assign("šǞ");
+      str2.assign("šǢ");
       break;
     }
 

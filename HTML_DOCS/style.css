@@ -1,4 +1,5 @@
    @font-face { font-family: LiberationSerif; src: local('Liberation Serif, Regular') ,url('LiberationSerif-Regular.ttf'); }
+   @font-face { font-family: LiberationSans; src: local('Liberation Sans, Regular') ,url('LiberationSans-Regular.ttf'); }
    @font-face {font-family: Bookerly; src: local('Bookerly') ,url('Bookerly.ttf'); }
    @font-face {font-family: Bukyvede; src: local('Bukyvede') ,url('BukyVede-Regular.ttf'); }
    @font-face {font-family: Monomakh; src: local('Monomakh') ,url('MonomakhUnicode.ttf'); }
@@ -398,7 +399,7 @@ a {
 .nav_arrow {
   cursor: default;
   color: grey;
-  font-family: Liberation_Serif;
+  font-family: LiberationSerif;
   user-select: none;
 }
 .nav_arrow:hover {
@@ -409,7 +410,7 @@ a {
 .nav_arrow_deactiv {
   cursor: default;
   color: grey;
-  font-family: Liberation_Serif;
+  font-family: LiberationSerif;
 }
 
 

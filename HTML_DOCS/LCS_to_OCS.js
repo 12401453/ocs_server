@@ -2,7 +2,7 @@ const dl_tl_regex = /[dt][ĺl][^̥]/;
 const ORT_regex = /[eo][rl]([tŕrpsšdfgћђklĺzžxčvbnńmǯ\+]|$)/
 const PV2_regex = /[kgx]v?(?:[ěęeiь]|ŕ̥|ĺ̥)/;
 const PV3_regex = /[ьię][kgx][auǫ]/;
-const tense_jer_regex = /[ьъ]j[Ǟeiьęǫu]/;
+const tense_jer_regex = /[ьъ]j[Ǣeiьęǫu]/;
 
 const PV2_map = new Map();
 PV2_map.set('k', 'c');
@@ -50,13 +50,13 @@ const long_adj_map = {
   'omajima' : 'ъіима',
   'emajima' : 'иима',
   'amajima' : 'ъіима',
-  'Ǟmajima' : 'иима',
+  'Ǣmajima' : 'иима',
   'amъjimъ' : 'ъіимъ',
-  'Ǟmъjimъ' : 'иимъ',
+  'Ǣmъjimъ' : 'иимъ',
   'axъjixъ' : 'ъіихъ',
-  'Ǟxъjixъ' : 'иихъ',
+  'Ǣxъjixъ' : 'иихъ',
   'amijimi' : 'ъіими',
-  'Ǟmijimi' : 'иими'
+  'Ǣmijimi' : 'иими'
 }
 
 const simplifyLongAdj = (lcs_form) => {
@@ -69,11 +69,11 @@ const simplifyLongAdj = (lcs_form) => {
 const mappings = {
   'sš' : 'ш',
   'bv' : 'б',
-  'ŕǞ' : 'рꙗ',
-  'ńǞ' : 'нꙗ',
-  'ĺǞ' : 'лꙗ',
+  'ŕǢ' : 'рꙗ',
+  'ńǢ' : 'нꙗ',
+  'ĺǢ' : 'лꙗ',
   'śa' : 'сꙗ',
-  'jǞ' : 'ꙗ',
+  'jǢ' : 'ꙗ',
   'ŕu' : 'рю',
   'ńu' : 'ню',
   'ĺu' : 'лю',
@@ -137,7 +137,7 @@ const mappings = {
   'č' : 'ч',
   'š' : 'ш',
   'ž' : 'ж',
-  'Ǟ' : 'а',
+  'Ǣ' : 'а',
   'a' : 'а',
   'e' : 'е',
   'ę' : 'ѧ',
@@ -160,6 +160,7 @@ const mappings = {
 
 const convertToOCS = (lcs_word, inflexion_class_id) => {
 
+  lcs_word = lcs_word.replaceAll("ę̌", "ę").replaceAll("y̨", "y").replaceAll("Q", "ъ");
   lcs_word = yeetTlDl(lcs_word);
 
   let ORT_pos =  lcs_word.search(ORT_regex);
@@ -187,4 +188,27 @@ const convertToOCS = (lcs_word, inflexion_class_id) => {
     lcs_word = lcs_word.replaceAll(key, mappings[key]);
   }
   return lcs_word;
+};
+
+const original_ocs_forms = new Array();
+
+const normaliseOCS = () => {
+  original_ocs_forms.length = 0;
+  document.querySelectorAll("[data-lcs_recon]").forEach(tt => {
+    const ocs_form = tt.firstChild.textContent
+    original_ocs_forms.push(ocs_form);
+    tt.firstChild.textContent = convertToOCS(tt.dataset.lcs_recon, tt.dataset.inflexion);
+    tt.style.backgroundColor = "light orange";
+    tt.style.color = "black";
+  });
+  ttPosition();
+};
+
+const restoreTextOCS = () => {
+  document.querySelectorAll("[data-lcs_recon]").forEach((tt, i) => {
+    tt.firstChild.textContent = original_ocs_forms[i];
+    tt.style.backgroundColor = "";
+    tt.style.color = "";
+  });
+  ttPosition();
 };

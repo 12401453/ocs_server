@@ -1,0 +1,6 @@
+ę̌
+y̨
+
+I've also replcaed the 3rd sg. and pl. pres. verb endings with "Q" to account for front-jer in Old Russian
+
+Should also replace the Instrumental Singular o-stem ending to account for OR ъмь
