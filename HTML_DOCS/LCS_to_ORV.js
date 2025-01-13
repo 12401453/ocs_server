@@ -81,6 +81,12 @@ const russifyDoublets = (lcs_form) => {
   if(lcs_form.includes("čьlově")) {
     lcs_form = lcs_form.replaceAll("čьlově", "čelově");
   }
+  if(lcs_form.startsWith("jedin")) {
+    lcs_form = lcs_form.replace("jedin", "odin");
+  }
+  else if(lcs_form.startsWith("jezer")) {
+    lcs_form = lcs_form.replace("jezer", "ozer");
+  }
   return lcs_form;
 };
 
@@ -110,7 +116,7 @@ const simplifyLongAdj = (lcs_form) => {
   return lcs_form;
 };
 
-const mappings = {
+const orv_mappings = {
   'sš' : 'ш',
   'bv' : 'б',
   'ŕǢ' : 'рꙗ',
@@ -235,8 +241,8 @@ const convertToORV = (lcs_word, inflexion_class_id) => {
 
   lcs_word = lengthenTenseJers(lcs_word);
 
-  for(const key in mappings) {
-    lcs_word = lcs_word.replaceAll(key, mappings[key]);
+  for(const key in orv_mappings) {
+    lcs_word = lcs_word.replaceAll(key, orv_mappings[key]);
   }
   return lcs_word;
 };

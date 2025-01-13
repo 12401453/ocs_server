@@ -883,3 +883,17 @@ border-bottom: 2px solid rgb(23, 33, 54, 0);
   -webkit-animation: spin 1s linear infinite; /* Safari */
   animation: spin 1s linear infinite;
 }
+
+/*--------------------Search Box-------------------*/
+#search_button {
+  width: 40px;
+  padding: 4px 8px 4px 4px;
+  flex-shrink: 0;
+  fill: #cbd9f487;
+  cursor: pointer;
+  border-radius: 0 40px 40px 0;
+  -webkit-tap-highlight-color: transparent;
+}
+#search_button:hover {
+  fill: #cbd9f4;
+}

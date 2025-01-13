@@ -66,7 +66,7 @@ const simplifyLongAdj = (lcs_form) => {
   return lcs_form;
 };
 
-const mappings = {
+const chu_mappings = {
   'sš' : 'ш',
   'bv' : 'б',
   'ŕǢ' : 'рꙗ',
@@ -184,8 +184,8 @@ const convertToOCS = (lcs_word, inflexion_class_id) => {
 
   lcs_word = lengthenTenseJers(lcs_word);
 
-  for(const key in mappings) {
-    lcs_word = lcs_word.replaceAll(key, mappings[key]);
+  for(const key in chu_mappings) {
+    lcs_word = lcs_word.replaceAll(key, chu_mappings[key]);
   }
   return lcs_word;
 };
@@ -209,6 +209,200 @@ const restoreTextOCS = () => {
     tt.firstChild.textContent = original_ocs_forms[i];
     tt.style.backgroundColor = "";
     tt.style.color = "";
+  });
+  ttPosition();
+};
+
+const denasalise = (lcs_form) => {
+  //this isnt good enough because OR will also spell original *Ǟ and *jǞ with the nasal letter, which I havent accounted for
+
+  lcs_form = lcs_form.replaceAll("ǫ", "u");
+  let match_counting_string = lcs_form;
+
+  while(match_counting_string.includes("ję")){
+    if(Math.floor(Math.random() * 100) > 50) {
+      lcs_form = lcs_form.replace("ję", "jǢ");
+    }
+    match_counting_string = match_counting_string.replace("ję", "jǢ");
+  }
+  while(match_counting_string.includes("ę")){
+    if(Math.floor(Math.random() * 100) > 50) {
+      //this will create loads of šjǢ which is not wanted
+      lcs_form = lcs_form.replace("ę", "jǢ")
+    }
+    match_counting_string = match_counting_string.replace("ę", "jǢ");
+  }
+  return lcs_form;
+};
+
+const russifyDoublets = (lcs_form) => {
+  switch(lcs_form) {
+    case "azъ":
+      lcs_form = "jǢzъ";
+      return lcs_form;
+      break;
+    case "tebě":
+      lcs_form = "tobě";
+      return lcs_form;
+      break;
+    case "sebě":
+      lcs_form = "sobě";
+      return lcs_form;
+      break;
+  }
+
+  if(lcs_form.includes("čьlově")) {
+    lcs_form = lcs_form.replaceAll("čьlově", "čelově");
+  }
+  if(lcs_form.startsWith("jedin")) {
+    lcs_form = lcs_form.replace("jedin", "odin");
+  }
+  else if(lcs_form.startsWith("jezer")) {
+    lcs_form = lcs_form.replace("jezer", "ozer");
+  }
+  
+  return lcs_form;
+};
+
+const orv_mappings = {
+  'sš' : 'ш',
+  'bv' : 'б',
+  'ŕǢ' : 'рꙗ',
+  'ńǢ' : 'нꙗ',
+  'ĺǢ' : 'лꙗ',
+  'śa' : 'сꙗ',
+  'jǢ' : 'ꙗ',
+  'ŕu' : 'рю',
+  'ńu' : 'ню',
+  'ĺu' : 'лю',
+  'śu' : 'сю',
+  'ju' : 'ю',
+  'ŕǫ' : 'рѭ',
+  'ńǫ' : 'нѭ',
+  'ĺǫ' : 'лѭ',
+  'jǫ' : 'ѭ',
+  'śǫ' : 'сѭ',
+  'ŕe' : 'р҄е',
+  'ŕi' : 'р҄и',
+  'ŕь' : 'р҄ь',
+  'ŕę' : 'рѩ',
+  'ńe' : 'н҄е',
+  'ńi' : 'н҄и',
+  'ńь' : 'н҄ь',
+  'ńę' : 'нѩ',
+  'ĺe' : 'л҄е',
+  'ĺi' : 'л҄и',
+  'ĺь' : 'л҄ь',
+  'ĺę' : 'лѩ',
+  'ję' : 'ѩ',
+  'je' : 'ѥ',
+  'ji' : 'и',
+  'jь' : 'и',
+  'ьj' : 'и',
+  'jo' : 'о',
+  'jě' : 'ѣ',
+  '' : '',
+  'ŕ̥' : 'ьр',
+  'r̥' : 'ър',
+  'ĺ̥' : 'ьл',
+  'l̥' : 'ъл',
+  'šč' : 'щ',
+  'šћ' : 'щ',
+  'žǯ' : 'жд',
+  'žђ' : 'жд',
+  'zr' : 'здр',
+  'ǵ' : 'ꙉ',
+  'ḱ' : 'к҄',
+  'x́' : 'х',
+  'ћ' : 'ч',
+  'ђ' : 'ж',
+  'b' : 'б',
+  'p' : 'п',
+  'v' : 'в',
+  'f' : 'ф',
+  't' : 'т',
+  'd' : 'д',
+  's' : 'с',
+  'z' : 'з',
+  'ʒ' : 'з',
+  'ś' : 'с',
+  'c' : 'ц',
+  'k' : 'к',
+  'g' : 'г',
+  'x' : 'х',
+  'ü' : 'ѵ',
+  'y' : 'ъі',
+  'č' : 'ч',
+  'š' : 'ш',
+  'ž' : 'ж',
+  'Ǣ' : 'а',
+  'a' : 'а',
+  'e' : 'е',
+  'ę' : 'ѧ',
+  'ě' : 'ѣ',
+  'i' : 'и',
+  'ь' : 'ь',
+  'ъ' : 'ъ',
+  'o' : 'о',
+  'ǫ' : 'ѫ',
+  'u' : 'оу',
+  'l' : 'л',
+  'n' : 'н',
+  'm' : 'м',
+  'r' : 'р',
+  '+' : '',
+  'ń' : 'н҄',
+  'ĺ' : 'л҄',
+  'ŕ' : 'р҄',
+}
+
+const convertToORV = (lcs_word, inflexion_class_id) => {
+
+  lcs_word = lcs_word.replaceAll("ę̌", "ě").replaceAll("y̨", "a").replaceAll("Q", "ь");
+
+  lcs_word = lcs_word.replace(/^ak/, "jǢk").replace(/^av/, "jǢv");
+  lcs_word = yeetTlDl(lcs_word);
+
+  lcs_word = denasalise(lcs_word);
+  lcs_word = russifyDoublets(lcs_word);
+
+  let ORT_pos =  lcs_word.search(ORT_regex);
+  while(ORT_pos != -1) {
+    //something going wrong, *gordьkę is coming out as "городоундефинедцѣ"
+
+    const ort_vowel = lcs_word.at(ORT_pos);
+    const ort_liquid = lcs_word.at(ORT_pos + 1);
+    if(ORT_pos == 0) lcs_word = lcs_word.slice(0, ORT_pos) + ort_liquid + ort_vowel + lcs_word.slice(ORT_pos + 2);
+    else lcs_word = lcs_word.slice(0, ORT_pos) + ort_vowel + ort_liquid + ort_vowel + lcs_word.slice(ORT_pos + 2);
+    ORT_pos = lcs_word.search(ORT_regex);
+  }
+
+  let PV2_pos = lcs_word.search(PV2_regex);
+  while(PV2_pos != -1) {
+    const PV2_cons = lcs_word.at(PV2_pos);
+    lcs_word = lcs_word.slice(0, PV2_pos) + PV2_map.get(PV2_cons) + lcs_word.slice(PV2_pos + 1);
+    PV2_pos = lcs_word.search(PV2_regex);
+  }
+  if(inflexion_class_id == 1013 || inflexion_class_id == 1029 || inflexion_class_id == 1036 || inflexion_class_id == 1057 || inflexion_class_id == 1017) lcs_word = applyPV3(lcs_word);
+
+  lcs_word = simplifyLongAdj(lcs_word);
+
+  lcs_word = lengthenTenseJers(lcs_word);
+
+  for(const key in orv_mappings) {
+    lcs_word = lcs_word.replaceAll(key, orv_mappings[key]);
+  }
+  return lcs_word;
+};
+
+const russifyOCS = () => {
+  original_ocs_forms.length = 0;
+  document.querySelectorAll("[data-lcs_recon]").forEach(tt => {
+    const ocs_form = tt.firstChild.textContent
+    original_ocs_forms.push(ocs_form);
+    tt.firstChild.textContent = convertToORV(tt.dataset.lcs_recon, tt.dataset.inflexion);
+    tt.style.backgroundColor = "light orange";
+    tt.style.color = "black";
   });
   ttPosition();
 };
