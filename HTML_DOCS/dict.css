@@ -6,19 +6,23 @@
     display: flex;
     flex-flow: column nowrap;
     height: fit-content;
-    width: 300px;
+    width: 400px;
     max-height: 80%;
   
     position: fixed;
     bottom: 0px;
     right: 4%;
     z-index: 2;
+
+    right: 50%;
+    transform: translateX(50%);
     
 }
 
 #dict_topbar {
     display: flex;
     flex-flow: row-reverse nowrap;
+    justify-content: space-between;
     box-sizing: border-box;
     height: 30px;
     min-height: 30px;
@@ -195,10 +199,6 @@
     background-color: rgb(141 147 157);
     height: 16%;
     width: 46%;
-}
-
-#dict_close {
-    display: none;
 }
 
 #dict_select {
