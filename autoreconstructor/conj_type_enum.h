@@ -139,6 +139,8 @@ if (conj_type == "den")
   if (conj_type == "masc_ar")
         return 311;
 
+  if (conj_type == "1.1_PRAP")
+        return 1411;
 
 
 

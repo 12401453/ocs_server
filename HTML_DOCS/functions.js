@@ -2768,7 +2768,7 @@ const lcsTooltip = function () {
     let tt_box_string = '<span class="lemma_tt" onclick="event.stopPropagation()"><span id="tt_top"><div id="lemma_tag_tt">';
     tt_box_string += convertToOCS(lcs_recon, inflexion_class_id) + '</div><span id="pos_tag_box_tt">';
     tt_box_string += '<span id="pos_tag_unassigned_tt" class="pos_tag_tt" title="unassigned"></span>' + '</span></span><span id="tt_mid"><div id="tt_meaning">';
-    tt_box_string +=  lcs_recon + '</div></span><span id="tt_bottom"></span></span>';
+    tt_box_string +=  lcs_recon.replaceAll("Q", "ъ") + '</div></span><span id="tt_bottom"></span></span>';
     
     lcs_word.append(document.createRange().createContextualFragment(tt_box_string));
   });

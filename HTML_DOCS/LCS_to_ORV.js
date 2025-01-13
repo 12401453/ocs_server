@@ -65,7 +65,7 @@ const denasalise = (lcs_form) => {
 const russifyDoublets = (lcs_form) => {
   switch(lcs_form) {
     case "azъ":
-      lcs_form = "jazъ";
+      lcs_form = "jǢzъ";
       return lcs_form;
       break;
     case "tebě":
@@ -148,10 +148,10 @@ const mappings = {
   'jo' : 'о',
   'jě' : 'ѣ',
   '' : '',
-  'ŕ̥' : 'рь',
-  'r̥' : 'ръ',
-  'ĺ̥' : 'ль',
-  'l̥' : 'лъ',
+  'ŕ̥' : 'ьр',
+  'r̥' : 'ър',
+  'ĺ̥' : 'ьл',
+  'l̥' : 'ъл',
   'šč' : 'щ',
   'šћ' : 'щ',
   'žǯ' : 'жд',
@@ -170,7 +170,7 @@ const mappings = {
   'd' : 'д',
   's' : 'с',
   'z' : 'з',
-  'ʒ' : 'ѕ',
+  'ʒ' : 'з',
   'ś' : 'с',
   'c' : 'ц',
   'k' : 'к',
@@ -202,11 +202,11 @@ const mappings = {
   'ŕ' : 'р҄',
 }
 
-const convertToOCS = (lcs_word, inflexion_class_id) => {
+const convertToORV = (lcs_word, inflexion_class_id) => {
 
   lcs_word = lcs_word.replaceAll("ę̌", "ě").replaceAll("y̨", "a").replaceAll("Q", "ь");
 
-  lcs_word = lcs_word.replace(/^ak/, "jǢk");
+  lcs_word = lcs_word.replace(/^ak/, "jǢk").replace(/^av/, "jǢv");
   lcs_word = yeetTlDl(lcs_word);
 
   lcs_word = denasalise(lcs_word);
@@ -218,7 +218,8 @@ const convertToOCS = (lcs_word, inflexion_class_id) => {
 
     const ort_vowel = lcs_word.at(ORT_pos);
     const ort_liquid = lcs_word.at(ORT_pos + 1);
-    lcs_word = lcs_word.slice(0, ORT_pos) + ort_vowel + ort_liquid + ort_vowel + lcs_word.slice(ORT_pos + 2);
+    if(ORT_pos == 0) lcs_word = lcs_word.slice(0, ORT_pos) + ort_liquid + ort_vowel + lcs_word.slice(ORT_pos + 2);
+    else lcs_word = lcs_word.slice(0, ORT_pos) + ort_vowel + ort_liquid + ort_vowel + lcs_word.slice(ORT_pos + 2);
     ORT_pos = lcs_word.search(ORT_regex);
   }
 
@@ -228,7 +229,7 @@ const convertToOCS = (lcs_word, inflexion_class_id) => {
     lcs_word = lcs_word.slice(0, PV2_pos) + PV2_map.get(PV2_cons) + lcs_word.slice(PV2_pos + 1);
     PV2_pos = lcs_word.search(PV2_regex);
   }
-  if(inflexion_class_id == 1013 || inflexion_class_id == 1029 || inflexion_class_id == 1036 || inflexion_class_id == 1057) lcs_word = applyPV3(lcs_word);
+  if(inflexion_class_id == 1013 || inflexion_class_id == 1029 || inflexion_class_id == 1036 || inflexion_class_id == 1057 || inflexion_class_id == 1017) lcs_word = applyPV3(lcs_word);
 
   lcs_word = simplifyLongAdj(lcs_word);
 
@@ -238,4 +239,27 @@ const convertToOCS = (lcs_word, inflexion_class_id) => {
     lcs_word = lcs_word.replaceAll(key, mappings[key]);
   }
   return lcs_word;
+};
+
+const original_ocs_forms = new Array();
+
+const russifyOCS = () => {
+  original_ocs_forms.length = 0;
+  document.querySelectorAll("[data-lcs_recon]").forEach(tt => {
+    const ocs_form = tt.firstChild.textContent
+    original_ocs_forms.push(ocs_form);
+    tt.firstChild.textContent = convertToORV(tt.dataset.lcs_recon, tt.dataset.inflexion);
+    tt.style.backgroundColor = "light orange";
+    tt.style.color = "black";
+  });
+  ttPosition();
+};
+
+const restoreTextOCS = () => {
+  document.querySelectorAll("[data-lcs_recon]").forEach((tt, i) => {
+    tt.firstChild.textContent = original_ocs_forms[i];
+    tt.style.backgroundColor = "";
+    tt.style.color = "";
+  });
+  ttPosition();
 };
