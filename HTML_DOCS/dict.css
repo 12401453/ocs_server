@@ -38,7 +38,7 @@
 #dict_bottombar {
     display: flex;
     flex-flow: row nowrap;
-    justify-content: space-around;
+    justify-content: flex-end;
     align-items: center;
   
 
@@ -56,8 +56,17 @@
     padding: 4px;
 }
 
+#searchbox_flexbox {
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+}
+
 #dict_searchbox {
-    width: 60%;
+    width: 165px;
     height: 73%;
 
     padding: 4px;
@@ -122,9 +131,9 @@
 }
 
 
-.dict_cell {
+/* .dict_cell {
     
-    /*height: inherit; */
+    
     width: 100%;
     padding: 5px;
     box-sizing: border-box;
@@ -140,7 +149,7 @@
 .dict_cell.right {
     border-left: 1px solid black;
     border-right: 2px solid black;
-}
+} */
 
 .dict_cell.Wk {
     border-left: 2px solid black;

@@ -22,6 +22,9 @@
     --chunk-letter-spacing: var(--cyr-letter-spacing);
 
     --no-lcs-opacity: 1.0;
+
+    --search-letter-font: IBM_PLEX_SANS;
+    --search-letter-size: 13px;
 }
 
 html {
@@ -935,7 +938,7 @@ border-bottom: 2px solid rgb(23, 33, 54, 0);
   /* border: 1px solid red; */
 }
 .search_type {
-  color: #cbd9f4a6;
+  color: #cbd9f47c;
   height: fit-content;
   width: 40px;
   text-align: center;
@@ -951,13 +954,115 @@ border-bottom: 2px solid rgb(23, 33, 54, 0);
   font-size: 13px;
   padding: 3px;
 
-  background-color: #071022;
+  background-color: #172136;
 }
 .search_type:hover {
-  background-color: #172136;
+  background-color: #071022;
 }
 .search_type.active{
   color: #cbd9f4;
-  background-color: #172136;
+  background-color: #071022;
+}
 
+#letter_button_box {
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: space-around;
+  align-items: flex-start;
+  width: 140px;
+  height: 100%;
+  gap: 3px;
+  overflow-y: auto;
+  scrollbar-width: none;
+  scrollbar-color: #040a16 #071022;
+  border: 1px solid black;
+  border-radius: 4px;
+  padding: 1px;
+  
+}
+.letter_button {
+  border: 1px solid black;
+  border-radius: 4px;
+  background-color:#071022;
+  color: #cbd9f4a6;
+  font-size: var(--search-letter-size);
+  font-family: var(--search-letter-font);
+  height: 20px;
+  width: 20px;
+  text-align: center;
+  cursor: pointer;
+  user-select: none;
+}
+.letter_button:hover {
+  border: 1px solid #cbd9f4;
+  color: #cbd9f4;
+}
+
+.dict_row.header {
+  font-weight: bold;
+  text-align: center;
+}
+
+.dict_cell {
+    
+  /*height: inherit; */
+  width: 100%;
+  padding: 5px;
+  box-sizing: border-box;
+  word-break: break-word;
+}
+
+
+
+.dict_cell.left {
+  border-left: 2px solid black;
+  border-right: 1px solid black;
+  width: 30%;
+}
+.dict_cell.middle {
+  width: 50%;
+}
+.dict_cell.right {
+  border-left: 1px solid black;
+  border-right: 2px solid black;
+  width: 20%;
+}
+
+#search_scope {
+  display: flex;
+  justify-content: space-evenly;
+  width: 100%;
+  font-size: 13px;
+  border-left: 2px solid black;
+  border-right: 2px solid black;
+  border-bottom: 2px solid black;
+  box-sizing: border-box;
+  cursor: pointer;
+}
+
+.scope_heading {
+  width: 33.333%;
+  text-align: center;
+  color: #cbd9f47c;
+  font-family: IBM_PLEX_SANS;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  background-color: #172136;
+}
+.scope_heading.active {
+  background-color: #071022;
+  color: #cbd9fd;
+}
+.scope_heading:hover {
+  color: #cbd9f4;
+}
+
+
+.dict_cell.dict_pos {
+  background-color: #172136;
+  font-weight: bold;
+  font-size: 14px;
+  text-align: center;
+  border-left: 2px solid black;
+  border-right: 2px solid black;
 }

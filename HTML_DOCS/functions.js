@@ -2659,12 +2659,13 @@ const convertToCyr = () => {
 
 
 const lcsPageSearch = (query) => {
-  query = query.replaceAll("ŕ̥", "W").replaceAll("r̥", "X").replaceAll("ĺ̥", "Y").replaceAll("l̥", "Z");
+  if(query == "") return;
+  query = query.replaceAll("ŕ̥", "W").replaceAll("r̥", "X").replaceAll("ĺ̥", "Y").replaceAll("l̥", "Z")
   resetLcsPageSearch();
   //const regex = new RegExp(`/${query}/u`);
   document.querySelectorAll("[data-lcs_recon]").forEach(reconstructed_word => {
     //if(regex.test(reconstructed_word.dataset.lcs_recon))
-    if(reconstructed_word.dataset.lcs_recon.replaceAll("ŕ̥", "W").replaceAll("r̥", "X").replaceAll("ĺ̥", "Y").replaceAll("l̥", "Z").includes(query)) {
+    if(reconstructed_word.dataset.lcs_recon.replaceAll("ŕ̥", "W").replaceAll("r̥", "X").replaceAll("ĺ̥", "Y").replaceAll("l̥", "Z").replaceAll("Q", "ъ").replaceAll("ę̌", "ę").replaceAll("y̨", "y").includes(query)) {
       reconstructed_word.classList.add("pulsate");
     }
   })
@@ -2817,7 +2818,123 @@ document.getElementById("annotation_mode_box").addEventListener('click', (event)
     else {
       event.currentTarget.querySelectorAll(".annotation_mode").forEach(button => button.classList.remove("active"));
       lcsTooltip();
-    }
+    }  
+  }
+});
+
+const ocs_search_letters = [
+  "ѣ",
+  "ѧ",
+  "ѫ",
+  "ѩ",
+  "ѭ",
+  "ꙗ",
+  "ѥ",
+  "ѕ",
+  "ѡ",
+  "ѱ",
+  "ѳ",
+  "ѵ",
+  "ѻ",
+  "ѿ",
+  "ꙋ",
+];
+const lcs_search_letters = [
+  "š",
+  "ž",
+  "č",
+  "ћ",
+  "ђ",
+  "Ǣ",
+  "ě",
+  "ǫ",
+  "ę",
+  "ĺ",
+  "ń",
+  "ŕ",
+  "l̥",
+  "r̥",
+  "n̥",
+  "ĺ̥",
+  "ŕ̥",
+  "ń̥",
+  "ǯ",
+  "y̨",
+  "ę̌",
+  "ǵ",
+  "ḱ",
+  "x́",
+  "ü",
+  "ъ",
+  "ь"
+];
+
+const switchSearchType = (event) => {
+  if(event.target.classList.contains("active")) return;
+  let search_letters = [];
+  document.querySelector(".search_type.active").classList.remove("active");
+  event.target.classList.add("active");
+  if(event.target.id == "lcs_search") {
+    search_letters = lcs_search_letters;
+    document.documentElement.style.setProperty("--search-letter-font", "IBM_PLEX_SANS");
+    document.documentElement.style.setProperty("--search-letter-size", "13px");
+  }
+  else {
+    search_letters = ocs_search_letters;
+    document.documentElement.style.setProperty("--search-letter-font", "Bukyvede");
+    document.documentElement.style.setProperty("--search-letter-size", "15px");
+  }
+
+  document.getElementById("letter_button_box").innerHTML = "";
+  let search_letter_html = "";
+  for(const letter of search_letters) {
+    search_letter_html += "<div class=\"letter_button\">" + letter + "</div>";
+  }
+  document.getElementById("letter_button_box").innerHTML = search_letter_html;
+  document.getElementById("letter_button_box").scrollTop = 0;
+};
+
+const insertLetter = (event) => {
+  if(event.target.className == "letter_button") {
+    const searchbox = document.getElementById("dict_searchbox");
+    const selection_start = searchbox.selectionStart;
+    const selection_end = searchbox.selectionEnd;
+    const new_letter = event.target.textContent;
+    const new_search_string = searchbox.value.substr(0, selection_start) + new_letter + searchbox.value.substr(selection_end);
+    searchbox.value = new_search_string;
+    searchbox.setSelectionRange(selection_start + new_letter.length, selection_start + new_letter.length);
+    searchbox.focus();
     
   }
+};
+
+
+document.getElementById("search_type_options").addEventListener('click', switchSearchType);
+
+document.getElementById("letter_button_box").addEventListener('wheel', (event) => {
+  event.preventDefault();
+  event.currentTarget.scrollTop += (event.deltaY > 0 ? 10 : -10);
+});
+document.getElementById("letter_button_box").addEventListener('click', insertLetter);
+
+const lookupForm = () => {
+  const search_term = document.getElementById("dict_searchbox").value.trim();
+  //console.log(search_term);
+  if(search_term == "") resetLcsPageSearch();
+  else lcsPageSearch(search_term);
+  document.getElementById("dict_searchbox").select();
+}
+
+document.getElementById("dict_searchbox").addEventListener('keydown', event => {
+  if(event.key == "Enter") {
+    event.preventDefault();
+    lookupForm();
+  }
+});
+document.getElementById("search_button").addEventListener('click', lookupForm);
+
+document.getElementById("dict_minimise").addEventListener('click', () => {
+  let dict_body = document.getElementById("dict_body");
+  if(dict_body.style.display == "flex") dict_body.style.display = "none";
+  else dict_body.style.display = "flex";
 });

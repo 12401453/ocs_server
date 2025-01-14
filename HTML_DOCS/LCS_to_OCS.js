@@ -213,24 +213,47 @@ const restoreTextOCS = () => {
   ttPosition();
 };
 
+const orv_shipyashi_nasal_regex = new RegExp(/[ščžћђǯj]ę/ug);
+const orv_shipyashi_a_regex = new RegExp(/[ščžћђǯj]Ǣ/ug);
+const orv_bare_nasal_regex = new RegExp(/[^ščžћђǯj]ę/ug);
+
 const denasalise = (lcs_form) => {
   //this isnt good enough because OR will also spell original *Ǟ and *jǞ with the nasal letter, which I havent accounted for
 
   lcs_form = lcs_form.replaceAll("ǫ", "u");
   let match_counting_string = lcs_form;
-
-  while(match_counting_string.includes("ję")){
-    if(Math.floor(Math.random() * 100) > 50) {
-      lcs_form = lcs_form.replace("ję", "jǢ");
+  
+  let regex_res = lcs_form.match(orv_shipyashi_nasal_regex);
+  if(regex_res !== null) {
+    for(const regex_match of regex_res) {
+      const match_pos = lcs_form.indexOf(regex_match);
+      if(Math.floor(Math.random() * 100) > 50) {
+        lcs_form = lcs_form.substr(0, match_pos) + lcs_form.substr(match_pos, 1) + "Ǣ" + lcs_form.substr(match_pos + 2);
+      }
+      match_counting_string = match_counting_string.replace(regex_match, "FF");
     }
-    match_counting_string = match_counting_string.replace("ję", "jǢ");
   }
-  while(match_counting_string.includes("ę")){
-    if(Math.floor(Math.random() * 100) > 50) {
-      //this will create loads of šjǢ which is not wanted
-      lcs_form = lcs_form.replace("ę", "jǢ")
+
+  regex_res = match_counting_string.match(orv_shipyashi_a_regex);
+  if(regex_res !== null) {
+    for(const regex_match of regex_res) {
+      const match_pos = lcs_form.indexOf(regex_match);
+      if(Math.floor(Math.random() * 100) > 50) {
+        lcs_form = lcs_form.substr(0, match_pos) + lcs_form.substr(match_pos, 1) + "ę" + lcs_form.substr(match_pos + 2);
+      }
+      match_counting_string = match_counting_string.replace(regex_match, "FF");
+    };
+  }
+
+  regex_res = match_counting_string.match(orv_bare_nasal_regex);
+  if(regex_res !== null) {
+    for(const regex_match of regex_res) {
+      const match_pos = lcs_form.indexOf(regex_match);
+      if(Math.floor(Math.random() * 100) > 50) {
+        lcs_form = lcs_form.substr(0, match_pos) + lcs_form.substr(match_pos, 1) + "jǢ" + lcs_form.substr(match_pos + 2);
+      }
+      match_counting_string = match_counting_string.replace(regex_match, "FF");
     }
-    match_counting_string = match_counting_string.replace("ę", "jǢ");
   }
   return lcs_form;
 };
