@@ -251,3 +251,10 @@ color: #cbd9f4;
 .annotation_mode.active {
   background-color: #f1ad2e;
 }
+
+.tooltip.converted {
+  color: black;
+}
+.tooltip.converted:hover {
+  color: red;
+}

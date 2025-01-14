@@ -118,6 +118,7 @@
     </div>
   </div>
 </div>
+<div id="dict_hidden_box"><div id="dict_hidden_text">Search</div></div>
 <script src="functions.js"></script>
 <script src="LCS_to_OCS.js"></script>
 <script src="dict_class.js"></script>

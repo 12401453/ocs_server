@@ -1,9 +1,6 @@
-#dict_hidden_box {
-    display: none;
-}
 
 #dict_outline {
-    display: flex;
+    display: none;
     flex-flow: column nowrap;
     height: fit-content;
     width: 400px;

@@ -3,7 +3,7 @@ body {
 }
 
 #p1 {
-  color: #cbd9f4;;
+  color: lightgrey;;
 }
 
 a {
@@ -224,8 +224,10 @@ color: #cbd9f4;
 }
 @keyframes burn_orange {
   50% { color: rgb(0 255 186); }
-  100% { color: #cbd9f4; }
+  /* 100% { color: #cbd9f4; } */
+  100% { color: white; }
 }
+  
 
 .annotation_mode {
   background-color: #181f2e;
@@ -233,4 +235,11 @@ color: #cbd9f4;
 }
 .annotation_mode.active {
   background-color: #071022;
+}
+
+.tooltip.converted {
+  color: white;
+}
+.tooltip.converted:hover {
+  color: rgb(255 115 205);;
 }

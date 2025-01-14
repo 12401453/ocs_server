@@ -45,7 +45,8 @@ const updateFont = (textselect_value) => {
 };
 
 const app_state = {
-  annotation_mode: "none"
+  annotation_mode: "none",
+  search_box_shown: false,
 }
 
 function selectText() {
@@ -2017,7 +2018,7 @@ const ttPosition = function () {
     else if(left_overflow > 0) {
       tooltip.style.transform = `translateX(${left_overflow + 1}px)`;
     }
-    
+
       /* console.log(tooltip);
       console.log(rectRight);
       console.log(right_overflow);
@@ -2870,7 +2871,7 @@ const lcs_search_letters = [
 ];
 
 const switchSearchType = (event) => {
-  if(event.target.classList.contains("active")) return;
+  if(event.target.classList.contains("active") || event.target.classList.contains("search_type") == false) return;
   let search_letters = [];
   document.querySelector(".search_type.active").classList.remove("active");
   event.target.classList.add("active");
@@ -2879,7 +2880,7 @@ const switchSearchType = (event) => {
     document.documentElement.style.setProperty("--search-letter-font", "IBM_PLEX_SANS");
     document.documentElement.style.setProperty("--search-letter-size", "13px");
   }
-  else {
+  else if(event.target.id == "ocs_search") {
     search_letters = ocs_search_letters;
     document.documentElement.style.setProperty("--search-letter-font", "Bukyvede");
     document.documentElement.style.setProperty("--search-letter-size", "15px");
@@ -2938,3 +2939,22 @@ document.getElementById("dict_minimise").addEventListener('click', () => {
   if(dict_body.style.display == "flex") dict_body.style.display = "none";
   else dict_body.style.display = "flex";
 });
+
+const toggleSearchBox = () => {
+  if(app_state.search_box_shown == true) {
+    document.getElementById("dict_hidden_box").style.display = "flex";
+    document.getElementById("dict_outline").style.display = "none";
+    document.getElementById("dict_searchbox").blur();
+    resetLcsPageSearch();
+    app_state.search_box_shown = false;
+  }
+  else {
+    document.getElementById("dict_hidden_box").style.display = "none";
+    document.getElementById("dict_outline").style.display = "flex";
+    document.getElementById("dict_searchbox").focus();
+    app_state.search_box_shown = true;
+  }
+}
+
+document.getElementById("dict_hidden_box").addEventListener('click', toggleSearchBox);
+document.getElementById("dict_close").addEventListener('click', toggleSearchBox);

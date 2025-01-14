@@ -198,8 +198,7 @@ const normaliseOCS = () => {
     const ocs_form = tt.firstChild.textContent
     original_ocs_forms.push(ocs_form);
     tt.firstChild.textContent = convertToOCS(tt.dataset.lcs_recon, tt.dataset.inflexion);
-    tt.style.backgroundColor = "light orange";
-    tt.style.color = "black";
+    tt.classList.add("converted");
   });
   ttPosition();
 };
@@ -207,8 +206,7 @@ const normaliseOCS = () => {
 const restoreTextOCS = () => {
   document.querySelectorAll("[data-lcs_recon]").forEach((tt, i) => {
     tt.firstChild.textContent = original_ocs_forms[i];
-    tt.style.backgroundColor = "";
-    tt.style.color = "";
+    tt.classList.remove("converted");
   });
   ttPosition();
 };
@@ -424,8 +422,7 @@ const russifyOCS = () => {
     const ocs_form = tt.firstChild.textContent
     original_ocs_forms.push(ocs_form);
     tt.firstChild.textContent = convertToORV(tt.dataset.lcs_recon, tt.dataset.inflexion);
-    tt.style.backgroundColor = "light orange";
-    tt.style.color = "black";
+    tt.classList.add("converted");
   });
   ttPosition();
 };
