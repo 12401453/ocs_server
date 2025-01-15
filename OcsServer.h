@@ -53,6 +53,9 @@ class OcsServer : public TcpListener {
         bool addText(std::string _POST[3], int clientSocket);
         bool addTextOldEnglish(std::string _POST[3], int clientSocket);
         bool lemmaTooltips(std::string _POST[1], int clientSocket);
+        bool lcsSearch(std::string _POST[1], int clientSocket);
+        
+        
         bool lemmaTooltipsMW(std::string _POST[3], int clientSocket);
         bool retrieveText(std::string text_id[1], int clientSocket);
         bool retrieveTextSubtitle(std::string text_id[2], int clientSocket);

@@ -680,6 +680,9 @@ void OcsServer::handlePOSTedData(const char* post_data, int clientSocket) {
     else if(!strcmp(m_url, "/lemma_tooltip.php")) {
         bool php_func_success = lemmaTooltips(post_values, clientSocket);
     }
+    else if(!strcmp(m_url, "/lcs_search.php")) {
+        bool php_func_success = lcsSearch(post_values, clientSocket);
+    }
     else if(!strcmp(m_url, "/lemma_tooltip_mw.php")) {
         bool php_func_success = lemmaTooltipsMW(post_values, clientSocket);
     }
@@ -766,6 +769,7 @@ int OcsServer::getPostFields(const char* url) {
     if(!strcmp(url, "/update_db.php")) return 3;
     else if(!strcmp(url, "/retrieve_subtitle.php")) return 2;
     else if(!strcmp(url, "/lemma_tooltip.php")) return 1;
+    else if(!strcmp(url, "/lcs_search.php")) return 1;
     else if(!strcmp(url, "/retrieve_text.php")) return 1;
     else if(!strcmp(url, "/retrieve_text_pageno.php")) return 2;
     else if(!strcmp(url, "/get_lang_id.php")) return 1;
@@ -1220,6 +1224,99 @@ bool OcsServer::lemmaTooltips(std::string _POST[1], int clientSocket) {
     }
     else {
         std::cout << "Database connection failed in lemmaTooltips()" << std::endl;
+        return false;
+    }
+}
+
+bool OcsServer::lcsSearch(std::string _POST[1], int clientSocket) {
+    sqlite3* DB;    
+    
+    if(!sqlite3_open("chu.db", &DB)) {
+
+        sqlite3_stmt* statement1;
+        sqlite3_stmt* statement2;     
+        std::string lcs_search_query = "%"+URIDecode(_POST[0])+"%";
+
+        const char* sql_text1 = "SELECT tokno, autoreconstructed_lcs, sentence_no FROM corpus WHERE autoreconstructed_lcs LIKE ?";
+        const char* sql_text2 = "SELECT tokno, chu_word_torot, presentation_before, presentation_after FROM corpus WHERE sentence_no = ?";
+        sqlite3_prepare_v2(DB, sql_text1, -1, &statement1, NULL);
+        sqlite3_prepare_v2(DB, sql_text2, -1, &statement2, NULL);
+        
+        
+        
+        sqlite3_bind_text(statement1, 1, lcs_search_query.c_str(), -1, SQLITE_STATIC);
+
+        
+
+        std::ostringstream lcs_results;
+        lcs_results << "[";
+        std::ostringstream text_results;
+        text_results << "[";
+        std::ostringstream tokno_results;
+        tokno_results << "[";
+
+
+        int tokno = 0;
+        std::string lcs_result = "";
+        std::string chu_word_torot = "";
+        std::string present_before = "";
+        std::string presentation_after = "";
+
+        int sentence_no = 0;
+   
+        while(sqlite3_step(statement1) == SQLITE_ROW) {
+            tokno = sqlite3_column_int(statement1, 0);
+            lcs_result = (const char*)sqlite3_column_text(statement1, 1);
+            sentence_no = sqlite3_column_int(statement1, 2);
+            std::cout << "lcs_result: " << lcs_result << "\n";
+            lcs_results << "\"" << htmlspecialchars(lcs_result) << "\"" << ",";
+            tokno_results << tokno << ",";
+
+            std::ostringstream text_content_result_oss;
+            text_content_result_oss << "\"";
+            sqlite3_bind_int(statement2, 1, sentence_no);
+            while(sqlite3_step(statement2) == SQLITE_ROW) {
+                text_content_result_oss << (const char*)sqlite3_column_text(statement2, 2);
+                if(sqlite3_column_int(statement2, 0) == tokno) {
+                    text_content_result_oss << escapeQuotes("<span class=\"result_word\">") + htmlspecialchars((const char*)sqlite3_column_text(statement2, 1)) + escapeQuotes("</span>");
+                }
+                else text_content_result_oss << htmlspecialchars((const char*)sqlite3_column_text(statement2, 1));
+                
+                text_content_result_oss << (const char*)sqlite3_column_text(statement2, 3);
+            }
+            text_content_result_oss << "\"";
+            text_results << text_content_result_oss.str() << ",";
+
+
+            sqlite3_reset(statement2);
+            sqlite3_clear_bindings(statement2);
+        }
+        std::cout << "before finalize\n";
+        std::cout << "sqlite_finalzie1 code: "<< sqlite3_finalize(statement1) << "\n";
+        std::cout << "sqlite_finalzie2 code: "<< sqlite3_finalize(statement2) << "\n";
+        
+        lcs_results.seekp(-1, std::ios_base::cur);
+        text_results.seekp(-1, std::ios_base::cur);
+        tokno_results.seekp(-1, std::ios_base::cur);
+
+        lcs_results << "]";
+        text_results << "]";
+        tokno_results << "]";    
+
+        std::string json_str = "[" + lcs_results.str() + "," + text_results.str() + "," + tokno_results.str() + "]";
+        int content_length = json_str.size();
+
+        std::ostringstream post_response;
+        post_response << "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: " << content_length << "\r\n\r\n" << json_str;
+
+        int length = post_response.str().size() + 1;
+        sendToClient(clientSocket, post_response.str().c_str(), length);
+        sqlite3_close(DB);
+       
+        return true;
+    }
+    else {
+        std::cout << "Database connection failed in lcsSearch()" << std::endl;
         return false;
     }
 }

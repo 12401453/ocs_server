@@ -216,7 +216,6 @@ const orv_shipyashi_a_regex = new RegExp(/[ščžћђǯj]Ǣ/ug);
 const orv_bare_nasal_regex = new RegExp(/[^ščžћђǯj]ę/ug);
 
 const denasalise = (lcs_form) => {
-  //this isnt good enough because OR will also spell original *Ǟ and *jǞ with the nasal letter, which I havent accounted for
 
   lcs_form = lcs_form.replaceAll("ǫ", "u");
   let match_counting_string = lcs_form;

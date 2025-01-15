@@ -2958,3 +2958,54 @@ const toggleSearchBox = () => {
 
 document.getElementById("dict_hidden_box").addEventListener('click', toggleSearchBox);
 document.getElementById("dict_close").addEventListener('click', toggleSearchBox);
+
+const lcsSearch = (query) => {
+  if(query.trim() == "") return;
+ 
+
+  const httpRequest = (method, url) => {
+    let send_data = "lcs_query=" + encodeURIComponent(query.trim());
+    const xhttp = new XMLHttpRequest();
+    xhttp.open(method, url, true);
+    xhttp.responseType = 'json';
+
+    xhttp.onload = () => {
+
+      if(xhttp.readyState == 4) {
+        const lcs_results = xhttp.response[0];
+        const text_results = xhttp.response[1];
+        const tokno_results = xhttp.response[2];
+
+        const results_count = xhttp.response[0].length;
+        
+        let dict_body = document.getElementById("dict_body");
+        dict_body.innerHTML = "";
+        dict_body.style.display = "flex";
+
+        if(results_count > 10000) {
+          dict_body.appendChild(document.createRange().createContextualFragment('<div class="dict_row"><div class="dict_cell Wk">Too many results, please narrow search</div></div>'));
+          return;
+        }
+        else if(results_count == 0) {
+          dict_body.appendChild(document.createRange().createContextualFragment('<div class="dict_row"><div class="dict_cell Wk">Nothing found</div></div>'));
+        }
+
+        for(let i = 0; i < results_count; i++) {            
+        
+          dict_body.appendChild(document.createRange().createContextualFragment('<div class="dict_row"><div class="dict_cell left">'+lcs_results[i]+'</div><div class="dict_cell middle">'+text_results[i]+'</div><div class="dict_cell right">'+getShortTextLocation(tokno_results[i])+'</div></div>'));
+  
+        }
+
+        
+      }
+
+    }
+    xhttp.send(send_data);
+  }
+  httpRequest("POST", "lcs_search.php");
+
+};
+
+const getShortTextLocation = (tokno) => {
+  return tokno;
+}
