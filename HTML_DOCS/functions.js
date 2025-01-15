@@ -2858,10 +2858,8 @@ const lcs_search_letters = [
   "ŕ",
   "l̥",
   "r̥",
-  "n̥",
   "ĺ̥",
   "ŕ̥",
-  "ń̥",
   "ǯ",
   "y̨",
   "ę̌",
@@ -3000,9 +2998,10 @@ const removeSearchLoadSpinner = () => {
 }
 
 const lcsSearch = (query) => {
+  
+  resetLcsPageSearch();
   if(query.trim() == "") {
     document.getElementById("search_results").innerHTML = '<div class="dict_row"><div class="dict_cell empty_results">Search results will appear here...</div></div>';
-    resetLcsPageSearch();
     return;
   }
 
@@ -3048,7 +3047,6 @@ const lcsSearch = (query) => {
         const results_count = xhttp.response[0].length;
         
         const search_results = document.getElementById("search_results");
-        search_results.innerHTML = "";
         document.getElementById("dict_body").style.display = "flex";
         app_state.search_box_minimised = false;
 
@@ -3064,6 +3062,7 @@ const lcsSearch = (query) => {
         for(let i = 0; i < results_count; i++) {            
           search_results_html += '<div class="dict_row"><div class="dict_cell left">'+lcs_results[i].replace("Q", "ъ")+'</div><div class="dict_cell middle">'+text_results[i]+'</div><div class="dict_cell right">'+getShortTextLocation(tokno_results[i])+'</div></div>';  
         }
+        search_results.innerHTML = "";
         search_results.appendChild(document.createRange().createContextualFragment(search_results_html));
 
         if(app_state.search_scope == 1) {

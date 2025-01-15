@@ -12,10 +12,14 @@
     --cyr-font-family: Menaion;
     --cyr-font-size: 23px;
     --cyr-letter-spacing: 0px;
+
+    --glag-font-family: Menaion;
+    --glag-font-size: 23px;
+    --glag-letter-spacing: 0px;
     
-    --glag-font-family: Bukyvede;
+    /* --glag-font-family: Bukyvede;
     --glag-font-size: 28px;
-    --glag-letter-spacing: 2px;
+    --glag-letter-spacing: 2px; */
 
     --chunk-font-family: var(--cyr-font-family);
     --chunk-font-size: var(--cyr-font-size);
