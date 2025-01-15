@@ -72,14 +72,14 @@
     <div id="dict_close"><svg id="red_cross" xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="24" viewBox="0 0 24 24" width="24" focusable="false"><path fill-rule="evenodd" clip-rule="evenodd" d="M5.29289 5.29289C5.68342 4.90237 6.31658 4.90237 6.70711 5.29289L12 10.5858L17.2929 5.29289C17.6834 4.90237 18.3166 4.90237 18.7071 5.29289C19.0976 5.68342 19.0976 6.31658 18.7071 6.70711L13.4142 12L18.7071 17.2929C19.0976 17.6834 19.0976 18.3166 18.7071 18.7071C18.3166 19.0976 17.6834 19.0976 17.2929 18.7071L12 13.4142L6.70711 18.7071C6.31658 19.0976 5.68342 19.0976 5.29289 18.7071C4.90237 18.3166 4.90237 17.6834 5.29289 17.2929L10.5858 12L5.29289 6.70711C4.90237 6.31658 4.90237 5.68342 5.29289 5.29289Z"></path></svg></div></div>
     <div id="dict_body" style="display: none;">
       <div id="search_scope">
-        <div class="scope_heading active">This Page</div>
-        <div class="scope_heading" style="border-left: 2px solid black;border-right: 2px solid black;">This Text</div>
-        <div class="scope_heading">Whole Corpus</div>
+        <div data-scope="1" class="scope_heading active">This Page</div>
+        <div data-scope="2" class="scope_heading" style="border-left: 2px solid black;border-right: 2px solid black;">This Text</div>
+        <div data-scope="3" class="scope_heading">Whole Corpus</div>
       </div>
-      <div class="dict_row header"><div class="dict_cell left">LCS</div><div class="dict_cell middle">Text Result</div><div class="dict_cell right">Location</div></div>
-      <div class="dict_row"><div class="dict_cell left">svales af</div><div class="dict_cell middle"></div><div class="dict_cell right">nachlassen, sich abkühlen</div></div>
-      <div class="dict_row"><div class="dict_cell left">svales af</div><div class="dict_cell middle"></div><div class="dict_cell right">nachlassen, sich abkühlen</div></div>
-      <div class="dict_row"><div class="dict_cell left">svales af</div><div class="dict_cell middle"></div><div class="dict_cell right">nachlassen, sich abkühlen</div></div>
+      <div class="dict_row header"><div class="dict_header left">LCS</div><div class="dict_header middle">Text Result</div><div class="dict_header right">Location</div></div>
+      <div id="search_results">
+        <div class="dict_row"><div class="dict_cell empty_results">Search results will appear here...</div></div>
+      </div>
     </div>
     <div id="dict_bottombar">
       <div id="searchbox_flexbox">

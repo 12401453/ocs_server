@@ -769,7 +769,7 @@ int OcsServer::getPostFields(const char* url) {
     if(!strcmp(url, "/update_db.php")) return 3;
     else if(!strcmp(url, "/retrieve_subtitle.php")) return 2;
     else if(!strcmp(url, "/lemma_tooltip.php")) return 1;
-    else if(!strcmp(url, "/lcs_search.php")) return 1;
+    else if(!strcmp(url, "/lcs_search.php")) return 3;
     else if(!strcmp(url, "/retrieve_text.php")) return 1;
     else if(!strcmp(url, "/retrieve_text_pageno.php")) return 2;
     else if(!strcmp(url, "/get_lang_id.php")) return 1;
@@ -1228,7 +1228,7 @@ bool OcsServer::lemmaTooltips(std::string _POST[1], int clientSocket) {
     }
 }
 
-bool OcsServer::lcsSearch(std::string _POST[1], int clientSocket) {
+bool OcsServer::lcsSearch(std::string _POST[3], int clientSocket) {
     sqlite3* DB;    
     
     if(!sqlite3_open("chu.db", &DB)) {
@@ -1236,17 +1236,17 @@ bool OcsServer::lcsSearch(std::string _POST[1], int clientSocket) {
         sqlite3_stmt* statement1;
         sqlite3_stmt* statement2;     
         std::string lcs_search_query = "%"+URIDecode(_POST[0])+"%";
+        int tokno_start = safeStrToInt(_POST[1]);
+        int tokno_end = safeStrToInt(_POST[2]);
 
-        const char* sql_text1 = "SELECT tokno, autoreconstructed_lcs, sentence_no FROM corpus WHERE autoreconstructed_lcs LIKE ?";
-        const char* sql_text2 = "SELECT tokno, chu_word_torot, presentation_before, presentation_after FROM corpus WHERE sentence_no = ?";
+        const char* sql_text1 = "SELECT tokno, autoreconstructed_lcs, sentence_no FROM corpus WHERE tokno >= ? AND tokno <= ? AND autoreconstructed_lcs LIKE ?";
+        const char* sql_text2 = "SELECT tokno, chu_word_torot, presentation_before, presentation_after FROM corpus WHERE tokno < ? AND tokno > ? AND sentence_no = ?";
         sqlite3_prepare_v2(DB, sql_text1, -1, &statement1, NULL);
         sqlite3_prepare_v2(DB, sql_text2, -1, &statement2, NULL);
-        
-        
-        
-        sqlite3_bind_text(statement1, 1, lcs_search_query.c_str(), -1, SQLITE_STATIC);
-
-        
+         
+        sqlite3_bind_int(statement1, 1, tokno_start);
+        sqlite3_bind_int(statement1, 2, tokno_end);
+        sqlite3_bind_text(statement1, 3, lcs_search_query.c_str(), -1, SQLITE_STATIC);
 
         std::ostringstream lcs_results;
         lcs_results << "[";
@@ -1263,18 +1263,22 @@ bool OcsServer::lcsSearch(std::string _POST[1], int clientSocket) {
         std::string presentation_after = "";
 
         int sentence_no = 0;
+        int results_count = 0;
    
         while(sqlite3_step(statement1) == SQLITE_ROW) {
             tokno = sqlite3_column_int(statement1, 0);
             lcs_result = (const char*)sqlite3_column_text(statement1, 1);
             sentence_no = sqlite3_column_int(statement1, 2);
-            std::cout << "lcs_result: " << lcs_result << "\n";
+            //std::cout << "lcs_result: " << lcs_result << "\n";
             lcs_results << "\"" << htmlspecialchars(lcs_result) << "\"" << ",";
             tokno_results << tokno << ",";
 
             std::ostringstream text_content_result_oss;
             text_content_result_oss << "\"";
-            sqlite3_bind_int(statement2, 1, sentence_no);
+
+            sqlite3_bind_int(statement2, 1, tokno + 5);
+            sqlite3_bind_int(statement2, 2, tokno - 5);
+            sqlite3_bind_int(statement2, 3, sentence_no);
             while(sqlite3_step(statement2) == SQLITE_ROW) {
                 text_content_result_oss << (const char*)sqlite3_column_text(statement2, 2);
                 if(sqlite3_column_int(statement2, 0) == tokno) {
@@ -1290,14 +1294,14 @@ bool OcsServer::lcsSearch(std::string _POST[1], int clientSocket) {
 
             sqlite3_reset(statement2);
             sqlite3_clear_bindings(statement2);
+            results_count++;
         }
-        std::cout << "before finalize\n";
-        std::cout << "sqlite_finalzie1 code: "<< sqlite3_finalize(statement1) << "\n";
-        std::cout << "sqlite_finalzie2 code: "<< sqlite3_finalize(statement2) << "\n";
-        
-        lcs_results.seekp(-1, std::ios_base::cur);
-        text_results.seekp(-1, std::ios_base::cur);
-        tokno_results.seekp(-1, std::ios_base::cur);
+                
+        if(results_count > 0) {
+            lcs_results.seekp(-1, std::ios_base::cur);
+            text_results.seekp(-1, std::ios_base::cur);
+            tokno_results.seekp(-1, std::ios_base::cur);
+        }
 
         lcs_results << "]";
         text_results << "]";
@@ -1322,7 +1326,7 @@ bool OcsServer::lcsSearch(std::string _POST[1], int clientSocket) {
 }
 
 void OcsServer::writeTextBody(std::ostringstream &html, sqlite3* DB, int tokno_start, int tokno_end) {
-    const char* sql_text = "SELECT chu_word_torot, presentation_before, presentation_after, sentence_no, lemma_id, morph_tag, autoreconstructed_lcs, inflexion_class_id FROM corpus WHERE tokno >= ? AND tokno <= ?";
+    const char* sql_text = "SELECT chu_word_torot, presentation_before, presentation_after, sentence_no, lemma_id, morph_tag, autoreconstructed_lcs, inflexion_class_id, tokno FROM corpus WHERE tokno >= ? AND tokno <= ?";
     sqlite3_stmt* statement;
     sqlite3_prepare_v2(DB, sql_text, -1, &statement, NULL);
     sqlite3_bind_int(statement, 1, tokno_start);
@@ -1336,6 +1340,7 @@ void OcsServer::writeTextBody(std::ostringstream &html, sqlite3* DB, int tokno_s
     int sentence_number_previous = 0;
     int sentence_no_current = 0;
     int inflexion_class_id = 0;
+    int tokno = 0;
     while(sqlite3_step(statement) == SQLITE_ROW) {
         chu_word_torot = (const char*)sqlite3_column_text(statement, 0);
         presentation_before = (const char*)sqlite3_column_text(statement, 1);
@@ -1343,6 +1348,7 @@ void OcsServer::writeTextBody(std::ostringstream &html, sqlite3* DB, int tokno_s
         sentence_no_current = sqlite3_column_int(statement, 3);
         lemma_id = sqlite3_column_int(statement, 4);
         inflexion_class_id = sqlite3_column_int(statement, 7);
+        tokno = sqlite3_column_int(statement, 8);
         if(sqlite3_column_type(statement, 5) == SQLITE_NULL) morph_tag = "";
         else morph_tag = (const char*)sqlite3_column_text(statement, 5);
         if(sqlite3_column_type(statement, 6) == SQLITE_NULL) autoreconstructed_lcs = "";
@@ -1352,7 +1358,7 @@ void OcsServer::writeTextBody(std::ostringstream &html, sqlite3* DB, int tokno_s
             html << "  |  ";
         }
 
-        html << "<span class=\"chunk\">" << presentation_before << "<span class=\"tooltip\" data-sentence_no=\"" << sentence_no_current << "\" data-lemma_id=\"" << lemma_id << "\""; 
+        html << "<span class=\"chunk\">" << presentation_before << "<span class=\"tooltip\" data-tokno=\"" << tokno << "\" data-sentence_no=\"" << sentence_no_current << "\" data-lemma_id=\"" << lemma_id << "\""; 
         if(lemma_id > 0) {
             html << " data-morph_tag=\"" << morph_tag << "\"";
         }

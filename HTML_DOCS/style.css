@@ -886,6 +886,20 @@ border-bottom: 2px solid rgb(23, 33, 54, 0);
   -webkit-animation: spin 1s linear infinite; /* Safari */
   animation: spin 1s linear infinite;
 }
+#search_load_spinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border: 3px solid #cbd9f487;
+  border-radius: 50%;
+  border-top: 3px solid #071022;
+  border-top: 3px solid #071022;
+  width: 22px;
+  height: 22px;
+  -webkit-animation: spin 1s linear infinite; /* Safari */
+  animation: spin 1s linear infinite;
+}
 
 /*--------------------Search Box-------------------*/
 #search_button {
@@ -1003,7 +1017,7 @@ border-bottom: 2px solid rgb(23, 33, 54, 0);
   text-align: center;
 }
 
-.dict_cell {
+.dict_cell, .dict_header {
     
   /*height: inherit; */
   width: 100%;
@@ -1012,6 +1026,19 @@ border-bottom: 2px solid rgb(23, 33, 54, 0);
   word-break: break-word;
 }
 
+.dict_header.left {
+  border-left: 2px solid black;
+  border-right: 1px solid black;
+  width: 30%;
+}
+.dict_header.middle {
+  width: 50%;
+}
+.dict_header.right {
+  border-left: 1px solid black;
+  border-right: 2px solid black;
+  width: 20%;
+}
 
 
 .dict_cell.left {
@@ -1021,6 +1048,7 @@ border-bottom: 2px solid rgb(23, 33, 54, 0);
 }
 .dict_cell.middle {
   width: 50%;
+  font-family: Menaion;
 }
 .dict_cell.right {
   border-left: 1px solid black;
@@ -1030,7 +1058,8 @@ border-bottom: 2px solid rgb(23, 33, 54, 0);
 
 #search_scope {
   display: flex;
-  justify-content: space-evenly;
+  justify-content: end;
+  flex-flow: row nowrap;
   width: 100%;
   font-size: 13px;
   border-left: 2px solid black;
@@ -1041,13 +1070,14 @@ border-bottom: 2px solid rgb(23, 33, 54, 0);
 }
 
 .scope_heading {
-  width: 33.333%;
+  width: 100%;
   text-align: center;
   color: #cbd9f47c;
   font-family: IBM_PLEX_SANS;
   padding-top: 5px;
   padding-bottom: 5px;
   background-color: #172136;
+  user-select: none;
 }
 .scope_heading.active {
   background-color: #071022;
@@ -1065,6 +1095,19 @@ border-bottom: 2px solid rgb(23, 33, 54, 0);
   text-align: center;
   border-left: 2px solid black;
   border-right: 2px solid black;
+}
+
+.dict_cell.no_results {
+  border-left: 2px solid black;
+  border-right: 2px solid black;
+  text-align: center;
+  color: red;
+}
+.dict_cell.empty_results {
+  border-left: 2px solid black;
+  border-right: 2px solid black;
+  text-align: center;
+  color: #cbd9f47c;
 }
 
 #dict_hidden_box {
@@ -1095,4 +1138,7 @@ border-bottom: 2px solid rgb(23, 33, 54, 0);
 #dict_hidden_text {
   font-family: IBM_Plex_Sans;
   font-size: 15px;
+}
+.result_word {
+  color: #ffc100;
 }

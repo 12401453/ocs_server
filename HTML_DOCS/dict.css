@@ -13,6 +13,8 @@
 
     right: 50%;
     transform: translateX(50%);
+
+    background-color: #071022;
     
 }
 
@@ -91,7 +93,9 @@
 
     /*firefox*/
     scrollbar-color: #040a16 #172136;
-    scrollbar-width: 9px;
+    scrollbar-width: thin;
+
+    position: relative;
 }
 
 #dict_body::-webkit-scrollbar {

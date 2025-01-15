@@ -47,6 +47,8 @@ const updateFont = (textselect_value) => {
 const app_state = {
   annotation_mode: "none",
   search_box_shown: false,
+  search_scope: 1,
+  search_box_minimised: true
 }
 
 function selectText() {
@@ -2594,7 +2596,8 @@ const glag_map = new Map([
   ["Ѳ", "Ⱚ"],
   ["Ѧ", "Ⱔ"],
   ["Ѩ", "Ⱗ"],
-  ["Ꙙ", "Ⱕ"]
+  ["Ꙙ", "Ⱕ"],
+  ["й", "ⰻ"]
 ]);
 const cyr_glag_clean_map = new Map([
   ["о҄у", "ѹ҄"],
@@ -2909,6 +2912,16 @@ const insertLetter = (event) => {
   }
 };
 
+const switchSearchScope = (event) => {
+  if(event.target.classList.contains("active") || event.target.classList.contains("scope_heading") == false) return;
+
+  event.currentTarget.querySelectorAll(".scope_heading").forEach(heading => heading.classList.remove("active"));
+  event.target.classList.add("active");
+  app_state.search_scope = Number(event.target.dataset.scope);
+  lcsSearch(document.getElementById("dict_searchbox").value.trim());
+}
+document.getElementById("search_scope").addEventListener('click', switchSearchScope);
+
 
 document.getElementById("search_type_options").addEventListener('click', switchSearchType);
 
@@ -2929,15 +2942,23 @@ const lookupForm = () => {
 document.getElementById("dict_searchbox").addEventListener('keydown', event => {
   if(event.key == "Enter") {
     event.preventDefault();
-    lookupForm();
+    lcsSearch(document.getElementById("dict_searchbox").value.trim());
   }
 });
-document.getElementById("search_button").addEventListener('click', lookupForm);
+document.getElementById("search_button").addEventListener('click', event => {
+  lcsSearch(document.getElementById("dict_searchbox").value.trim());
+});
 
 document.getElementById("dict_minimise").addEventListener('click', () => {
   let dict_body = document.getElementById("dict_body");
-  if(dict_body.style.display == "flex") dict_body.style.display = "none";
-  else dict_body.style.display = "flex";
+  if(dict_body.style.display == "flex") {
+    dict_body.style.display = "none";
+    app_state.search_box_minimised = true;
+  }
+  else {
+    dict_body.style.display = "flex";
+    app_state.search_box_minimised = false;
+  }
 });
 
 const toggleSearchBox = () => {
@@ -2959,12 +2980,60 @@ const toggleSearchBox = () => {
 document.getElementById("dict_hidden_box").addEventListener('click', toggleSearchBox);
 document.getElementById("dict_close").addEventListener('click', toggleSearchBox);
 
+const search_load_spinner = document.createElement("div");
+search_load_spinner.id = "search_load_spinner";
+
+const showSearchLoadSpinner = (minimised) => {
+  document.getElementById("dict_searchbox").disabled = true;
+  if(minimised) {
+    document.getElementById("search_button").append(search_load_spinner);
+  }
+  else {
+    document.getElementById("dict_body").style.opacity = "50%";
+    document.getElementById("dict_body").append(search_load_spinner);
+  }
+}
+const removeSearchLoadSpinner = () => {
+  document.getElementById("dict_body").style.opacity = "";
+  document.getElementById("search_load_spinner").remove();
+  document.getElementById("dict_searchbox").disabled = false;
+}
+
 const lcsSearch = (query) => {
-  if(query.trim() == "") return;
- 
+  if(query.trim() == "") {
+    document.getElementById("search_results").innerHTML = '<div class="dict_row"><div class="dict_cell empty_results">Search results will appear here...</div></div>';
+    resetLcsPageSearch();
+    return;
+  }
+
+  showSearchLoadSpinner(app_state.search_box_minimised);
+  
+  let tokno_start = 0;
+  let tokno_end = 0;
+
+  const textSelect = document.getElementById("textselect");
+  const subtitleSelect = document.getElementById("subtitle_select");
+
+  switch(app_state.search_scope) {
+    case 1:
+      tokno_start = page_toknos_arr[current_pageno - 1][0];
+      tokno_end = page_toknos_arr[current_pageno - 1][1];
+      break;
+    case 2:
+      tokno_start = textSelect.options[textSelect.selectedIndex].dataset.tokno_start;
+      tokno_end = textSelect.options[textSelect.selectedIndex].dataset.tokno_end;
+      break;
+    case 3:
+      tokno_start = 0;
+      tokno_end = textSelect.options[textSelect.options.length - 1].dataset.tokno_end;
+      break;
+  }
+  let send_data = "lcs_query=" + encodeURIComponent(query.trim()) +"&tokno_start=" + tokno_start + "&tokno_end=" + tokno_end;
+
+  console.log(send_data);
 
   const httpRequest = (method, url) => {
-    let send_data = "lcs_query=" + encodeURIComponent(query.trim());
+    
     const xhttp = new XMLHttpRequest();
     xhttp.open(method, url, true);
     xhttp.responseType = 'json';
@@ -2978,27 +3047,32 @@ const lcsSearch = (query) => {
 
         const results_count = xhttp.response[0].length;
         
-        let dict_body = document.getElementById("dict_body");
-        dict_body.innerHTML = "";
-        dict_body.style.display = "flex";
+        const search_results = document.getElementById("search_results");
+        search_results.innerHTML = "";
+        document.getElementById("dict_body").style.display = "flex";
+        app_state.search_box_minimised = false;
 
         if(results_count > 10000) {
-          dict_body.appendChild(document.createRange().createContextualFragment('<div class="dict_row"><div class="dict_cell Wk">Too many results, please narrow search</div></div>'));
+          search_results.appendChild(document.createRange().createContextualFragment('<div class="dict_row"><div class="dict_cell no_results">Too many results, please narrow search</div></div>'));
           return;
         }
         else if(results_count == 0) {
-          dict_body.appendChild(document.createRange().createContextualFragment('<div class="dict_row"><div class="dict_cell Wk">Nothing found</div></div>'));
+          search_results.appendChild(document.createRange().createContextualFragment('<div class="dict_row"><div class="dict_cell no_results">Nothing found</div></div>'));
         }
 
+        let search_results_html = "";
         for(let i = 0; i < results_count; i++) {            
-        
-          dict_body.appendChild(document.createRange().createContextualFragment('<div class="dict_row"><div class="dict_cell left">'+lcs_results[i]+'</div><div class="dict_cell middle">'+text_results[i]+'</div><div class="dict_cell right">'+getShortTextLocation(tokno_results[i])+'</div></div>'));
-  
+          search_results_html += '<div class="dict_row"><div class="dict_cell left">'+lcs_results[i].replace("Q", "ъ")+'</div><div class="dict_cell middle">'+text_results[i]+'</div><div class="dict_cell right">'+getShortTextLocation(tokno_results[i])+'</div></div>';  
         }
+        search_results.appendChild(document.createRange().createContextualFragment(search_results_html));
 
-        
+        if(app_state.search_scope == 1) {
+          for(const result_tokno of tokno_results) {
+            document.querySelector("[data-tokno=\""+result_tokno+"\"]").classList.add("pulsate");
+          }
+        }
+        removeSearchLoadSpinner();
       }
-
     }
     xhttp.send(send_data);
   }
