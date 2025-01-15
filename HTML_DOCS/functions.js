@@ -3049,6 +3049,7 @@ const lcsSearch = (query) => {
         const search_results = document.getElementById("search_results");
         document.getElementById("dict_body").style.display = "flex";
         app_state.search_box_minimised = false;
+        search_results.innerHTML = "";
 
         if(results_count > 10000) {
           search_results.appendChild(document.createRange().createContextualFragment('<div class="dict_row"><div class="dict_cell no_results">Too many results, please narrow search</div></div>'));
@@ -3062,7 +3063,6 @@ const lcsSearch = (query) => {
         for(let i = 0; i < results_count; i++) {            
           search_results_html += '<div class="dict_row"><div class="dict_cell left">'+lcs_results[i].replace("Q", "ъ")+'</div><div class="dict_cell middle">'+text_results[i]+'</div><div class="dict_cell right">'+getShortTextLocation(tokno_results[i])+'</div></div>';  
         }
-        search_results.innerHTML = "";
         search_results.appendChild(document.createRange().createContextualFragment(search_results_html));
 
         if(app_state.search_scope == 1) {
