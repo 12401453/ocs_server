@@ -847,6 +847,11 @@ border-bottom: 2px solid rgb(23, 33, 54, 0);
 .tooltip[data-lemma_id="0"] {
   opacity: 50%;
 }
+.tooltip[data-lemma_id="0"].tooltip[data-lcs_recon] {
+  opacity: 100%;
+  color: pink;
+}
+
 
 #annotation_mode_box {
   display: flex;

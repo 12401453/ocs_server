@@ -161,6 +161,9 @@ const chu_mappings = {
 const convertToOCS = (lcs_word, inflexion_class_id) => {
 
   lcs_word = lcs_word.replaceAll("ę̌", "ę").replaceAll("y̨", "y").replaceAll("Q", "ъ");
+
+  lcs_word = lcs_word.replace(/^ak/, "jǢk"); //not really justified other than by the extreme rarity of ак- spellings in OCS
+
   lcs_word = yeetTlDl(lcs_word);
 
   let ORT_pos =  lcs_word.search(ORT_regex);
@@ -379,6 +382,7 @@ const orv_mappings = {
 const convertToORV = (lcs_word, inflexion_class_id) => {
 
   lcs_word = lcs_word.replaceAll("ę̌", "ě").replaceAll("y̨", "a").replaceAll("Q", "ь");
+  lcs_word = lcs_word.replaceAll("ĺ̥", "l̥");
 
   lcs_word = lcs_word.replace(/^ak/, "jǢk").replace(/^av/, "jǢv");
   lcs_word = yeetTlDl(lcs_word);
@@ -388,10 +392,12 @@ const convertToORV = (lcs_word, inflexion_class_id) => {
 
   let ORT_pos =  lcs_word.search(ORT_regex);
   while(ORT_pos != -1) {
-    //something going wrong, *gordьkę is coming out as "городоундефинедцѣ"
 
-    const ort_vowel = lcs_word.at(ORT_pos);
-    const ort_liquid = lcs_word.at(ORT_pos + 1);
+    let ort_vowel = lcs_word.at(ORT_pos);
+    let ort_liquid = lcs_word.at(ORT_pos + 1);
+    if(ort_vowel == "e" && ort_liquid == "l") {
+      ort_vowel = "o";
+    }
     if(ORT_pos == 0) lcs_word = lcs_word.slice(0, ORT_pos) + ort_liquid + ort_vowel + lcs_word.slice(ORT_pos + 2);
     else lcs_word = lcs_word.slice(0, ORT_pos) + ort_vowel + ort_liquid + ort_vowel + lcs_word.slice(ORT_pos + 2);
     ORT_pos = lcs_word.search(ORT_regex);
