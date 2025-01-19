@@ -3053,10 +3053,13 @@ const lcsSearch = (query) => {
 
         if(results_count > 10000) {
           search_results.appendChild(document.createRange().createContextualFragment('<div class="dict_row"><div class="dict_cell no_results">Too many results, please narrow search</div></div>'));
+          removeSearchLoadSpinner();
           return;
         }
         else if(results_count == 0) {
           search_results.appendChild(document.createRange().createContextualFragment('<div class="dict_row"><div class="dict_cell no_results">Nothing found</div></div>'));
+          removeSearchLoadSpinner();
+          return;
         }
 
         let search_results_html = "";

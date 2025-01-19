@@ -58,6 +58,21 @@ void class_I_clean(std::string &verb, bool imperative)
 
   std::string str1, str2;
   int x, y;
+
+  //prevent nasalised-jat from being replaced with Ǣ after palatals
+  str1.assign("ę̌");
+  str2.assign("Z");
+  do
+  {
+    x = verb.find(str1);
+    if (x == -1)
+    {
+      break;
+    }
+    y = str1.length();
+    verb.replace(x, y, str2);
+  } while (x != -1);
+
   for (int letno = 0; letno < 41; letno++)
   {
 
@@ -243,6 +258,19 @@ void class_I_clean(std::string &verb, bool imperative)
       verb.replace(x, y, str2);
     } while (x != -1);
   }
+
+  str1.assign("Z");
+  str2.assign("ę̌");
+  do
+  {
+    x = verb.find(str1);
+    if (x == -1)
+    {
+      break;
+    }
+    y = str1.length();
+    verb.replace(x, y, str2);
+  } while (x != -1);
 
   return;
 }
@@ -472,6 +500,22 @@ void class_3_clean(std::string &verb)
 
   std::string str1, str2;
   int x, y;
+
+  str1.assign("ę̌");
+  str2.assign("Z");
+  do
+  {
+    x = verb.find(str1);
+    if (x == -1)
+    {
+      break;
+    }
+    y = str1.length();
+    verb.replace(x, y, str2);
+  } while (x != -1);
+
+
+
   for (int letno = 0; letno < 4; letno++)
   {
 
@@ -506,6 +550,19 @@ void class_3_clean(std::string &verb)
       verb.replace(x, y, str2);
     } while (x != -1);
   }
+
+  str1.assign("Z");
+  str2.assign("ę̌");
+  do
+  {
+    x = verb.find(str1);
+    if (x == -1)
+    {
+      break;
+    }
+    y = str1.length();
+    verb.replace(x, y, str2);
+  } while (x != -1);
 
   return;
 }

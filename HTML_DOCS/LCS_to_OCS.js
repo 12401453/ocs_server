@@ -387,6 +387,7 @@ const convertToORV = (lcs_word, inflexion_class_id) => {
   lcs_word = lcs_word.replace(/^ak/, "jǢk").replace(/^av/, "jǢv");
   lcs_word = yeetTlDl(lcs_word);
 
+  if(inflexion_class_id == 1013 || inflexion_class_id == 1029 || inflexion_class_id == 1036 || inflexion_class_id == 1057 || inflexion_class_id == 1017) lcs_word = applyPV3(lcs_word);
   lcs_word = denasalise(lcs_word);
   lcs_word = russifyDoublets(lcs_word);
 
@@ -409,7 +410,6 @@ const convertToORV = (lcs_word, inflexion_class_id) => {
     lcs_word = lcs_word.slice(0, PV2_pos) + PV2_map.get(PV2_cons) + lcs_word.slice(PV2_pos + 1);
     PV2_pos = lcs_word.search(PV2_regex);
   }
-  if(inflexion_class_id == 1013 || inflexion_class_id == 1029 || inflexion_class_id == 1036 || inflexion_class_id == 1057 || inflexion_class_id == 1017) lcs_word = applyPV3(lcs_word);
 
   lcs_word = simplifyLongAdj(lcs_word);
 
@@ -426,7 +426,7 @@ const russifyOCS = () => {
   document.querySelectorAll("[data-lcs_recon]").forEach(tt => {
     const ocs_form = tt.firstChild.textContent
     original_ocs_forms.push(ocs_form);
-    tt.firstChild.textContent = convertToORV(tt.dataset.lcs_recon, tt.dataset.inflexion);
+    tt.firstChild.textContent = convertToORV(tt.dataset.lcs_recon, Number(tt.dataset.inflexion));
     tt.classList.add("converted");
   });
   ttPosition();
