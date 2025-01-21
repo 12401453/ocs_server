@@ -267,7 +267,7 @@ int OcsServer::checkHeaderEnd(const char* msg) {
             else if(page_type == 1 && line.find("<?cky") != -1) ss_text << "<br><br><div id=\"textbody\"></div>\n";
             
             //For some reason I do not understand, if you insert a <script> tag to declare the below JS variable outside of the script tag at the bottom, on Chrome Android the server very often will get stuck for absolutely ages on loading the Bookerly font file when you refresh the page, and the javascript engine will freeze for about 5-10seconds, but this never happens on Desktop. Thus I've had to make up another bullshit <?js tag to signal where to insert this C++-generated JS
-            else if(page_type == 1 && cookies_present && line.find("<?js") != -1) {
+            else if(page_type == 1 /*&& cookies_present*/ && line.find("<?js") != -1) { //the insertTextSelect() function should set all the cookie-values if they are absent, and I need this to run when there are no cookies inorder to set the page_toknos_arr javascript-array to the correct value or functions will break
                 ss_text << "let cookie_textselect = " << m_cookies[0] << ";\n";
                 ss_text << "page_toknos_arr = " << m_page_toknos_arr << ";\n";
                 ss_text << "if(page_toknos_arr.length > 1) {document.getElementById('pagenos').addEventListener('click', selectText_splitup);\ndocument.getElementById('pagenos').addEventListener('keydown', selectText_splitup);}\n";
@@ -1282,7 +1282,7 @@ bool OcsServer::lcsSearch(std::string _POST[3], int clientSocket) {
             while(sqlite3_step(statement2) == SQLITE_ROW) {
                 text_content_result_oss << (const char*)sqlite3_column_text(statement2, 2);
                 if(sqlite3_column_int(statement2, 0) == tokno) {
-                    text_content_result_oss << escapeQuotes("<span class=\"result_word\">") + htmlspecialchars((const char*)sqlite3_column_text(statement2, 1)) + escapeQuotes("</span>");
+                    text_content_result_oss << escapeQuotes("<span class=\"result_word\">") + htmlspecialchars((const char*)sqlite3_column_text(statement2, 1)) + "</span>";
                 }
                 else text_content_result_oss << htmlspecialchars((const char*)sqlite3_column_text(statement2, 1));
                 
@@ -4107,4 +4107,134 @@ bool OcsServer::lemmaTooltipsMW(std::string _POST[3], int clientSocket) {
         std::cout << "Database connection failed in lemmaTooltips()" << std::endl;
         return false;
     }
+}
+
+bool OcsServer::retrieveTextFromSearch(std::string _POST[1]) {
+
+    int result_tokno = safeStrToInt(_POST[0]);
+
+    int sentences_per_page = 30;
+    std::ostringstream page_toknos_arr;
+    page_toknos_arr << "[";
+    int pageno_count = 1;
+    int sentence_count = 0;
+
+    int result_pageno = 1;
+    bool pageno_found = false;
+
+    sqlite3* DB;
+    sqlite3_stmt* statement;
+
+    if (!sqlite3_open("chu.db", &DB)) {
+
+        const char* sql_text;
+
+        sql_text = "SELECT tokno_start, tokno_end FROM subtitles WHERE tokno_start <= ? AND tokno_end >= ?";
+        sqlite3_prepare_v2(DB, sql_text, -1, &statement, NULL);
+        sqlite3_bind_int(statement, 1, result_tokno);
+        sqlite3_bind_int(statement, 2, result_tokno);
+        sqlite3_step(statement);
+        int tokno_start = sqlite3_column_int(statement, 0);
+        int tokno_end = sqlite3_column_int(statement, 1);
+        sqlite3_finalize(statement);
+
+        sql_text = "SELECT text_id, text_title FROM texts WHERE tokno_start <= ? AND tokno_end >= ?";
+        sqlite3_prepare_v2(DB, sql_text, -1, &statement, NULL);
+        sqlite3_bind_int(statement, 1, result_tokno);
+        sqlite3_bind_int(statement, 2, result_tokno);
+        sqlite3_step(statement);
+        int text_id = sqlite3_column_int(statement, 0);
+        std::string text_id_str = (const char*)sqlite3_column_text(statement, 1);
+        sqlite3_finalize(statement);
+
+        sql_text = "SELECT subtitle_text FROM subtitles WHERE text_id = ?";
+        sqlite3_prepare_v2(DB, sql_text, -1, &statement, NULL);
+        sqlite3_bind_int(statement, 1, text_id);
+        std::ostringstream subtitles_arr;
+        std::string subtitle_str;
+        subtitles_arr << "[";
+        while (sqlite3_step(statement) == SQLITE_ROW) {
+            subtitle_str.assign((const char*)sqlite3_column_text(statement, 0));
+            subtitles_arr << escapeQuotes(subtitle_str) << ',';
+        }
+        subtitles_arr.seekp(-1, std::ios_base::cur);
+        subtitles_arr << "]";
+        sqlite3_finalize(statement);
+
+        //the sentence_nos are not in any guaranteed order
+        sql_text = "SELECT sentence_no, tokno FROM corpus WHERE rowid >= ? AND rowid <= ? GROUP BY sentence_no ORDER BY tokno";
+        sqlite3_prepare_v2(DB, sql_text, -1, &statement, NULL);
+        sqlite3_bind_int(statement, 1, tokno_start);
+        sqlite3_bind_int(statement, 2, tokno_end);
+
+        std::vector<int> page_toknos_vec;
+        page_toknos_vec.reserve(16);
+        page_toknos_vec.push_back(tokno_start);
+        //I don't know whether the sentence_nos are guaranteed to be contiguous so I have to count each row rather than just do "last - first" to get the total number of sentences
+        page_toknos_arr << "[" << tokno_start;
+        while (sqlite3_step(statement) == SQLITE_ROW) {
+            int sentence_no = sqlite3_column_int(statement, 0);
+            int sentence_start_tokno = sqlite3_column_int(statement, 1);
+            sentence_count++;
+
+            std::cout << "sentence_count:" << sentence_count << "; sentences_per_page: " << sentences_per_page << "\n";
+
+            if (sentence_count % sentences_per_page == 0) {
+                page_toknos_arr << "," << sentence_start_tokno - 1 << "],[" << sentence_start_tokno;
+                page_toknos_vec.push_back(sentence_start_tokno);
+                if (pageno_found == false && result_tokno <= sentence_start_tokno) {
+                    result_pageno = pageno_count;
+                    pageno_found = true;
+                }
+                pageno_count++;
+            }
+        }
+        page_toknos_vec.push_back(tokno_end + 1);
+        page_toknos_arr << "," << tokno_end << "]]";
+        m_page_toknos_arr = page_toknos_arr.str();
+        m_pageno_count = pageno_count;
+        sqlite3_finalize(statement);
+
+        m_cookies[1] = std::to_string(result_pageno);
+
+        std::ostringstream html;
+        html << "<br><div id=\"textbody\">";
+        writeTextBody(html, DB, page_toknos_vec[result_pageno - 1], page_toknos_vec[result_pageno] - 1);
+
+        html << "</div>";
+
+        if (m_pageno_count > 1) {
+            html << "<br><br><div id='pageno_footer'><div id=\"pagenos\">";
+            html << "<div id=\"pageno_leftarrow\" class=\"nav_arrow\">&lt;</div>";
+            html << "<textarea id=\"pageno_box\" spellcheck=\"false\" autocomplete=\"off\">";
+            html << result_pageno;
+            html << "</textarea>";
+            html << "<div class=\"pageno_text\" style=\"width: 40px;\">of</div>";
+            html << "<div class=\"pageno_text\">" << pageno_count << "</div>";
+
+            html << "<div id=\"pageno_rightarrow\" class=\"nav_arrow\">&gt;</div>";
+            html << "</div></div>";
+        }
+        else {
+            html << "<br>";
+        }
+        std::cout << m_page_toknos_arr << "\n";
+
+        std::string json_str = "[\"html\":\"" + escapeQuotes(html.str()) + "\",\"subtitles\":\"" + escapeQuotes(subtitles_arr.str()) + "\",\"page_toknos\":" + page_toknos_arr.str() + "]";
+        int content_length = json_str.size();
+
+        std::ostringstream post_response;
+        post_response << "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: " << content_length << "\r\n\r\n" << json_str;
+
+        int length = post_response.str().size() + 1;
+        sendToClient(clientSocket, post_response.str().c_str(), length);
+
+        sqlite3_close(DB);
+
+    }
+    else {
+
+        html << "Database connection failed on retrieveTextFromSearch()<br><br>\n";
+    }
+    // html << "<br><br><div id=\"textbody\">text_id: " << cookie_textselect << "<br>subtitle_id: " << cookie_subtitle_id << "<br>pageno: " << cookie_pageno << "</div>\n";
 }

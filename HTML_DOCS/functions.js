@@ -2681,10 +2681,9 @@ const resetLcsPageSearch = () => {
 const btn_load_spinner = document.createElement("div");
 btn_load_spinner.id = "btn_load_spinner";
 
-const lemmaTooltip = function () {
+const lemmaTooltip = function (show_load_spinner) {
 
   const torot_btn = document.getElementById("torot_mode");
-  torot_btn.append(btn_load_spinner);
 
   removeTooltips();
   
@@ -2704,10 +2703,12 @@ const lemmaTooltip = function () {
   if(page_lemma_ids_arr.length == 0) {
     document.getElementById("lcs_mode").classList.remove("active");
     torot_btn.classList.add("active");
-    torot_btn.removeChild(btn_load_spinner);
     app_state.annotation_mode = "torot";
     return;
   }
+
+  if(show_load_spinner) torot_btn.append(btn_load_spinner);
+  
   const page_lemma_ids_str = page_lemma_ids_arr.join(",");
   
   const httpRequest = (method, url) => {
@@ -2744,7 +2745,7 @@ const lemmaTooltip = function () {
 
         document.getElementById("lcs_mode").classList.remove("active");
         torot_btn.classList.add("active");
-        torot_btn.removeChild(btn_load_spinner);
+        if(show_load_spinner) torot_btn.removeChild(btn_load_spinner);
         // document.getElementById("tt_toggle").disabled = false;
         setTimeout(ttPosition, 200);
         app_state.annotation_mode = "torot";
@@ -2792,7 +2793,7 @@ const removeTooltips = () => {
 const applyTooltips = () => {
   switch(app_state.annotation_mode) {
     case "torot":
-      lemmaTooltip();
+      lemmaTooltip(false);
       break;
     case "lcs":
       lcsTooltip();
@@ -2811,7 +2812,7 @@ document.getElementById("annotation_mode_box").addEventListener('click', (event)
     }
     else {
       //event.currentTarget.querySelectorAll(".annotation_mode").forEach(button => button.classList.remove("active"));
-      lemmaTooltip();
+      lemmaTooltip(true);
     }
   }
   else if(annotation_button.id == "lcs_mode") {
