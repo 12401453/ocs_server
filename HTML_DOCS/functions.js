@@ -27,6 +27,7 @@ function setLangId() {
   dict.display();
 }
 
+//these should be put into the app_state object
 let page_toknos_arr = [];
 let current_pageno = 1;
 let dt_end = 0;
@@ -52,10 +53,6 @@ const app_state = {
 }
 
 function selectText() {
-  if(displayWordEditor.edit_mode) {
-    displayWordEditor.stopEditing();
-  }
-  if(display_word != null) delAnnotate();
 
   showLoadingButton();
 
@@ -98,14 +95,6 @@ function selectText() {
             document.getElementById("pagenos").addEventListener('click', selectText_splitup);
             document.getElementById("pagenos").addEventListener('keydown', selectText_splitup);
           }
-         
-          //document.getElementById("textbody").addEventListener('click', showAnnotate);
-
-          document.querySelectorAll('.multiword').forEach(mw => {
-            mw.addEventListener('click', showMultiwordAnnotate);
-            mw.addEventListener('mouseover', underlineMultiwords);
-            mw.addEventListener('mouseout', removeUnderlineMultiwords);
-          });
           
           if(tooltips_shown) {
           }
@@ -3085,4 +3074,64 @@ const lcsSearch = (query) => {
 
 const getShortTextLocation = (tokno) => {
   return tokno;
+}
+
+const retrieveTextFromSearch = (tokno) => {
+
+  showLoadingButton();
+
+  let post_data = "tokno=" + tokno;
+  const httpRequest = (method, url) => {
+
+    const xhttp = new XMLHttpRequest();
+    xhttp.open(method, url, true);
+    xhttp.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+    xhttp.responseType = 'json';
+
+    xhttp.onreadystatechange = () => {
+
+      if (xhttp.readyState == 4) {
+
+        console.log(xhttp.response);
+
+        const subtitle_select = document.getElementById("subtitle_select");
+        subtitle_select.innerHTML = xhttp.response.subtitles_html;
+
+        current_pageno = Number(xhttp.response.result_pageno);
+        page_toknos_arr = xhttp.response.page_toknos;
+        const result_text_id = Number(xhttp.response.text_id);
+
+        const textselect = document.getElementById("textselect");
+        Array.from(textselect.options).forEach(option => { if (option.value == result_text_id) option.selected = true; })
+
+        // for (const subtitle_id of Object.keys(subtitles_json)) {
+        //   const option = document.createElement("option");
+        //   option.value = subtitle_id;
+        //   option.dataset.tokno_start = subtitles_json[subtitle_id][0];
+        //   option.dataset.tokno_end = subtitles_json[subtitle_id][1];
+        //   option.textContent = subtitles_json[subtitle_id][2];
+        //   subtitle_select.append(option);
+        // }
+        textselect.dispatchEvent(new Event('cookie_selection'));
+        subtitle_select.dispatchEvent(new Event('cookie_selection'));
+
+        document.getElementById("p1").innerHTML = xhttp.response.html;
+
+
+        if (page_toknos_arr.length > 1) {
+          document.getElementById("pagenos").addEventListener('click', selectText_splitup);
+          document.getElementById("pagenos").addEventListener('keydown', selectText_splitup);
+        }
+
+        removeLoadingButton();
+
+        //applyTooltips();
+      }
+
+    }
+
+    xhttp.send(post_data);
+  }
+
+  httpRequest("POST", "retrieve_text_search.php");
 }

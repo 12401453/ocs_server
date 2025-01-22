@@ -93,7 +93,7 @@ class OcsServer : public TcpListener {
 
         void writeTextBody(std::ostringstream& html, sqlite3* DB, int tokno_start, int tokno_end);
 
-        bool retrieveTextFromSearch(std::string _POST[1]);
+        bool retrieveTextFromSearch(std::string _POST[1], int clientSocket);
 
         const char*         m_post_data;
         std::string         m_post_data_incomplete;

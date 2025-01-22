@@ -698,6 +698,9 @@ void OcsServer::handlePOSTedData(const char* post_data, int clientSocket) {
     else if(!strcmp(m_url, "/retrieve_text_pageno.php")) {
         bool php_func_success = retrieveTextPageNo(post_values, clientSocket);
     }
+    else if (!strcmp(m_url, "/retrieve_text_search.php")) {
+        bool php_func_success = retrieveTextFromSearch(post_values, clientSocket);
+    }
     else if(!strcmp(m_url, "/delete_text.php")) {
         bool php_func_success = deleteText(post_values, clientSocket);
     }
@@ -772,6 +775,7 @@ int OcsServer::getPostFields(const char* url) {
     else if(!strcmp(url, "/lcs_search.php")) return 3;
     else if(!strcmp(url, "/retrieve_text.php")) return 1;
     else if(!strcmp(url, "/retrieve_text_pageno.php")) return 2;
+    else if (!strcmp(url, "/retrieve_text_search.php")) return 1;
     else if(!strcmp(url, "/get_lang_id.php")) return 1;
     else if(!strcmp(url, "/pull_lemma.php")) return 4;
     else if(!strcmp(url, "/lemma_record.php")) return 8;
@@ -1763,7 +1767,7 @@ void OcsServer::void_retrieveText(std::ostringstream &html) {
             int sentence_start_tokno = sqlite3_column_int(statement, 1);
             sentence_count++;
 
-            std::cout << "sentence_count:" << sentence_count << "; sentences_per_page: " << sentences_per_page << "\n";
+            // std::cout << "sentence_count:" << sentence_count << "; sentences_per_page: " << sentences_per_page << "\n";
 
             if(sentence_count % sentences_per_page == 0) {
                 page_toknos_arr << "," << sentence_start_tokno - 1 << "],[" << sentence_start_tokno;
@@ -4109,7 +4113,7 @@ bool OcsServer::lemmaTooltipsMW(std::string _POST[3], int clientSocket) {
     }
 }
 
-bool OcsServer::retrieveTextFromSearch(std::string _POST[1]) {
+bool OcsServer::retrieveTextFromSearch(std::string _POST[1], int clientSocket) {
 
     int result_tokno = safeStrToInt(_POST[0]);
 
@@ -4129,13 +4133,14 @@ bool OcsServer::retrieveTextFromSearch(std::string _POST[1]) {
 
         const char* sql_text;
 
-        sql_text = "SELECT tokno_start, tokno_end FROM subtitles WHERE tokno_start <= ? AND tokno_end >= ?";
+        sql_text = "SELECT tokno_start, tokno_end, subtitle_id FROM subtitles WHERE tokno_start <= ? AND tokno_end >= ?";
         sqlite3_prepare_v2(DB, sql_text, -1, &statement, NULL);
         sqlite3_bind_int(statement, 1, result_tokno);
         sqlite3_bind_int(statement, 2, result_tokno);
         sqlite3_step(statement);
         int tokno_start = sqlite3_column_int(statement, 0);
         int tokno_end = sqlite3_column_int(statement, 1);
+        int selected_subtitle_id = sqlite3_column_int(statement, 2);
         sqlite3_finalize(statement);
 
         sql_text = "SELECT text_id, text_title FROM texts WHERE tokno_start <= ? AND tokno_end >= ?";
@@ -4144,21 +4149,24 @@ bool OcsServer::retrieveTextFromSearch(std::string _POST[1]) {
         sqlite3_bind_int(statement, 2, result_tokno);
         sqlite3_step(statement);
         int text_id = sqlite3_column_int(statement, 0);
-        std::string text_id_str = (const char*)sqlite3_column_text(statement, 1);
+        std::string text_title_str = (const char*)sqlite3_column_text(statement, 1);
         sqlite3_finalize(statement);
 
-        sql_text = "SELECT subtitle_text FROM subtitles WHERE text_id = ?";
+        sql_text = "SELECT subtitle_text, subtitle_id, tokno_start, tokno_end FROM subtitles WHERE text_id = ?";
         sqlite3_prepare_v2(DB, sql_text, -1, &statement, NULL);
         sqlite3_bind_int(statement, 1, text_id);
-        std::ostringstream subtitles_arr;
-        std::string subtitle_str;
-        subtitles_arr << "[";
+        std::ostringstream subtitles_html;
+        std::string subtitle_text_str;
+        int subtitle_tokno_start, subtitle_tokno_end, subtitle_id;
         while (sqlite3_step(statement) == SQLITE_ROW) {
-            subtitle_str.assign((const char*)sqlite3_column_text(statement, 0));
-            subtitles_arr << escapeQuotes(subtitle_str) << ',';
+            subtitle_text_str.assign((const char*)sqlite3_column_text(statement, 0));
+            subtitle_id = sqlite3_column_int(statement, 1);
+            subtitle_tokno_start = sqlite3_column_int(statement, 2);
+            subtitle_tokno_end = sqlite3_column_int(statement, 3);
+            subtitles_html << "<option value=\"" << subtitle_id << "\" data-tokno_start=\"" << subtitle_tokno_start << "\" data-tokno_end=\"" << subtitle_tokno_end << "\"";
+            if(subtitle_id == selected_subtitle_id) subtitles_html << " selected";
+            subtitles_html << ">" << htmlspecialchars(subtitle_text_str) << "</option>";
         }
-        subtitles_arr.seekp(-1, std::ios_base::cur);
-        subtitles_arr << "]";
         sqlite3_finalize(statement);
 
         //the sentence_nos are not in any guaranteed order
@@ -4176,8 +4184,6 @@ bool OcsServer::retrieveTextFromSearch(std::string _POST[1]) {
             int sentence_no = sqlite3_column_int(statement, 0);
             int sentence_start_tokno = sqlite3_column_int(statement, 1);
             sentence_count++;
-
-            std::cout << "sentence_count:" << sentence_count << "; sentences_per_page: " << sentences_per_page << "\n";
 
             if (sentence_count % sentences_per_page == 0) {
                 page_toknos_arr << "," << sentence_start_tokno - 1 << "],[" << sentence_start_tokno;
@@ -4220,7 +4226,7 @@ bool OcsServer::retrieveTextFromSearch(std::string _POST[1]) {
         }
         std::cout << m_page_toknos_arr << "\n";
 
-        std::string json_str = "[\"html\":\"" + escapeQuotes(html.str()) + "\",\"subtitles\":\"" + escapeQuotes(subtitles_arr.str()) + "\",\"page_toknos\":" + page_toknos_arr.str() + "]";
+        std::string json_str = "{\"html\":\"" + escapeQuotes(html.str()) + "\",\"subtitles_html\":\"" + escapeQuotes(subtitles_html.str()) + "\",\"page_toknos\":" + page_toknos_arr.str() + ",\"text_id\":" + std::to_string(text_id) + ",\"result_pageno\":" + std::to_string(result_pageno) + "}";
         int content_length = json_str.size();
 
         std::ostringstream post_response;
@@ -4230,11 +4236,13 @@ bool OcsServer::retrieveTextFromSearch(std::string _POST[1]) {
         sendToClient(clientSocket, post_response.str().c_str(), length);
 
         sqlite3_close(DB);
+        return true;
 
     }
     else {
 
-        html << "Database connection failed on retrieveTextFromSearch()<br><br>\n";
+        std::cout << "Database connection failed on retrieveTextFromSearch()<br><br>\n";
+        return false;
     }
     // html << "<br><br><div id=\"textbody\">text_id: " << cookie_textselect << "<br>subtitle_id: " << cookie_subtitle_id << "<br>pageno: " << cookie_pageno << "</div>\n";
 }
