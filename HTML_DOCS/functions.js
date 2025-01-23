@@ -2796,37 +2796,65 @@ const applyTooltips = () => {
   }
 };
 
+// document.getElementById("annotation_mode_box").addEventListener('click', (event) => {
+//   const annotation_button = event.target;
+//   if(annotation_button.id == "torot_mode") {
+//     if(annotation_button.classList.contains("active")) {
+//       annotation_button.classList.remove("active");
+//       removeTooltips();
+//     }
+//     else {
+//       //event.currentTarget.querySelectorAll(".annotation_mode").forEach(button => button.classList.remove("active"));
+//       lemmaTooltip(true);
+//     }
+//   }
+//   else if(annotation_button.id == "lcs_mode") {
+//     if(annotation_button.classList.contains("active")) {
+//       annotation_button.classList.remove("active");
+//       removeTooltips();
+//     }
+//     else {
+//       event.currentTarget.querySelectorAll(".annotation_mode").forEach(button => button.classList.remove("active"));
+//       lcsTooltip();
+//     }  
+//   }
+//   else if(annotation_button.id == "greek_mode") {
+//     if(annotation_button.classList.contains("active")) {
+//       annotation_button.classList.remove("active");
+//       removeTooltips();
+//     }
+//     else {
+//       event.currentTarget.querySelectorAll(".annotation_mode").forEach(button => button.classList.remove("active"));
+//       greekTooltips(true);
+//     }  
+//   }
+// });
+
 document.getElementById("annotation_mode_box").addEventListener('click', (event) => {
   const annotation_button = event.target;
-  if(annotation_button.id == "torot_mode") {
-    if(annotation_button.classList.contains("active")) {
-      annotation_button.classList.remove("active");
+  if(annotation_button.classList.contains("annotation_mode")) {
+    //removeTooltips();
+    console.log(annotation_button.id.startsWith(app_state.annotation_mode));
+    Array.from(event.currentTarget.children).forEach(child => child.classList.remove('active'));
+    if(annotation_button.id.startsWith(app_state.annotation_mode)) {
       removeTooltips();
     }
     else {
-      //event.currentTarget.querySelectorAll(".annotation_mode").forEach(button => button.classList.remove("active"));
-      lemmaTooltip(true);
+      annotation_button.classList.add("active");
+      switch(annotation_button.id) {
+        case "torot_mode":
+          lemmaTooltip(true);
+          break;
+        case "lcs_mode":
+          lcsTooltip();
+          break;
+        case "greek_mode":
+          greekTooltips(true);
+          break;
+        default:
+          return;
+      }
     }
-  }
-  else if(annotation_button.id == "lcs_mode") {
-    if(annotation_button.classList.contains("active")) {
-      annotation_button.classList.remove("active");
-      removeTooltips();
-    }
-    else {
-      event.currentTarget.querySelectorAll(".annotation_mode").forEach(button => button.classList.remove("active"));
-      lcsTooltip();
-    }  
-  }
-  else if(annotation_button.id == "greek_mode") {
-    if(annotation_button.classList.contains("active")) {
-      annotation_button.classList.remove("active");
-      removeTooltips();
-    }
-    else {
-      event.currentTarget.querySelectorAll(".annotation_mode").forEach(button => button.classList.remove("active"));
-      greekTooltips(true);
-    }  
   }
 });
 
@@ -3253,11 +3281,7 @@ const lcsRegexSearch = (query) => {
 const greekTooltips = function (show_load_spinner) {
 
   const greek_btn = document.getElementById("greek_mode");
-
   removeTooltips();
-  
-
-  document.querySelectorAll(".lemma_tt").forEach(lemma_tt => lemma_tt.remove());
   
   let tokno_start = page_toknos_arr[current_pageno - 1][0];
   let tokno_end = page_toknos_arr[current_pageno - 1][1];
