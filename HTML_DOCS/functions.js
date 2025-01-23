@@ -2787,7 +2787,11 @@ const applyTooltips = () => {
     case "lcs":
       lcsTooltip();
       break;
+    case "greek":
+      greekTooltips();
+      break;
     default:
+  
 
   }
 };
@@ -2812,6 +2816,16 @@ document.getElementById("annotation_mode_box").addEventListener('click', (event)
     else {
       event.currentTarget.querySelectorAll(".annotation_mode").forEach(button => button.classList.remove("active"));
       lcsTooltip();
+    }  
+  }
+  else if(annotation_button.id == "greek_mode") {
+    if(annotation_button.classList.contains("active")) {
+      annotation_button.classList.remove("active");
+      removeTooltips();
+    }
+    else {
+      event.currentTarget.querySelectorAll(".annotation_mode").forEach(button => button.classList.remove("active"));
+      greekTooltips(true);
     }  
   }
 });
@@ -3233,5 +3247,70 @@ const lcsRegexSearch = (query) => {
     xhttp.send(send_data);
   }
   httpRequest("POST", "lcs_regex_search.php");
+
+};
+
+const greekTooltips = function (show_load_spinner) {
+
+  const greek_btn = document.getElementById("greek_mode");
+
+  removeTooltips();
+  
+
+  document.querySelectorAll(".lemma_tt").forEach(lemma_tt => lemma_tt.remove());
+  
+  let tokno_start = page_toknos_arr[current_pageno - 1][0];
+  let tokno_end = page_toknos_arr[current_pageno - 1][1];
+
+  if(show_load_spinner) greek_btn.append(btn_load_spinner);
+  
+  const httpRequest = (method, url) => {
+
+    // let send_data = toknos_POST_data;
+    let send_data = "tokno_start=" + tokno_start + "&tokno_end=" + tokno_end;
+    const xhttp = new XMLHttpRequest();
+    xhttp.open(method, url, true);
+    xhttp.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+    xhttp.responseType = 'json';
+
+    xhttp.onload = () => {
+      if(xhttp.readyState == 4) {
+        tooltips_shown = true;
+        // const pos_array = xhttp.response[0];
+        // const greek_forms_array = xhttp.response[1];
+        // const greek_morph_tags_array = xhttp.response[2];
+        const greek_data = xhttp.response;
+
+        const alligned_toknos = Object.keys(xhttp.response);
+
+        alligned_toknos.forEach(alligned_tokno => {
+          const ocs_word = document.querySelector(`[data-tokno="${alligned_tokno}"]`);
+          const greek_data_row = greek_data[alligned_tokno];
+          
+          let tt_box_string = '<span class="lemma_tt" onclick="event.stopPropagation()"><span id="tt_top"><div id="lemma_tag_tt" style="font-family: Bukyvede;font-weight: bold;">';
+          tt_box_string += greek_data_row[0] + '</div><span id="pos_tag_box_tt">';
+          tt_box_string += tt_pos_arr[proiel_pos_map[greek_data_row[3] - 1][0]] + '</span></span><span id="tt_mid"><div id="tt_meaning">';
+          
+  
+          const finished_string = tt_box_string + "<span class=\"greek_form\" style=\"font-family: Bukyvede;font-weight: bold;\">" + greek_data_row[1] + "<br></span>" + convertMorphTag(greek_data_row[2]) + '</div></span><span id="tt_bottom"></span></span>'; 
+          const tt_fragment = document.createRange().createContextualFragment(finished_string);
+          tt_fragment.getElementById("pos_tag_box_tt").firstChild.title = proiel_pos_map[greek_data_row[3] - 1][1];
+          ocs_word.append(tt_fragment);
+    
+
+        });
+
+        document.getElementById("lcs_mode").classList.remove("active");
+        if(alligned_toknos.length > 0) greek_btn.classList.add("active");
+        if(show_load_spinner) greek_btn.removeChild(btn_load_spinner);
+        setTimeout(ttPosition, 200);
+        app_state.annotation_mode = "greek";
+        
+      }
+
+    }
+    xhttp.send(send_data);
+  };
+  httpRequest("POST", "greek_tooltips.php");
 
 };

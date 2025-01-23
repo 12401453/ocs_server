@@ -749,6 +749,9 @@ void OcsServer::handlePOSTedData(const char* post_data, int clientSocket) {
     else if(!strcmp(m_url, "/lcs_regex_search.php")) {
         bool php_func_success = lcsRegexSearch(post_values, clientSocket);
     }
+    else if(!strcmp(m_url, "/greek_tooltips.php")) {
+        bool php_func_success = greekTooltips(post_values, clientSocket);
+    }
 
     std::cout << "m_url: " << m_url << std::endl;
     
@@ -801,6 +804,7 @@ int OcsServer::getPostFields(const char* url) {
     else if(!strcmp(url, "/update_displayWord.php")) return 5;
     else if(!strcmp(url, "/lemma_tooltip_mw.php")) return 3;
     else if(!strcmp(url, "/lcs_regex_search.php")) return 3;
+    else if(!strcmp(url, "/greek_tooltips.php")) return 2;
     else return -1;
 }
 
@@ -1211,6 +1215,7 @@ bool OcsServer::lemmaTooltips(std::string _POST[1], int clientSocket) {
             sqlite3_reset(statement1);
             sqlite3_clear_bindings(statement1);
         }
+        sqlite3_finalize(statement1);
         
         lemma_ocs_array.seekp(-1, std::ios_base::cur);
         pos_array.seekp(-1, std::ios_base::cur);       
@@ -4378,6 +4383,78 @@ bool OcsServer::lcsRegexSearch(std::string _POST[3], int clientSocket) {
     }
     else {
         std::cout << "Database connection failed in lcsRegexSearch()" << std::endl;
+        return false;
+    }
+}
+
+bool OcsServer::greekTooltips(std::string _POST[2], int clientSocket) {
+    sqlite3* DB;    
+    
+    if(!sqlite3_open("chu.db", &DB)) {
+
+        sqlite3_stmt* statement1;
+        sqlite3_stmt* statement2;     
+
+        int tokno_start = safeStrToInt(_POST[0]);
+        int tokno_end = safeStrToInt(_POST[1]);
+        
+
+        const char* sql_text1 = "SELECT chu_tokno, gk_word, gk_lemma_id, gk_morph_tag, gk_pos FROM greek_alignments WHERE chu_tokno >= ? AND chu_tokno <= ?";
+        std::cout << sql_text1 << "\n";
+        std::cout << "prep code: " << sqlite3_prepare_v2(DB, sql_text1, -1, &statement1, NULL) << "\n";
+        std::cout << "bind code: " << sqlite3_bind_int(statement1, 1, tokno_start) << "\n";
+        sqlite3_bind_int(statement1, 2, tokno_end);
+
+        const char* sql_text2 = "SELECT gk_lemma_form FROM greek_lemmas WHERE gk_lemma_id = ?";
+        sqlite3_prepare_v2(DB, sql_text2, -1, &statement2, NULL);
+
+
+        std::string gk_word, gk_morph_tag, gk_lemma_form;
+        int chu_tokno, gk_lemma_id, gk_pos;
+
+        std::ostringstream json;
+        json << "{";
+        
+        int results_count = 0;
+        while(sqlite3_step(statement1) == SQLITE_ROW) {
+            chu_tokno = sqlite3_column_int(statement1, 0);
+            gk_lemma_id = sqlite3_column_int(statement1, 2);
+            gk_pos = sqlite3_column_int(statement1, 4);
+            gk_morph_tag = (const char*)sqlite3_column_text(statement1, 3);
+            gk_word = (const char*)sqlite3_column_text(statement1, 1);
+
+            sqlite3_bind_int(statement2, 1, gk_lemma_id);
+            sqlite3_step(statement2);
+            gk_lemma_form = (const char*)sqlite3_column_text(statement2, 0);
+
+            json << "\"" << chu_tokno << "\":[\"" << escapeQuotes(gk_word) << "\",\"" << escapeQuotes(gk_lemma_form) << "\",\"" << gk_morph_tag << "\"," << gk_pos << "],";
+
+
+            sqlite3_reset(statement2);
+            sqlite3_clear_bindings(statement2);
+
+            results_count++;
+        }
+        sqlite3_finalize(statement1);
+        sqlite3_finalize(statement2);
+        
+        if(results_count > 0) json.seekp(-1, std::ios_base::cur);
+        json << "}";
+
+        std::string json_str = json.str();
+        int content_length = json_str.size();
+
+        std::ostringstream post_response;
+        post_response << "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: " << content_length << "\r\n\r\n" << json_str;
+
+        int length = post_response.str().size() + 1;
+        sendToClient(clientSocket, post_response.str().c_str(), length);
+        sqlite3_close(DB);
+       
+        return true;
+    }
+    else {
+        std::cout << "Database connection failed in greekTooltips()" << std::endl;
         return false;
     }
 }
