@@ -4262,7 +4262,15 @@ bool OcsServer::lcsRegexSearch(std::string _POST[3], int clientSocket) {
 
     if(U_FAILURE(status)) {
         std::cout << "the regex failed\n";
-        return false;
+        std::string json_str = "[]";
+        int content_length = json_str.size();
+
+        std::ostringstream post_response;
+        post_response << "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: " << content_length << "\r\n\r\n" << json_str;
+
+        int length = post_response.str().size() + 1;
+        sendToClient(clientSocket, post_response.str().c_str(), length);
+        return true;
     }
   
     

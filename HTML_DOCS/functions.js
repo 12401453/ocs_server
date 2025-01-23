@@ -3078,8 +3078,6 @@ const getShortTextLocation = (tokno) => {
 }
 
 const retrieveTextFromSearch = (tokno) => {
-
-  minimiseSearchbox();
   showLoadingButton();
 
   let post_data = "tokno=" + tokno;
@@ -3127,6 +3125,7 @@ const retrieveTextFromSearch = (tokno) => {
         document.cookie = "text_id="+result_text_id+";max-age=157680000";
         document.cookie = "current_pageno="+current_pageno+";max-age=157680000";
 
+        minimiseSearchbox();
         applyTooltips();
       }
 
@@ -3187,16 +3186,24 @@ const lcsRegexSearch = (query) => {
     xhttp.onload = () => {
 
       if(xhttp.readyState == 4) {
+        
+        const search_results = document.getElementById("search_results");
+
+        document.getElementById("dict_body").style.display = "flex";
+        app_state.search_box_minimised = false;
+        search_results.innerHTML = "";
+        
+        if(xhttp.response.length == 0) {
+          search_results.appendChild(document.createRange().createContextualFragment('<div class="dict_row"><div class="dict_cell no_results">That regex was malformed. Repent!</div></div>'));
+          removeSearchLoadSpinner();
+          return;
+        }
+
         const lcs_results = xhttp.response[0];
         const text_results = xhttp.response[1];
         const tokno_results = xhttp.response[2];
 
         const results_count = xhttp.response[0].length;
-        
-        const search_results = document.getElementById("search_results");
-        document.getElementById("dict_body").style.display = "flex";
-        app_state.search_box_minimised = false;
-        search_results.innerHTML = "";
 
         if(results_count > 10000) {
           search_results.appendChild(document.createRange().createContextualFragment('<div class="dict_row"><div class="dict_cell no_results">Too many results, please narrow search</div></div>'));
