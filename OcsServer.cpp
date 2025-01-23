@@ -746,6 +746,9 @@ void OcsServer::handlePOSTedData(const char* post_data, int clientSocket) {
     else if(!strcmp(m_url, "/update_displayWord.php")) {
         bool php_func_success = updateDisplayWord(post_values, clientSocket);
     }
+    else if(!strcmp(m_url, "/lcs_regex_search.php")) {
+        bool php_func_success = lcsRegexSearch(post_values, clientSocket);
+    }
 
     std::cout << "m_url: " << m_url << std::endl;
     
@@ -797,6 +800,7 @@ int OcsServer::getPostFields(const char* url) {
     else if(!strcmp(url, "/add_text_OE.php")) return 3;
     else if(!strcmp(url, "/update_displayWord.php")) return 5;
     else if(!strcmp(url, "/lemma_tooltip_mw.php")) return 3;
+    else if(!strcmp(url, "/lcs_regex_search.php")) return 3;
     else return -1;
 }
 
@@ -4195,6 +4199,8 @@ bool OcsServer::retrieveTextFromSearch(std::string _POST[1], int clientSocket) {
                 pageno_count++;
             }
         }
+        if(pageno_found == false) result_pageno = pageno_count; //the final page will contain less than 30 sentences so that modulo condition will never be fulfilled
+
         page_toknos_vec.push_back(tokno_end + 1);
         page_toknos_arr << "," << tokno_end << "]]";
         m_page_toknos_arr = page_toknos_arr.str();
@@ -4226,7 +4232,7 @@ bool OcsServer::retrieveTextFromSearch(std::string _POST[1], int clientSocket) {
         }
         std::cout << m_page_toknos_arr << "\n";
 
-        std::string json_str = "{\"html\":\"" + escapeQuotes(html.str()) + "\",\"subtitles_html\":\"" + escapeQuotes(subtitles_html.str()) + "\",\"page_toknos\":" + page_toknos_arr.str() + ",\"text_id\":" + std::to_string(text_id) + ",\"result_pageno\":" + std::to_string(result_pageno) + "}";
+        std::string json_str = "{\"html\":\"" + escapeQuotes(html.str()) + "\",\"subtitles_html\":\"" + escapeQuotes(subtitles_html.str()) + "\",\"page_toknos\":" + page_toknos_arr.str() + ",\"text_id\":" + std::to_string(text_id) + ",\"result_pageno\":" + std::to_string(result_pageno) + ",\"subtitle_id\":" + std::to_string(selected_subtitle_id) + "}";
         int content_length = json_str.size();
 
         std::ostringstream post_response;
@@ -4245,4 +4251,125 @@ bool OcsServer::retrieveTextFromSearch(std::string _POST[1], int clientSocket) {
         return false;
     }
     // html << "<br><br><div id=\"textbody\">text_id: " << cookie_textselect << "<br>subtitle_id: " << cookie_subtitle_id << "<br>pageno: " << cookie_pageno << "</div>\n";
+}
+
+bool OcsServer::lcsRegexSearch(std::string _POST[3], int clientSocket) {
+    sqlite3* DB;
+    
+    UErrorCode status = U_ZERO_ERROR;
+    icu::UnicodeString regex_str = URIDecode(_POST[0]).c_str();
+    icu::RegexMatcher *matcher = new icu::RegexMatcher(regex_str, 0, status);
+
+    if(U_FAILURE(status)) {
+        std::cout << "the regex failed\n";
+        return false;
+    }
+  
+    
+    if(!sqlite3_open("chu.db", &DB)) {
+        
+
+        sqlite3_stmt* statement1;
+        sqlite3_stmt* statement2;     
+       
+        std::string regex_bytes;
+        regex_str.toUTF8String(regex_bytes);
+        std::cout << "regex: " << regex_bytes << "\n";
+
+        int tokno_start = safeStrToInt(_POST[1]);
+        int tokno_end = safeStrToInt(_POST[2]);
+
+        const char* sql_text1 = "SELECT tokno, autoreconstructed_lcs, sentence_no FROM corpus WHERE tokno >= ? AND tokno <= ? AND autoreconstructed_lcs IS NOT NULL";
+        const char* sql_text2 = "SELECT tokno, chu_word_torot, presentation_before, presentation_after FROM corpus WHERE tokno < ? AND tokno > ? AND sentence_no = ?";
+        sqlite3_prepare_v2(DB, sql_text1, -1, &statement1, NULL);
+        sqlite3_prepare_v2(DB, sql_text2, -1, &statement2, NULL);
+         
+        sqlite3_bind_int(statement1, 1, tokno_start);
+        sqlite3_bind_int(statement1, 2, tokno_end);
+
+        std::ostringstream lcs_results;
+        lcs_results << "[";
+        std::ostringstream text_results;
+        text_results << "[";
+        std::ostringstream tokno_results;
+        tokno_results << "[";
+
+
+        int tokno = 0;
+        icu::UnicodeString lcs_result;
+        std::string lcs_result_str = "";
+        std::string chu_word_torot = "";
+        std::string present_before = "";
+        std::string presentation_after = "";
+
+        int sentence_no = 0;
+        int results_count = 0;
+   
+        while(sqlite3_step(statement1) == SQLITE_ROW) {
+           
+            //lcs_result = (const char*)sqlite3_column_text(statement1, 1);
+
+            lcs_result.setTo((const char*)sqlite3_column_text(statement1, 1));
+            matcher->reset(lcs_result);
+            if(matcher->find()) {
+                
+                lcs_result.toUTF8String(lcs_result_str);
+
+                sentence_no = sqlite3_column_int(statement1, 2);
+                tokno = sqlite3_column_int(statement1, 0);
+                //std::cout << "lcs_result: " << lcs_result << "\n";
+                lcs_results << "\"" << htmlspecialchars(lcs_result_str) << "\"" << ",";
+                tokno_results << tokno << ",";
+
+                std::ostringstream text_content_result_oss;
+                text_content_result_oss << "\"";
+
+                sqlite3_bind_int(statement2, 1, tokno + 5);
+                sqlite3_bind_int(statement2, 2, tokno - 5);
+                sqlite3_bind_int(statement2, 3, sentence_no);
+                while(sqlite3_step(statement2) == SQLITE_ROW) {
+                    text_content_result_oss << (const char*)sqlite3_column_text(statement2, 2);
+                    if(sqlite3_column_int(statement2, 0) == tokno) {
+                        text_content_result_oss << "<span class=\\\"result_word\\\">" + htmlspecialchars((const char*)sqlite3_column_text(statement2, 1)) + "</span>";
+                    }
+                    else text_content_result_oss << htmlspecialchars((const char*)sqlite3_column_text(statement2, 1));
+                    
+                    text_content_result_oss << (const char*)sqlite3_column_text(statement2, 3);
+                }
+                text_content_result_oss << "\"";
+                text_results << text_content_result_oss.str() << ",";
+
+                lcs_result_str.clear();
+                sqlite3_reset(statement2);
+                sqlite3_clear_bindings(statement2);
+                results_count++;
+            }
+        }
+                
+        if(results_count > 0) {
+            lcs_results.seekp(-1, std::ios_base::cur);
+            text_results.seekp(-1, std::ios_base::cur);
+            tokno_results.seekp(-1, std::ios_base::cur);
+        }
+
+        lcs_results << "]";
+        text_results << "]";
+        tokno_results << "]";    
+
+        std::string json_str = "[" + lcs_results.str() + "," + text_results.str() + "," + tokno_results.str() + "]";
+        int content_length = json_str.size();
+
+        std::ostringstream post_response;
+        post_response << "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: " << content_length << "\r\n\r\n" << json_str;
+
+        int length = post_response.str().size() + 1;
+        sendToClient(clientSocket, post_response.str().c_str(), length);
+        sqlite3_close(DB);
+       
+        return true;
+    }
+    else {
+        std::cout << "Database connection failed in lcsRegexSearch()" << std::endl;
+        return false;
+    }
 }

@@ -227,6 +227,14 @@ color: #cbd9f4;
   /* 100% { color: #cbd9f4; } */
   100% { color: white; }
 }
+
+.flash_pink {
+  animation: burn_pink 1s infinite;
+}
+@keyframes burn_pink {
+  50% { color: rgb(255 115 205); }
+  100% { color: #cbd9f4; }
+}
   
 
 .annotation_mode {

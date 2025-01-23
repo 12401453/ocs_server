@@ -1151,3 +1151,11 @@ border-bottom: 2px solid rgb(23, 33, 54, 0);
 .result_word {
   color: #ffc100;
 }
+
+.search_link {
+  cursor: pointer;
+}
+.search_link:hover {
+  color: white;
+  text-decoration: underline;
+}

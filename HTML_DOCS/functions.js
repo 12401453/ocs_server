@@ -2937,8 +2937,8 @@ document.getElementById("search_button").addEventListener('click', event => {
   lcsSearch(document.getElementById("dict_searchbox").value.trim());
 });
 
-document.getElementById("dict_minimise").addEventListener('click', () => {
-  let dict_body = document.getElementById("dict_body");
+const minimiseSearchbox = () => {
+  const dict_body = document.getElementById("dict_body");
   if(dict_body.style.display == "flex") {
     dict_body.style.display = "none";
     app_state.search_box_minimised = true;
@@ -2947,7 +2947,8 @@ document.getElementById("dict_minimise").addEventListener('click', () => {
     dict_body.style.display = "flex";
     app_state.search_box_minimised = false;
   }
-});
+};
+document.getElementById("dict_minimise").addEventListener('click', minimiseSearchbox);
 
 const toggleSearchBox = () => {
   if(app_state.search_box_shown == true) {
@@ -3054,7 +3055,7 @@ const lcsSearch = (query) => {
 
         let search_results_html = "";
         for(let i = 0; i < results_count; i++) {            
-          search_results_html += '<div class="dict_row"><div class="dict_cell left">'+lcs_results[i].replace("Q", "ъ")+'</div><div class="dict_cell middle">'+text_results[i]+'</div><div class="dict_cell right">'+getShortTextLocation(tokno_results[i])+'</div></div>';  
+          search_results_html += '<div class="dict_row"><div class="dict_cell left">'+lcs_results[i].replace("Q", "ъ")+'</div><div class="dict_cell middle">'+text_results[i]+'</div><div class="dict_cell right search_link">'+getShortTextLocation(tokno_results[i])+'</div></div>';  
         }
         search_results.appendChild(document.createRange().createContextualFragment(search_results_html));
 
@@ -3078,6 +3079,7 @@ const getShortTextLocation = (tokno) => {
 
 const retrieveTextFromSearch = (tokno) => {
 
+  minimiseSearchbox();
   showLoadingButton();
 
   let post_data = "tokno=" + tokno;
@@ -3092,26 +3094,17 @@ const retrieveTextFromSearch = (tokno) => {
 
       if (xhttp.readyState == 4) {
 
-        console.log(xhttp.response);
-
         const subtitle_select = document.getElementById("subtitle_select");
         subtitle_select.innerHTML = xhttp.response.subtitles_html;
 
         current_pageno = Number(xhttp.response.result_pageno);
         page_toknos_arr = xhttp.response.page_toknos;
         const result_text_id = Number(xhttp.response.text_id);
+        const selected_subtitle_id = xhttp.response.subtitle_id;
 
         const textselect = document.getElementById("textselect");
-        Array.from(textselect.options).forEach(option => { if (option.value == result_text_id) option.selected = true; })
+        Array.from(textselect.options).forEach(option => { if (option.value == result_text_id) option.selected = true; });
 
-        // for (const subtitle_id of Object.keys(subtitles_json)) {
-        //   const option = document.createElement("option");
-        //   option.value = subtitle_id;
-        //   option.dataset.tokno_start = subtitles_json[subtitle_id][0];
-        //   option.dataset.tokno_end = subtitles_json[subtitle_id][1];
-        //   option.textContent = subtitles_json[subtitle_id][2];
-        //   subtitle_select.append(option);
-        // }
         textselect.dispatchEvent(new Event('cookie_selection'));
         subtitle_select.dispatchEvent(new Event('cookie_selection'));
 
@@ -3124,8 +3117,17 @@ const retrieveTextFromSearch = (tokno) => {
         }
 
         removeLoadingButton();
+        
+        console.log(tokno);
+        const result_word = document.querySelector("[data-tokno=\""+tokno+"\"]");
+        result_word.classList.add("flash_pink");
+        result_word.scrollIntoView();
 
-        //applyTooltips();
+        document.cookie = "subtitle_id="+selected_subtitle_id+";max-age=157680000";
+        document.cookie = "text_id="+result_text_id+";max-age=157680000";
+        document.cookie = "current_pageno="+current_pageno+";max-age=157680000";
+
+        applyTooltips();
       }
 
     }
@@ -3135,3 +3137,94 @@ const retrieveTextFromSearch = (tokno) => {
 
   httpRequest("POST", "retrieve_text_search.php");
 }
+
+document.getElementById("search_results"),addEventListener('click', (event) => {
+  if(event.target.classList.contains("search_link")) {
+    retrieveTextFromSearch(event.target.textContent);
+  }
+});
+
+const lcsRegexSearch = (query) => {
+  
+  resetLcsPageSearch();
+  if(query.trim() == "") {
+    document.getElementById("search_results").innerHTML = '<div class="dict_row"><div class="dict_cell empty_results">Search results will appear here...</div></div>';
+    return;
+  }
+
+  showSearchLoadSpinner(app_state.search_box_minimised);
+  
+  let tokno_start = 0;
+  let tokno_end = 0;
+
+  const textSelect = document.getElementById("textselect");
+  const subtitleSelect = document.getElementById("subtitle_select");
+
+  switch(app_state.search_scope) {
+    case 1:
+      tokno_start = page_toknos_arr[current_pageno - 1][0];
+      tokno_end = page_toknos_arr[current_pageno - 1][1];
+      break;
+    case 2:
+      tokno_start = textSelect.options[textSelect.selectedIndex].dataset.tokno_start;
+      tokno_end = textSelect.options[textSelect.selectedIndex].dataset.tokno_end;
+      break;
+    case 3:
+      tokno_start = 0;
+      tokno_end = textSelect.options[textSelect.options.length - 1].dataset.tokno_end;
+      break;
+  }
+  let send_data = "lcs_query=" + encodeURIComponent(query.trim()) +"&tokno_start=" + tokno_start + "&tokno_end=" + tokno_end;
+
+  console.log(send_data);
+
+  const httpRequest = (method, url) => {
+    
+    const xhttp = new XMLHttpRequest();
+    xhttp.open(method, url, true);
+    xhttp.responseType = 'json';
+
+    xhttp.onload = () => {
+
+      if(xhttp.readyState == 4) {
+        const lcs_results = xhttp.response[0];
+        const text_results = xhttp.response[1];
+        const tokno_results = xhttp.response[2];
+
+        const results_count = xhttp.response[0].length;
+        
+        const search_results = document.getElementById("search_results");
+        document.getElementById("dict_body").style.display = "flex";
+        app_state.search_box_minimised = false;
+        search_results.innerHTML = "";
+
+        if(results_count > 10000) {
+          search_results.appendChild(document.createRange().createContextualFragment('<div class="dict_row"><div class="dict_cell no_results">Too many results, please narrow search</div></div>'));
+          removeSearchLoadSpinner();
+          return;
+        }
+        else if(results_count == 0) {
+          search_results.appendChild(document.createRange().createContextualFragment('<div class="dict_row"><div class="dict_cell no_results">Nothing found</div></div>'));
+          removeSearchLoadSpinner();
+          return;
+        }
+
+        let search_results_html = "";
+        for(let i = 0; i < results_count; i++) {            
+          search_results_html += '<div class="dict_row"><div class="dict_cell left">'+lcs_results[i].replace("Q", "ъ")+'</div><div class="dict_cell middle">'+text_results[i]+'</div><div class="dict_cell right search_link">'+getShortTextLocation(tokno_results[i])+'</div></div>';  
+        }
+        search_results.appendChild(document.createRange().createContextualFragment(search_results_html));
+
+        if(app_state.search_scope == 1) {
+          for(const result_tokno of tokno_results) {
+            document.querySelector("[data-tokno=\""+result_tokno+"\"]").classList.add("pulsate");
+          }
+        }
+        removeSearchLoadSpinner();
+      }
+    }
+    xhttp.send(send_data);
+  }
+  httpRequest("POST", "lcs_regex_search.php");
+
+};
