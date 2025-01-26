@@ -251,3 +251,7 @@ color: #cbd9f4;
 .tooltip.converted:hover {
   color: rgb(255 115 205);;
 }
+
+.tooltip[data-auto_tagged="1"] {
+  color: pink;
+}

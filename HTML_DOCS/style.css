@@ -26,6 +26,7 @@
     --chunk-letter-spacing: var(--cyr-letter-spacing);
 
     --no-lcs-opacity: 1.0;
+    --no-lemma_id-opacity: 0.5;
 
     --search-letter-font: IBM_PLEX_SANS;
     --search-letter-size: 13px;
@@ -844,12 +845,8 @@ border-bottom: 2px solid rgb(23, 33, 54, 0);
   opacity: var(--no-lcs-opacity);
 }
 
-.tooltip[data-lemma_id="0"] {
-  opacity: 50%;
-}
-.tooltip[data-lemma_id="0"].tooltip[data-lcs_recon] {
-  opacity: 100%;
-  color: pink;
+.tooltip:not([data-lemma_id]) {
+  opacity: var(--no-lemma_id-opacity);
 }
 
 

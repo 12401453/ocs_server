@@ -24,6 +24,9 @@
   --chunk-letter-spacing: var(--cyr-letter-spacing);
 
   --no-lcs-opacity: 1.0;
+  --no-lemma_id-opacity: 0.5;
+
+  --search-letter-font: IBM_PLEX_SANS;
 }
 
 html {
@@ -812,8 +815,8 @@ a {
   opacity: var(--no-lcs-opacity);
 }
 
-.tooltip[data-lemma_id="0"] {
-  opacity: 50%;
+.tooltip:not([data-lemma_id]) {
+  opacity: var(--no-lemma_id-opacity);
 }
 
 #annotation_mode_box {

@@ -2752,7 +2752,7 @@ const lcsTooltip = function () {
 
   removeTooltips();
   
-  document.documentElement.style.setProperty("--no-lcs-opacity", "0.7");
+  document.documentElement.style.setProperty("--no-lcs-opacity", "0.5");
   
   const lcs_words = document.querySelectorAll("[data-lcs_recon]");
 
@@ -2776,6 +2776,7 @@ const lcsTooltip = function () {
 const removeTooltips = () => {
   document.querySelectorAll(".lemma_tt").forEach(lemma_tt => lemma_tt.remove());
   document.documentElement.style.setProperty("--no-lcs-opacity", "1.0");
+  document.documentElement.style.setProperty("--no-lemma_id-opacity", "0.5");
   app_state.annotation_mode = "none";
 };
 
@@ -3320,6 +3321,8 @@ const greekTooltips = function (show_load_spinner) {
           const tt_fragment = document.createRange().createContextualFragment(finished_string);
           tt_fragment.getElementById("pos_tag_box_tt").firstChild.title = proiel_pos_map[greek_data_row[3] - 1][1];
           ocs_word.append(tt_fragment);
+
+          document.documentElement.style.setProperty("--no-lemma_id-opacity", "1.0");
     
 
         });

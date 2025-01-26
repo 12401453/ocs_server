@@ -1339,7 +1339,7 @@ bool OcsServer::lcsSearch(std::string _POST[3], int clientSocket) {
 }
 
 void OcsServer::writeTextBody(std::ostringstream &html, sqlite3* DB, int tokno_start, int tokno_end) {
-    const char* sql_text = "SELECT chu_word_torot, presentation_before, presentation_after, sentence_no, lemma_id, morph_tag, autoreconstructed_lcs, inflexion_class_id, tokno FROM corpus WHERE tokno >= ? AND tokno <= ?";
+    const char* sql_text = "SELECT chu_word_torot, presentation_before, presentation_after, sentence_no, lemma_id, morph_tag, autoreconstructed_lcs, inflexion_class_id, tokno, auto_tagged FROM corpus WHERE tokno >= ? AND tokno <= ?";
     sqlite3_stmt* statement;
     sqlite3_prepare_v2(DB, sql_text, -1, &statement, NULL);
     sqlite3_bind_int(statement, 1, tokno_start);
@@ -1354,6 +1354,7 @@ void OcsServer::writeTextBody(std::ostringstream &html, sqlite3* DB, int tokno_s
     int sentence_no_current = 0;
     int inflexion_class_id = 0;
     int tokno = 0;
+    int auto_tagged = 0;
     while(sqlite3_step(statement) == SQLITE_ROW) {
         chu_word_torot = (const char*)sqlite3_column_text(statement, 0);
         presentation_before = (const char*)sqlite3_column_text(statement, 1);
@@ -1362,6 +1363,7 @@ void OcsServer::writeTextBody(std::ostringstream &html, sqlite3* DB, int tokno_s
         lemma_id = sqlite3_column_int(statement, 4);
         inflexion_class_id = sqlite3_column_int(statement, 7);
         tokno = sqlite3_column_int(statement, 8);
+        auto_tagged = sqlite3_column_int(statement, 9);
         if(sqlite3_column_type(statement, 5) == SQLITE_NULL) morph_tag = "";
         else morph_tag = (const char*)sqlite3_column_text(statement, 5);
         if(sqlite3_column_type(statement, 6) == SQLITE_NULL) autoreconstructed_lcs = "";
@@ -1371,9 +1373,9 @@ void OcsServer::writeTextBody(std::ostringstream &html, sqlite3* DB, int tokno_s
             html << "  |  ";
         }
 
-        html << "<span class=\"chunk\">" << presentation_before << "<span class=\"tooltip\" data-tokno=\"" << tokno << "\" data-sentence_no=\"" << sentence_no_current << "\" data-lemma_id=\"" << lemma_id << "\""; 
+        html << "<span class=\"chunk\">" << presentation_before << "<span class=\"tooltip\" data-tokno=\"" << tokno << "\" data-sentence_no=\"" << sentence_no_current << "\" data-auto_tagged=\"" << auto_tagged << "\""; 
         if(lemma_id > 0) {
-            html << " data-morph_tag=\"" << morph_tag << "\"";
+            html << " data-lemma_id=\"" << lemma_id << "\"" " data-morph_tag=\"" << morph_tag << "\"";
         }
         if(!autoreconstructed_lcs.empty()) {
             html << " data-lcs_recon=\"" << autoreconstructed_lcs << "\" data-inflexion=\"" << inflexion_class_id << "\"";

@@ -276,11 +276,11 @@ std::unordered_map <int, std::string> text_id_map = {
 int main () {
     //std::cout.setstate(std::ios_base::failbit);
     sqlite3* DB;
-    if(!sqlite3_open("chu_corpus_untagged.db", &DB)) {
+    if(!sqlite3_open("chu_corpus_untagged_including_autorecon_autotagged.db", &DB)) {
 
         sqlite3_stmt* statement;
 
-        std::ifstream chu_words_file("chu_words_full_with_titles_untagged.csv");
+        std::ifstream chu_words_file("chu_words_full_with_titles_untagged_autotags_added.csv");
         std::ifstream lemma_spreadsheet("lemmas_with_text_occurence_gdrive.csv");
         std::ifstream chu_lemmas_file("chu_lemmas.csv");
         std::ifstream chu_subtitles_file("chu_subtitles.csv");
@@ -308,7 +308,7 @@ int main () {
 
         sqlite3_exec(DB, sql_BEGIN, nullptr, nullptr, nullptr);
 
-        sqlite3_exec(DB, "DROP TABLE IF EXISTS corpus;CREATE TABLE corpus (tokno INTEGER PRIMARY KEY, chu_word_torot TEXT, chu_word_normalised TEXT, morph_tag TEXT, lemma_id INTEGER, sentence_no INTEGER, presentation_before TEXT, presentation_after TEXT, autoreconstructed_lcs TEXT, inflexion_class_id INTEGER, autoreconstructed_morph_replace TEXT);CREATE INDEX lemma_id_index on corpus(lemma_id) WHERE lemma_id IS NOT NULL;CREATE INDEX sentence_no_index on corpus(sentence_no);CREATE INDEX inflexion_class_corpus_index on corpus(inflexion_class_id) WHERE inflexion_class_id IS NOT NULL", nullptr, nullptr, nullptr);
+        sqlite3_exec(DB, "DROP TABLE IF EXISTS corpus;CREATE TABLE corpus (tokno INTEGER PRIMARY KEY, chu_word_torot TEXT, chu_word_normalised TEXT, morph_tag TEXT, lemma_id INTEGER, sentence_no INTEGER, presentation_before TEXT, presentation_after TEXT, autoreconstructed_lcs TEXT, inflexion_class_id INTEGER, autoreconstructed_morph_replace TEXT, auto_tagged INTEGER);CREATE INDEX lemma_id_index on corpus(lemma_id) WHERE lemma_id IS NOT NULL;CREATE INDEX sentence_no_index on corpus(sentence_no);CREATE INDEX inflexion_class_corpus_index on corpus(inflexion_class_id) WHERE inflexion_class_id IS NOT NULL", nullptr, nullptr, nullptr);
         sqlite3_exec(DB, "DROP TABLE IF EXISTS lemmas;CREATE TABLE lemmas (lemma_id INTEGER PRIMARY KEY, pos INTEGER, lemma_lcs TEXT, lemma_ocs TEXT, stem_lcs TEXT, inflexion_class_id INTEGER);CREATE INDEX inflexion_class_index ON lemmas(inflexion_class_id) WHERE inflexion_class_id IS NOT NULL", nullptr, nullptr, nullptr);
         sqlite3_exec(DB, "DROP TABLE IF EXISTS inflexion_classes;CREATE TABLE inflexion_classes (inflexion_class_id INTEGER PRIMARY KEY, inflexion_class_name TEXT)", nullptr, nullptr, nullptr);
         sqlite3_exec(DB, "DROP TABLE IF EXISTS texts;CREATE TABLE texts (text_id INTEGER PRIMARY KEY, text_title TEXT, tokno_start INTEGER, tokno_end INTEGER)", nullptr, nullptr, nullptr);
@@ -317,7 +317,7 @@ int main () {
         std::unordered_map<std::string, int> inflexion_class_map;
         std::unordered_map<std::string, int> lemma_id_map;
 
-        const char *sql_text = "INSERT INTO corpus (chu_word_torot, chu_word_normalised, morph_tag, lemma_id, sentence_no, presentation_before, presentation_after, autoreconstructed_lcs, autoreconstructed_morph_replace) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        const char *sql_text = "INSERT INTO corpus (chu_word_torot, chu_word_normalised, morph_tag, lemma_id, sentence_no, presentation_before, presentation_after, autoreconstructed_lcs, autoreconstructed_morph_replace, auto_tagged) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         const char* sql_text_table = "INSERT INTO texts (text_title, tokno_start, tokno_end) VALUES (?, ?, ?)";
         const char* sql_subtitle_table = "INSERT INTO subtitles (subtitle_text, text_id, tokno_start, tokno_end) VALUES (?, ?, ?, ?)";
@@ -342,9 +342,9 @@ int main () {
         while(std::getline(chu_words_file, line)) {
             std::stringstream ss_line(line);
 
-            std::string chu_word_torot, chu_word_normalised, morph_tag, presentation_before, presentation_after, autoreconstructed_lcs, autoreconstructed_morph_replace;
+            std::string chu_word_torot, chu_word_normalised, morph_tag, presentation_before, presentation_after, autoreconstructed_lcs, autoreconstructed_morph_replace, torot_pos;
             int lemma_id, sentence_no, main_title_id, subtitle_id;
-
+            bool auto_tagged;
 
             int row_no = 1;
             while(std::getline(ss_line, field, '|')) {
@@ -380,6 +380,13 @@ int main () {
                         //std::cout << "stoi 04\n";
                         subtitle_id = std::stoi(field);
                         break;
+                    case 2:
+                      torot_pos = field;
+                      break;
+                    case 11:
+                      auto_tagged = (bool)std::stoi(field);
+                      break;
+
                     default:
                         ;
 		            }
@@ -387,6 +394,7 @@ int main () {
             }
             std::array<std::string, 2> autoreconstructed_array = ReconstructMorphReplace(chu_word_torot, morph_tag, lemma_id);
             autoreconstructed_lcs = autoreconstructed_array[0];
+
             if(autoreconstructed_lcs.empty()) {
               sqlite3_bind_null(statement, 8);
               sqlite3_bind_null(statement, 9);
@@ -398,8 +406,7 @@ int main () {
               else sqlite3_bind_text(statement, 9, autoreconstructed_morph_replace.c_str(), -1, SQLITE_TRANSIENT);
             }
 
-            if(lemma_id > 0) sqlite3_bind_int(statement, 4, lemma_id);
-            else sqlite3_bind_null(statement, 4);
+            sqlite3_bind_int(statement, 4, lemma_id);
             sqlite3_bind_int(statement, 5, sentence_no);
             sqlite3_bind_text(statement, 1, chu_word_torot.c_str(), -1, SQLITE_TRANSIENT);
             sqlite3_bind_text(statement, 2, chu_word_normalised.c_str(), -1, SQLITE_TRANSIENT);
@@ -407,6 +414,8 @@ int main () {
             else sqlite3_bind_null(statement, 3);
             sqlite3_bind_text(statement, 6, presentation_before.c_str(), -1, SQLITE_TRANSIENT);
             sqlite3_bind_text(statement, 7, presentation_after.c_str(), -1, SQLITE_TRANSIENT);
+            if(auto_tagged) sqlite3_bind_int(statement, 10, 1);
+            else sqlite3_bind_null(statement, 10);
 
             sqlite3_step(statement);
             sqlite3_reset(statement);
