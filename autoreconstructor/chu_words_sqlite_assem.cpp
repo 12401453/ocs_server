@@ -396,6 +396,7 @@ int main () {
             std::array<std::string, 2> autoreconstructed_array = ReconstructMorphReplace(chu_word_torot, morph_tag, lemma_id);
             autoreconstructed_lcs = autoreconstructed_array[0];
 
+            std::cout << "1autoreconstructed_lcs: " << autoreconstructed_lcs << "\n";
             if(autoreconstructed_lcs.empty()) {
               sqlite3_bind_null(statement, 8);
               sqlite3_bind_null(statement, 9);
@@ -421,10 +422,9 @@ int main () {
             sqlite3_step(statement);
             sqlite3_reset(statement);
             sqlite3_clear_bindings(statement);
-
             if(current_subtitle_id != subtitle_id || current_main_title_id < main_title_id) {
               subtitle_tokno_end = tokno_count - 1;
-              
+              std::cout << "2autoreconstructed_lcs: " << autoreconstructed_lcs << "\n";
               sqlite3_bind_text(statement_subtitles, 1, subtitles_vector[current_main_title_id - 1][current_subtitle_id - 1].c_str(), -1, SQLITE_TRANSIENT);
               sqlite3_bind_int(statement_subtitles, 2, current_main_title_id); 
               sqlite3_bind_int(statement_subtitles, 3, subtitle_tokno_start);
@@ -452,6 +452,8 @@ int main () {
               main_tokno_start = tokno_count;
             }
             tokno_count++;
+
+             
         }
         main_tokno_end = tokno_count - 1;
         subtitle_tokno_end = tokno_count - 1;
@@ -470,7 +472,6 @@ int main () {
         sqlite3_finalize(statement);
         sqlite3_finalize(statement_subtitles);
         sqlite3_finalize(statement_texts);
-
 
         while(std::getline(chu_lemmas_file, line)) {
             std::stringstream ss_line(line);

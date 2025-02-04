@@ -91,6 +91,7 @@ class OcsServer : public TcpListener {
         std::string URIDecode(std::string &text);
         std::string htmlspecialchars(const std::string &innerHTML);
         std::string escapeQuotes(const std::string &quoteystring);
+        std::string applySuperscripts(const std::string &database_text);
 
         void writeTextBody(std::ostringstream& html, sqlite3* DB, int tokno_start, int tokno_end);
 

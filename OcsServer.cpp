@@ -580,6 +580,25 @@ std::string OcsServer::escapeQuotes(const std::string &quoteystring) {
     return escaped;
 }
 
+std::string OcsServer::applySuperscripts(const std::string &database_text) {
+    std::string superscript_text;
+
+    for(auto i = database_text.begin(), nd = database_text.end(); i < nd; i++) {
+        char c = (*i);
+        switch(c) {
+            case '$':
+                superscript_text += "<sup>";
+                break;
+            case '@':
+                superscript_text += "</sup>";
+                break;
+            default:
+                superscript_text += c;
+        }
+    }
+    return superscript_text;
+}
+
 //in order to avoid using std::vector I cannot save the array of the POSTed data into a variable which persists outside this function, because the size of the array is only known if I know which POST data I am processing, which means the code to create an array out of the m_post_data has to be repeated everytime a function to handle it is called
 void OcsServer::handlePOSTedData(const char* post_data, int clientSocket) {
     std::cout << "------------------------COMPLETE POST DATA------------------------\n" << post_data << "\n-------------------------------------------------------\n";
@@ -1373,14 +1392,14 @@ void OcsServer::writeTextBody(std::ostringstream &html, sqlite3* DB, int tokno_s
             html << "  |  ";
         }
 
-        html << "<span class=\"chunk\">" << presentation_before << "<span class=\"tooltip\" data-tokno=\"" << tokno << "\" data-sentence_no=\"" << sentence_no_current << "\" data-auto_tagged=\"" << auto_tagged << "\""; 
+        html << "<span class=\"chunk\">" << applySuperscripts(presentation_before) << "<span class=\"tooltip\" data-tokno=\"" << tokno << "\" data-sentence_no=\"" << sentence_no_current << "\" data-auto_tagged=\"" << auto_tagged << "\""; 
         if(lemma_id > 0) {
             html << " data-lemma_id=\"" << lemma_id << "\"" " data-morph_tag=\"" << morph_tag << "\"";
         }
         if(!autoreconstructed_lcs.empty()) {
             html << " data-lcs_recon=\"" << autoreconstructed_lcs << "\" data-inflexion=\"" << inflexion_class_id << "\"";
         }
-        html << ">" << chu_word_torot << "</span>" << presentation_after << "</span>";
+        html << ">" << applySuperscripts(chu_word_torot) << "</span>" << applySuperscripts(presentation_after) << "</span>";
         sentence_number_previous = sentence_no_current;
         autoreconstructed_lcs.clear();
 
