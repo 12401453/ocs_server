@@ -45,6 +45,8 @@ const updateFont = (textselect_value) => {
   }
 };
 
+updateFont(document.getElementById("textselect").value);
+
 const app_state = {
   annotation_mode: "none",
   search_box_shown: false,
@@ -3146,6 +3148,7 @@ const retrieveTextFromSearch = (tokno) => {
         const textselect = document.getElementById("textselect");
         Array.from(textselect.options).forEach(option => { if (option.value == result_text_id) option.selected = true; });
 
+        updateFont(textselect.value);
         textselect.dispatchEvent(new Event('cookie_selection'));
         subtitle_select.dispatchEvent(new Event('cookie_selection'));
 
@@ -3161,7 +3164,7 @@ const retrieveTextFromSearch = (tokno) => {
         
         console.log(tokno);
         const result_word = document.querySelector("[data-tokno=\""+tokno+"\"]");
-        result_word.classList.add("flash_pink");
+        result_word.classList.add("pulsate");
         result_word.scrollIntoView();
 
         document.cookie = "subtitle_id="+selected_subtitle_id+";max-age=157680000";

@@ -1312,13 +1312,13 @@ bool OcsServer::lcsSearch(std::string _POST[3], int clientSocket) {
             sqlite3_bind_int(statement2, 2, tokno - 5);
             sqlite3_bind_int(statement2, 3, sentence_no);
             while(sqlite3_step(statement2) == SQLITE_ROW) {
-                text_content_result_oss << (const char*)sqlite3_column_text(statement2, 2);
+                text_content_result_oss << applySuperscripts((const char*)sqlite3_column_text(statement2, 2));
                 if(sqlite3_column_int(statement2, 0) == tokno) {
-                    text_content_result_oss << escapeQuotes("<span class=\"result_word\">") + htmlspecialchars((const char*)sqlite3_column_text(statement2, 1)) + "</span>";
+                    text_content_result_oss << "<span class=\\\"result_word\\\">" + applySuperscripts((const char*)sqlite3_column_text(statement2, 1)) + "</span>";
                 }
-                else text_content_result_oss << htmlspecialchars((const char*)sqlite3_column_text(statement2, 1));
+                else text_content_result_oss << applySuperscripts((const char*)sqlite3_column_text(statement2, 1));
                 
-                text_content_result_oss << (const char*)sqlite3_column_text(statement2, 3);
+                text_content_result_oss << applySuperscripts((const char*)sqlite3_column_text(statement2, 3));
             }
             text_content_result_oss << "\"";
             text_results << text_content_result_oss.str() << ",";
@@ -4362,13 +4362,13 @@ bool OcsServer::lcsRegexSearch(std::string _POST[3], int clientSocket) {
                 sqlite3_bind_int(statement2, 2, tokno - 5);
                 sqlite3_bind_int(statement2, 3, sentence_no);
                 while(sqlite3_step(statement2) == SQLITE_ROW) {
-                    text_content_result_oss << (const char*)sqlite3_column_text(statement2, 2);
+                    text_content_result_oss << applySuperscripts((const char*)sqlite3_column_text(statement2, 2));
                     if(sqlite3_column_int(statement2, 0) == tokno) {
-                        text_content_result_oss << "<span class=\\\"result_word\\\">" + htmlspecialchars((const char*)sqlite3_column_text(statement2, 1)) + "</span>";
+                        text_content_result_oss << "<span class=\\\"result_word\\\">" + applySuperscripts((const char*)sqlite3_column_text(statement2, 1)) + "</span>";
                     }
-                    else text_content_result_oss << htmlspecialchars((const char*)sqlite3_column_text(statement2, 1));
+                    else text_content_result_oss << applySuperscripts((const char*)sqlite3_column_text(statement2, 1));
                     
-                    text_content_result_oss << (const char*)sqlite3_column_text(statement2, 3);
+                    text_content_result_oss << applySuperscripts((const char*)sqlite3_column_text(statement2, 3));
                 }
                 text_content_result_oss << "\"";
                 text_results << text_content_result_oss.str() << ",";

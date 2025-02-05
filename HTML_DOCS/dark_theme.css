@@ -102,6 +102,9 @@ a {
 .tooltip {
 color: #cbd9f4;
 }
+.tooltip[data-auto_tagged="1"] {
+  color: rgb(241 222 105);
+}
 
 .tooltip:hover {
   color: rgb(255 115 205);
@@ -235,7 +238,6 @@ color: #cbd9f4;
   50% { color: rgb(255 115 205); }
   100% { color: #cbd9f4; }
 }
-  
 
 .annotation_mode {
   background-color: #181f2e;
@@ -250,8 +252,4 @@ color: #cbd9f4;
 }
 .tooltip.converted:hover {
   color: rgb(255 115 205);;
-}
-
-.tooltip[data-auto_tagged="1"] {
-  color: pink;
 }

@@ -103,6 +103,9 @@ a {
 .tooltip {
 color: #670202;
 }
+.tooltip[data-auto_tagged="1"] {
+  color: rgb(165, 48, 189);
+}
 
 .tooltip:hover {
   color: red;
@@ -244,6 +247,14 @@ color: #cbd9f4;
   100% { color: #670202; }
 }
 
+.flash_pink {
+  animation: burn_pink 1s infinite;
+}
+@keyframes burn_pink {
+  50% { color: rgb(255 115 205); }
+  100% { color: #670202; }
+}
+
 .annotation_mode {
   background-color: #f0c36dbd;
   color: black;
@@ -257,8 +268,4 @@ color: #cbd9f4;
 }
 .tooltip.converted:hover {
   color: red;
-}
-
-.tooltip[data-auto_tagged="1"] {
-  color: rgb(165, 48, 189);
 }

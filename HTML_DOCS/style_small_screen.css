@@ -820,6 +820,7 @@ a {
 }
 
 #annotation_mode_box {
+  margin-top: 9px; /* br elements within a flexbox do not seem to do anything on Firefox */
   display: flex;
   justify-content: space-around;
   width: 100%;

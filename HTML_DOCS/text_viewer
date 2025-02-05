@@ -49,7 +49,6 @@
       </select> -->
     </div>
   </div>
-  <br>
   <div id="annotation_mode_box">
     <div id="torot_mode" class="annotation_mode">TOROT</div>
     <div id="lcs_mode" class="annotation_mode">LCS</div>
@@ -127,7 +126,6 @@
   <?js ?>
 const textselector = document.getElementById('textselect');
 const subtitleselector = document.getElementById('subtitle_select');
-
 
 const textselect_resize = (event) => {
   let dummyselect = document.createElement('select');
