@@ -104,7 +104,7 @@ a {
 color: #670202;
 }
 .tooltip[data-auto_tagged="1"] {
-  color: rgb(165, 48, 189);
+  color: rgb(91 0 110);
 }
 
 .tooltip:hover {
