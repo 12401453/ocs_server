@@ -51,7 +51,8 @@ const app_state = {
   annotation_mode: "none",
   search_box_shown: false,
   search_scope: 1,
-  search_box_minimised: true
+  search_box_minimised: true,
+  regex_search: false
 }
 
 function selectText() {
@@ -1946,28 +1947,28 @@ const differentiateAnnotations = function () {
 
 };
 
-const keyboard_tt = (event) => {
-  if(display_word != null || displayWordEditor.edit_mode) return;
-  if(event.key == "T") {
-    if(document.getElementById("tt_toggle").checked == false) document.getElementById("tt_toggle").checked = true;
-    else document.getElementById("tt_toggle").checked = false;
-    tt_type();
-    //console.log("shit and T down");
-  }
+// const keyboard_tt = (event) => {
+//   if(display_word != null || displayWordEditor.edit_mode) return;
+//   if(event.key == "T") {
+//     if(document.getElementById("tt_toggle").checked == false) document.getElementById("tt_toggle").checked = true;
+//     else document.getElementById("tt_toggle").checked = false;
+//     tt_type();
+//     //console.log("shit and T down");
+//   }
 
-};
-window.addEventListener("keydown", event1 => {
-  if(event1.key == "Shift") {
-    window.addEventListener("keydown", keyboard_tt);
-    //console.log("shift down");
-  }
-});
-window.addEventListener("keyup", event1 => {
-  if(event1.key == "Shift") {
-    window.removeEventListener("keydown", keyboard_tt);
-    //console.log("shift up");
-  }
-});
+// };
+// window.addEventListener("keydown", event1 => {
+//   if(event1.key == "Shift") {
+//     window.addEventListener("keydown", keyboard_tt);
+//     //console.log("shift down");
+//   }
+// });
+// window.addEventListener("keyup", event1 => {
+//   if(event1.key == "Shift") {
+//     window.removeEventListener("keydown", keyboard_tt);
+//     //console.log("shift up");
+//   }
+// });
 
 const underlineMultiwords = function (event) {
   (document.querySelectorAll('[data-multiword="'+event.target.dataset.multiword+'"]').forEach(multiword =>  {multiword.style.borderBottom = "2px solid rgb(0, 255, 186)";})); 
@@ -2799,40 +2800,6 @@ const applyTooltips = () => {
   }
 };
 
-// document.getElementById("annotation_mode_box").addEventListener('click', (event) => {
-//   const annotation_button = event.target;
-//   if(annotation_button.id == "torot_mode") {
-//     if(annotation_button.classList.contains("active")) {
-//       annotation_button.classList.remove("active");
-//       removeTooltips();
-//     }
-//     else {
-//       //event.currentTarget.querySelectorAll(".annotation_mode").forEach(button => button.classList.remove("active"));
-//       lemmaTooltip(true);
-//     }
-//   }
-//   else if(annotation_button.id == "lcs_mode") {
-//     if(annotation_button.classList.contains("active")) {
-//       annotation_button.classList.remove("active");
-//       removeTooltips();
-//     }
-//     else {
-//       event.currentTarget.querySelectorAll(".annotation_mode").forEach(button => button.classList.remove("active"));
-//       lcsTooltip();
-//     }  
-//   }
-//   else if(annotation_button.id == "greek_mode") {
-//     if(annotation_button.classList.contains("active")) {
-//       annotation_button.classList.remove("active");
-//       removeTooltips();
-//     }
-//     else {
-//       event.currentTarget.querySelectorAll(".annotation_mode").forEach(button => button.classList.remove("active"));
-//       greekTooltips(true);
-//     }  
-//   }
-// });
-
 document.getElementById("annotation_mode_box").addEventListener('click', (event) => {
   const annotation_button = event.target;
   if(annotation_button.classList.contains("annotation_mode")) {
@@ -2951,7 +2918,7 @@ const switchSearchScope = (event) => {
   event.currentTarget.querySelectorAll(".scope_heading").forEach(heading => heading.classList.remove("active"));
   event.target.classList.add("active");
   app_state.search_scope = Number(event.target.dataset.scope);
-  lcsSearch(document.getElementById("dict_searchbox").value.trim());
+  lcsSearch(document.getElementById("dict_searchbox").value.trim(), app_state.regex_search);
 }
 document.getElementById("search_scope").addEventListener('click', switchSearchScope);
 
@@ -2960,7 +2927,7 @@ document.getElementById("search_type_options").addEventListener('click', switchS
 
 document.getElementById("letter_button_box").addEventListener('wheel', (event) => {
   event.preventDefault();
-  event.currentTarget.scrollTop += (event.deltaY > 0 ? 10 : -10);
+  event.currentTarget.scrollTop += (event.deltaY > 0 ? 5 : -5);
 });
 document.getElementById("letter_button_box").addEventListener('click', insertLetter);
 
@@ -2975,11 +2942,11 @@ const lookupForm = () => {
 document.getElementById("dict_searchbox").addEventListener('keydown', event => {
   if(event.key == "Enter") {
     event.preventDefault();
-    lcsSearch(document.getElementById("dict_searchbox").value.trim());
+    lcsSearch(document.getElementById("dict_searchbox").value.trim(), app_state.regex_search);
   }
 });
 document.getElementById("search_button").addEventListener('click', event => {
-  lcsSearch(document.getElementById("dict_searchbox").value.trim());
+  lcsSearch(document.getElementById("dict_searchbox").value.trim(), app_state.regex_search);
 });
 
 const minimiseSearchbox = () => {
@@ -3033,7 +3000,9 @@ const removeSearchLoadSpinner = () => {
   document.getElementById("dict_searchbox").disabled = false;
 }
 
-const lcsSearch = (query) => {
+const lcsSearch = (query, regex=false) => {
+  let url = "lcs_search.php";
+  if(regex) url = "lcs_regex_search.php";
   
   resetLcsPageSearch();
   if(query.trim() == "") {
@@ -3076,16 +3045,24 @@ const lcsSearch = (query) => {
     xhttp.onload = () => {
 
       if(xhttp.readyState == 4) {
+
+        const search_results = document.getElementById("search_results");
+        document.getElementById("dict_body").style.display = "flex";
+        app_state.search_box_minimised = false;
+        search_results.innerHTML = "";
+        //for regex-search only
+        console.log(xhttp.response.length);
+        if(xhttp.response.length == 0) {
+          search_results.appendChild(document.createRange().createContextualFragment('<div class="dict_row"><div class="dict_cell no_results">That regex was malformed. Repent!</div></div>'));
+          removeSearchLoadSpinner();
+          return;
+        }
+
         const lcs_results = xhttp.response[0];
         const text_results = xhttp.response[1];
         const tokno_results = xhttp.response[2];
 
         const results_count = xhttp.response[0].length;
-        
-        const search_results = document.getElementById("search_results");
-        document.getElementById("dict_body").style.display = "flex";
-        app_state.search_box_minimised = false;
-        search_results.innerHTML = "";
 
         if(results_count > 10000) {
           search_results.appendChild(document.createRange().createContextualFragment('<div class="dict_row"><div class="dict_cell no_results">Too many results, please narrow search</div></div>'));
@@ -3114,7 +3091,7 @@ const lcsSearch = (query) => {
     }
     xhttp.send(send_data);
   }
-  httpRequest("POST", "lcs_search.php");
+  httpRequest("POST", url);
 
 };
 
@@ -3344,3 +3321,19 @@ const greekTooltips = function (show_load_spinner) {
   httpRequest("POST", "greek_tooltips.php");
 
 };
+
+const toggleRegexSearch = (event) => {
+  const checkbox = document.getElementById('regex_checkbox');
+  
+  if(app_state.regex_search === false) {
+    app_state.regex_search = true;
+    checkbox.checked = true;
+    document.getElementById("regex_box_label").style.opacity = "1.0";
+  }
+  else {
+    app_state.regex_search = false;
+    checkbox.checked = false;
+    document.getElementById("regex_box_label").style.opacity = "";
+  }
+}
+document.getElementById("regex_box").addEventListener('click', toggleRegexSearch);

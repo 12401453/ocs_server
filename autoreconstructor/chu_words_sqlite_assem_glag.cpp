@@ -393,7 +393,7 @@ int main () {
 		            }
                 row_no++;
             }
-            std::array<std::string, 2> autoreconstructed_array = ReconstructMorphReplace(chu_word_torot, morph_tag, lemma_id);
+            std::array<std::string, 2> autoreconstructed_array = ReconstructMorphReplace(chu_word_normalised, morph_tag, lemma_id);
             autoreconstructed_lcs = autoreconstructed_array[0];
 
             std::cout << "1autoreconstructed_lcs: " << autoreconstructed_lcs << "\n";
