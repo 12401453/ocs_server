@@ -3051,9 +3051,9 @@ const lcsSearch = (query, regex=false) => {
         app_state.search_box_minimised = false;
         search_results.innerHTML = "";
         //for regex-search only
-        console.log(xhttp.response.length);
-        if(xhttp.response.length == 0) {
-          search_results.appendChild(document.createRange().createContextualFragment('<div class="dict_row"><div class="dict_cell no_results">That regex was malformed. Repent!</div></div>'));
+        if(xhttp.response.error) {
+          const error_msg = xhttp.response.error;
+          search_results.appendChild(document.createRange().createContextualFragment('<div class="dict_row"><div class="dict_cell no_results">'+error_msg+'</div></div>'));
           removeSearchLoadSpinner();
           return;
         }
@@ -3064,12 +3064,7 @@ const lcsSearch = (query, regex=false) => {
 
         const results_count = xhttp.response[0].length;
 
-        if(results_count > 10000) {
-          search_results.appendChild(document.createRange().createContextualFragment('<div class="dict_row"><div class="dict_cell no_results">Too many results, please narrow search</div></div>'));
-          removeSearchLoadSpinner();
-          return;
-        }
-        else if(results_count == 0) {
+        if(results_count == 0) {
           search_results.appendChild(document.createRange().createContextualFragment('<div class="dict_row"><div class="dict_cell no_results">Nothing found</div></div>'));
           removeSearchLoadSpinner();
           return;

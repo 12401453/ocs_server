@@ -1287,7 +1287,6 @@ bool OcsServer::lcsSearch(std::string _POST[3], int clientSocket) {
         std::ostringstream tokno_results;
         tokno_results << "[";
 
-
         int tokno = 0;
         std::string lcs_result = "";
         std::string chu_word_torot = "";
@@ -1302,11 +1301,10 @@ bool OcsServer::lcsSearch(std::string _POST[3], int clientSocket) {
             lcs_result = (const char*)sqlite3_column_text(statement1, 1);
             sentence_no = sqlite3_column_int(statement1, 2);
             //std::cout << "lcs_result: " << lcs_result << "\n";
-            lcs_results << "\"" << htmlspecialchars(lcs_result) << "\"" << ",";
+            lcs_results << "\"" << lcs_result << "\"" << ",";
             tokno_results << tokno << ",";
 
             std::ostringstream text_content_result_oss;
-            text_content_result_oss << "\"";
 
             sqlite3_bind_int(statement2, 1, tokno + 5);
             sqlite3_bind_int(statement2, 2, tokno - 5);
@@ -1314,20 +1312,40 @@ bool OcsServer::lcsSearch(std::string _POST[3], int clientSocket) {
             while(sqlite3_step(statement2) == SQLITE_ROW) {
                 text_content_result_oss << applySuperscripts((const char*)sqlite3_column_text(statement2, 2));
                 if(sqlite3_column_int(statement2, 0) == tokno) {
-                    text_content_result_oss << "<span class=\\\"result_word\\\">" + applySuperscripts((const char*)sqlite3_column_text(statement2, 1)) + "</span>";
+                    text_content_result_oss << "<span class=\"result_word\">" + applySuperscripts((const char*)sqlite3_column_text(statement2, 1)) + "</span>";
                 }
                 else text_content_result_oss << applySuperscripts((const char*)sqlite3_column_text(statement2, 1));
                 
                 text_content_result_oss << applySuperscripts((const char*)sqlite3_column_text(statement2, 3));
             }
-            text_content_result_oss << "\"";
-            text_results << text_content_result_oss.str() << ",";
+            text_results << "\"" << escapeQuotes(text_content_result_oss.str()) << "\",";
 
 
             sqlite3_reset(statement2);
             sqlite3_clear_bindings(statement2);
             results_count++;
+
+            if(results_count > 5000) {
+
+                std::cout << "too many results\n";
+                std::string json_str = "{\"error\":\"Too many results, please narrow the search query\"}";
+                int content_length = json_str.size();
+
+                std::ostringstream post_response;
+                post_response << "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: " << content_length << "\r\n\r\n" << json_str;
+
+                int length = post_response.str().size() + 1;
+                sendToClient(clientSocket, post_response.str().c_str(), length);
+
+                sqlite3_finalize(statement1);
+                sqlite3_finalize(statement2);
+
+                sqlite3_close(DB);
+                return true;
+            }
         }
+        sqlite3_finalize(statement1);
+        sqlite3_finalize(statement2);
                 
         if(results_count > 0) {
             lcs_results.seekp(-1, std::ios_base::cur);
@@ -4288,7 +4306,7 @@ bool OcsServer::lcsRegexSearch(std::string _POST[3], int clientSocket) {
 
     if(U_FAILURE(status)) {
         std::cout << "the regex failed\n";
-        std::string json_str = "[]";
+        std::string json_str = "{\"error\":\"That regex was malformed. Repent!\"}";
         int content_length = json_str.size();
 
         std::ostringstream post_response;
@@ -4356,7 +4374,6 @@ bool OcsServer::lcsRegexSearch(std::string _POST[3], int clientSocket) {
                 tokno_results << tokno << ",";
 
                 std::ostringstream text_content_result_oss;
-                text_content_result_oss << "\"";
 
                 sqlite3_bind_int(statement2, 1, tokno + 5);
                 sqlite3_bind_int(statement2, 2, tokno - 5);
@@ -4364,21 +4381,41 @@ bool OcsServer::lcsRegexSearch(std::string _POST[3], int clientSocket) {
                 while(sqlite3_step(statement2) == SQLITE_ROW) {
                     text_content_result_oss << applySuperscripts((const char*)sqlite3_column_text(statement2, 2));
                     if(sqlite3_column_int(statement2, 0) == tokno) {
-                        text_content_result_oss << "<span class=\\\"result_word\\\">" + applySuperscripts((const char*)sqlite3_column_text(statement2, 1)) + "</span>";
+                        text_content_result_oss << "<span class=\"result_word\">" + applySuperscripts((const char*)sqlite3_column_text(statement2, 1)) + "</span>";
                     }
                     else text_content_result_oss << applySuperscripts((const char*)sqlite3_column_text(statement2, 1));
                     
                     text_content_result_oss << applySuperscripts((const char*)sqlite3_column_text(statement2, 3));
                 }
-                text_content_result_oss << "\"";
-                text_results << text_content_result_oss.str() << ",";
+                text_results << "\"" << escapeQuotes(text_content_result_oss.str()) << "\",";
 
                 lcs_result_str.clear();
                 sqlite3_reset(statement2);
                 sqlite3_clear_bindings(statement2);
                 results_count++;
+
+                if(results_count > 5000) {
+
+                    std::cout << "too many results\n";
+                    std::string json_str = "{\"error\":\"Too many results, please narrow the search query\"}";
+                    int content_length = json_str.size();
+
+                    std::ostringstream post_response;
+                    post_response << "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: " << content_length << "\r\n\r\n" << json_str;
+
+                    int length = post_response.str().size() + 1;
+                    sendToClient(clientSocket, post_response.str().c_str(), length);
+
+                    sqlite3_finalize(statement1);
+                    sqlite3_finalize(statement2);
+
+                    sqlite3_close(DB);
+                    return true;
+                }
             }
         }
+        sqlite3_finalize(statement1);
+        sqlite3_finalize(statement2);
                 
         if(results_count > 0) {
             lcs_results.seekp(-1, std::ios_base::cur);
