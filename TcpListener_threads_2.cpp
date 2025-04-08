@@ -170,8 +170,8 @@ void TcpListener::onClientConnected(int clientSocket) {
             message_size += bytesIn;
             c_str_msg_write_position = (char*)mempcpy(c_str_msg_write_position, buf, bytesIn);
         }
-        printf("message_size: %i\n", message_size);
-        printf("%s\n", c_str_message_buffer);
+        //printf("message_size: %i\n", message_size);
+        //printf("%s\n", c_str_message_buffer);
         onMessageReceived(clientSocket, c_str_message_buffer, message_size + 1, get_or_post, headers_length, content_length); //need to send an extra \0 from the buffer to null-terminate the message
         
         close(clientSocket);
