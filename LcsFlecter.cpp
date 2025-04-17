@@ -209,10 +209,43 @@ const std::unordered_map<int, inner_map> LcsFlecter::m_verb_classes = {
 
     {4001, v_400_c0},
     {4002, v_400_c1},
-}
+};
 
 int main() {
-    LcsFlecter* flecter = new LcsFlecter;
 
-    std::cout << flecter->getEnding(101, 3);
+
+    std::ofstream noun_inflections_file("noun_inflections.cpp");
+    std::ofstream verb_inflections_file("verb_inflections.cpp");
+
+    LcsFlecter* flecter = new LcsFlecter;
+    
+    noun_inflections_file << "std::unordered_map<int, std::unordered_map<int, std::string>> noun_inflections {";
+    for(const auto& outer_map: flecter->m_noun_classes) {
+        noun_inflections_file << "\n  {" << outer_map.first << ",{";
+        for(const auto& inner_map : outer_map.second) {
+            noun_inflections_file << "\n    {" << inner_map.first << ",\"" << inner_map.second << "\"},";
+        }
+        noun_inflections_file << "\n    }";
+        noun_inflections_file << "\n  },";
+    }
+    noun_inflections_file << "\n}\n";
+
+    verb_inflections_file << "std::unordered_map<int, std::unordered_map<int, std::string>> verb_inflections {";
+    for(const auto& outer_map: flecter->m_verb_classes) {
+        verb_inflections_file << "\n  {" << outer_map.first << ",{";
+        for(const auto& inner_map : outer_map.second) {
+            verb_inflections_file << "\n    {" << inner_map.first << ",\"" << inner_map.second << "\"},";
+        }
+        verb_inflections_file << "\n    }";
+        verb_inflections_file << "\n  },";
+    }
+    verb_inflections_file << "\n}\n";
+
+
+
+    delete flecter;
+    noun_inflections_file.close();
+    verb_inflections_file.close();
+
+    return 0;
 }

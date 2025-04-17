@@ -19,10 +19,11 @@ class LcsFlecter {
         // return "fuck off\n";
         return m_noun_classes.at(outer_no).at(inner_no);
     }
+    
 
-    private:
+    //private:
         static const std::unordered_map<int, inner_map> m_noun_classes;
-        static const std::unordered_map<int, inner_map> n_verb_classes; 
+        static const std::unordered_map<int, inner_map> m_verb_classes; 
         static const inner_map m_noun_endings;
         static const inner_map m_verb_endings;
 
