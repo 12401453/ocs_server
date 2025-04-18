@@ -21,10 +21,8 @@ class LcsFlecter {
     }
     
 
-    //private:
+    private:
         static const std::unordered_map<int, inner_map> m_noun_classes;
         static const std::unordered_map<int, inner_map> m_verb_classes; 
-        static const inner_map m_noun_endings;
-        static const inner_map m_verb_endings;
 
 };
