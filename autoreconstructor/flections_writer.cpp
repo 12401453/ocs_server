@@ -2,6 +2,8 @@
 #include <string>
 #include <fstream>
 #include <unordered_map>
+#include <vector>
+#include <algorithm>
 
 typedef std::unordered_map<int, std::string> inner_map;
 
@@ -16,6 +18,8 @@ class FlectWriter {
     static const std::unordered_map<int, inner_map> m_verb_classes; 
     static const inner_map m_noun_endings;
     static const inner_map m_verb_endings;
+
+    #include "conj_type_enum.h"
 
 };
 
@@ -231,6 +235,10 @@ const std::unordered_map<int, inner_map> FlectWriter::m_verb_classes = {
     {4002, v_400_c1},
 };
 
+struct {
+    bool operator()(std::pair<int, std::string> pair_a, std::pair<int, std::string> pair_b) const { return pair_a.first < pair_b.first; }
+} customLess;
+
 int main() {
 
 
@@ -242,7 +250,13 @@ int main() {
     //noun_inflections_file << "std::unordered_map<int, std::unordered_map<int, std::string>> noun_inflections {";
     for(const auto& outer_map: flecter->m_noun_classes) {
         noun_inflections_file << "\n  {" << outer_map.first << ",{";
+        std::vector<std::pair<int, std::string>> endings_vec;
+        endings_vec.reserve(64);
         for(const auto& inner_map : outer_map.second) {
+            endings_vec.emplace_back(inner_map);   
+            std::sort(endings_vec.begin(), endings_vec.end(), customLess);          
+        }
+        for(const auto& inner_map : endings_vec) {
             noun_inflections_file << "\n    {" << inner_map.first << ",\"" << inner_map.second << "\"},";
         }
         noun_inflections_file << "\n    }";
@@ -253,7 +267,13 @@ int main() {
     //verb_inflections_file << "std::unordered_map<int, std::unordered_map<int, std::string>> verb_inflections {";
     for(const auto& outer_map: flecter->m_verb_classes) {
         verb_inflections_file << "\n  {" << outer_map.first << ",{";
+        std::vector<std::pair<int, std::string>> endings_vec;
+        endings_vec.reserve(64);
         for(const auto& inner_map : outer_map.second) {
+            endings_vec.emplace_back(inner_map);   
+            std::sort(endings_vec.begin(), endings_vec.end(), customLess);       
+        }
+        for(const auto& inner_map : endings_vec) {
             verb_inflections_file << "\n    {" << inner_map.first << ",\"" << inner_map.second << "\"},";
         }
         verb_inflections_file << "\n    }";
