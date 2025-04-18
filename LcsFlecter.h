@@ -13,6 +13,11 @@
 
 typedef std::map<int, std::string> inner_map;
 
+struct Inflection {
+    int desinence_ix;
+    std::string flected_form;
+};
+
 class LcsFlecter {
     public:
         LcsFlecter(bool noun, std::string conj_type="") : m_active_endings(noun ? m_noun_endings : m_verb_endings), m_noun_verb(noun) {
@@ -23,11 +28,11 @@ class LcsFlecter {
     std::string getEnding(std::string conj_type, int desinence_ix);
     void setConjType(std::string conj_type);
 
-    std::string addEndings(std::string stem, int desinence_ix);
-    std::vector<std::string> getFullParadigm(std::string stem, std::string conj_type);
-    std::vector<std::string> getFullParadigm(std::string stem);
+    Inflection addEnding(std::string stem, int desinence_ix);
+    std::vector<Inflection> getFullParadigm(std::string stem, std::string conj_type);
+    std::vector<Inflection> getFullParadigm(std::string stem);
 
-    std::string postProcess(std::string form);
+    std::string postProcess(Inflection &indexed_inflection);
 
 
 
@@ -44,6 +49,8 @@ class LcsFlecter {
 
     std::string firstVelarClean(std::string flecter_output);
     std::string pv1LongE(std::string flecter_output);
+
+    std::string Dejotate(std::string jotated_form);
     
 
     private:

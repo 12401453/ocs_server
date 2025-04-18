@@ -52,32 +52,41 @@ std::string LcsFlecter::getEnding(std::string conj_type, int desinence_ix) {
     }
 }
 
-std::string LcsFlecter::addEndings(std::string stem, int desinence_ix) {
-    return stem + getEnding(desinence_ix);
+Inflection LcsFlecter::addEnding(std::string stem, int desinence_ix) {
+    return {desinence_ix, stem.append(getEnding(desinence_ix))};
 }
 
-std::vector<std::string> LcsFlecter::getFullParadigm(std::string stem, std::string conj_type) {
+std::string LcsFlecter::postProcess(Inflection &indexed_inflection) {
+    if(m_noun_verb == NOUN) {
+
+    }
+    else {
+        
+    }
+};
+
+std::vector<Inflection> LcsFlecter::getFullParadigm(std::string stem, std::string conj_type) {
     setConjType(conj_type);
-    std::vector<std::string> inflected_forms;
+    std::vector<Inflection> inflected_forms;
     inflected_forms.reserve(64);
 
     for(const auto& ending_pair : m_active_endings.at(m_outer_map_no)) {
-        inflected_forms.emplace_back(ending_pair.second);
+        Inflection infl = {ending_pair.first, stem + ending_pair.second};
+        inflected_forms.emplace_back(infl);
     }
 
     return inflected_forms;
-
 }
-std::vector<std::string> LcsFlecter::getFullParadigm(std::string stem) {
-    std::vector<std::string> inflected_forms;
+std::vector<Inflection> LcsFlecter::getFullParadigm(std::string stem) {
+    std::vector<Inflection> inflected_forms;
     inflected_forms.reserve(64);
 
     for(const auto& ending_pair : m_active_endings.at(m_outer_map_no)) {
-        inflected_forms.emplace_back(ending_pair.second);
+        Inflection infl = {ending_pair.first, stem + ending_pair.second};
+        inflected_forms.emplace_back(infl);
     }
 
     return inflected_forms;
-
 }
 
 void replaceAll(std::string &source, const std::string yeeted, const std::string replacement) {
@@ -95,30 +104,6 @@ void replaceAll(std::string &source, const std::string yeeted, const std::string
         source = source.replace(yeeted_pos, yeeted_length, replacement); 
         yeeted_pos = source.find(yeeted, yeeted_pos + replacement_length);
     }
-}
-
-
-int main() {
-
-    // std::string conj_type, stem, desinence_ix;
-    // std::getline(std::cin, conj_type);
-    // std::getline(std::cin, stem);
-    // std::getline(std::cin, desinence_ix);
-    
-    LcsFlecter* noun_flecter = new LcsFlecter(NOUN, "den");
-    LcsFlecter* verb_flecter = new LcsFlecter(VERB, "wote");
-
-    std::cout << verb_flecter->addEndings("zapo", 7) << "\n";
-    std::cout << noun_flecter->addEndings("", 20) << "\n";
-
-    for(const auto& ending : noun_flecter->getFullParadigm("")) {
-        std::cout << ending << "\n";
-    }
-    
-    delete noun_flecter;
-    delete verb_flecter;
-
-    return 0;
 }
 
 std::string LcsFlecter::class1Clean(std::string flecter_output, bool imperative) {
@@ -233,7 +218,7 @@ std::string LcsFlecter::class3Clean(std::string flecter_output) {
     replaceAll(flecter_output, "Z",  "ę̌");
     return flecter_output;
 }
-std::string class5AblautClean(std::string flecter_output) {
+std::string LcsFlecter::class5AblautClean(std::string flecter_output) {
     replaceAll(flecter_output, "strъg", "strug");
     replaceAll(flecter_output, "stьl", "stel");
     replaceAll(flecter_output, "ĺьv", "lu");
@@ -252,25 +237,25 @@ std::string class5AblautClean(std::string flecter_output) {
 
     return flecter_output;
 }
-std::string class11InfixClean(std::string flecter_output) {
+std::string LcsFlecter::class11InfixClean(std::string flecter_output) {
     replaceAll(flecter_output, "leg", "lęg");
     replaceAll(flecter_output, "sěd", "sęd");
 
     return flecter_output;
 }
-std::string class12InfixClean(std::string flecter_output) {
+std::string LcsFlecter::class12InfixClean(std::string flecter_output) {
     replaceAll(flecter_output, "rět", "ręt");
 
     return flecter_output;
 }
-std::string imperfSheta(std::string flecter_output) {
+std::string LcsFlecter::imperfSheta(std::string flecter_output) {
     replaceAll(flecter_output, "šeta", "sta");
     replaceAll(flecter_output, "šete", "ste");
 
     return flecter_output;
 }
 
-std::string firstVelarClean(std::string flecter_output) {
+std::string LcsFlecter::firstVelarClean(std::string flecter_output) {
     replaceAll(flecter_output, "ske", "šče");
     replaceAll(flecter_output, "ge", "že");
     replaceAll(flecter_output, "ke", "če");
@@ -285,10 +270,76 @@ std::string firstVelarClean(std::string flecter_output) {
     return flecter_output;
 
 }
-std::string pv1LongE(std::string flecter_output) {
+std::string LcsFlecter::pv1LongE(std::string flecter_output) {
     replaceAll(flecter_output, "gě", "žǢ");
     replaceAll(flecter_output, "kě", "čǢ");
     replaceAll(flecter_output, "xě", "šǢ");
 
     return flecter_output;
+}
+std::string LcsFlecter::Dejotate(std::string jotated_form) {
+    replaceAll(jotated_form, "strj", "šћŕ");
+    replaceAll(jotated_form, "stj", "šћ");
+    replaceAll(jotated_form, "zdj", "žђ");
+    replaceAll(jotated_form, "slj", "šĺ");
+    replaceAll(jotated_form, "zlj", "žĺ");
+    replaceAll(jotated_form, "znj", "žń");
+    replaceAll(jotated_form, "snj", "šń");
+    replaceAll(jotated_form, "trj", "ћŕ");
+    replaceAll(jotated_form, "drj", "ђŕ");
+    replaceAll(jotated_form, "tvj", "ћvĺ");
+    replaceAll(jotated_form, "bj", "bĺ");
+    replaceAll(jotated_form, "pj", "pĺ");
+    replaceAll(jotated_form, "mj", "mĺ");
+    replaceAll(jotated_form, "vj", "vĺ");
+    replaceAll(jotated_form, "kt", "ћ");
+    replaceAll(jotated_form, "gt", "ћ");
+    replaceAll(jotated_form, "tj", "ћ");
+    replaceAll(jotated_form, "dj", "ђ");
+    replaceAll(jotated_form, "nj", "ń");
+    replaceAll(jotated_form, "lj", "ĺ");
+    replaceAll(jotated_form, "rj", "ŕ");
+    replaceAll(jotated_form, "sj", "š");
+    replaceAll(jotated_form, "zj", "ž");
+    replaceAll(jotated_form, "čj", "č");
+    replaceAll(jotated_form, "šj", "š");
+    replaceAll(jotated_form, "žj", "ž");
+    replaceAll(jotated_form, "zž", "žǯ");
+    replaceAll(jotated_form, "jj", "j");
+    replaceAll(jotated_form, "gj", "ž");
+    replaceAll(jotated_form, "kj", "č");
+    replaceAll(jotated_form, "xj", "š");
+    replaceAll(jotated_form, "ђj", "ђ");
+    replaceAll(jotated_form, "ńj", "ń");
+    replaceAll(jotated_form, "ћj", "ћ");
+    replaceAll(jotated_form, "ĺj", "ĺ");
+    replaceAll(jotated_form, "ŕj", "ŕ");
+
+    return jotated_form;
+}
+
+
+int main() {
+
+    // std::string conj_type, stem, desinence_ix;
+    // std::getline(std::cin, conj_type);
+    // std::getline(std::cin, stem);
+    // std::getline(std::cin, desinence_ix);
+    
+    LcsFlecter* noun_flecter = new LcsFlecter(NOUN, "den");
+    LcsFlecter* verb_flecter = new LcsFlecter(VERB, "11");
+
+    verb_flecter->setConjType("14");
+
+    std::cout << verb_flecter->addEnding("rek", 13).flected_form<< "\n";
+    std::cout << noun_flecter->addEnding("", 20).flected_form << "\n";
+
+    for(const auto& ending : verb_flecter->getFullParadigm("vъvŕ̥g")) {
+        std::cout << ending.desinence_ix << " " << ending.flected_form << "\n";
+    }
+    
+    delete noun_flecter;
+    delete verb_flecter;
+
+    return 0;
 }
