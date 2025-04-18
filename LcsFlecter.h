@@ -26,6 +26,24 @@ class LcsFlecter {
     std::string addEndings(std::string stem, int desinence_ix);
     std::vector<std::string> getFullParadigm(std::string stem, std::string conj_type);
     std::vector<std::string> getFullParadigm(std::string stem);
+
+    std::string postProcess(std::string form);
+
+
+
+    std::string class1Clean(std::string flecter_output, bool imperative);
+    std::string class1NasalClean(std::string flecter_output);
+    std::string itiClean(std::string flecter_output);
+    std::string class14AblautClean(std::string flecter_output);
+    std::string class15AblautClean(std::string flecter_output);
+    std::string class3Clean(std::string flecter_output);
+    std::string class5AblautClean(std::string flecter_output);
+    std::string class11InfixClean(std::string flecter_output);
+    std::string class12InfixClean(std::string flecter_output);
+    std::string imperfSheta(std::string flecter_output);
+
+    std::string firstVelarClean(std::string flecter_output);
+    std::string pv1LongE(std::string flecter_output);
     
 
     private:
