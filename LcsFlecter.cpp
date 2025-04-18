@@ -58,6 +58,20 @@ Inflection LcsFlecter::addEnding(std::string stem, int desinence_ix) {
 
 std::string LcsFlecter::postProcess(Inflection &indexed_inflection) {
     if(m_noun_verb == NOUN) {
+        short int gender_third = 0;
+        if(c_strStartsWith(m_conj_type.c_str(), "masc")) {
+            gender_third = 1;
+        }
+        else if(c_strStartsWith(m_conj_type.c_str(), "nt")) {
+            gender_third = 3;
+        }
+        else if(c_strStartsWith(m_conj_type.c_str(), "fem")) {
+            gender_third = 2;
+        }
+
+        if(m_conj_type == "masc_ji" || m_conj_type == "masc_a" || m_conj_type == "masc_a_PV3" || m_conj_type == "masc_ja") {
+            gender_third = 2;
+        }
 
     }
     else {
@@ -78,12 +92,41 @@ std::vector<Inflection> LcsFlecter::getFullParadigm(std::string stem, std::strin
     return inflected_forms;
 }
 std::vector<Inflection> LcsFlecter::getFullParadigm(std::string stem) {
+    const auto& desinences = m_active_endings.at(m_outer_map_no);
+    auto desinences_iter = desinences.begin();
+    auto desinences_iter_end = desinences.end();
+    
+    short int gender_third = 0;
+    if(m_noun_verb == NOUN) {
+        if(c_strStartsWith(m_conj_type.c_str(), "masc")) {
+            gender_third = 1;
+            std::advance(desinences_iter_end, -42);
+        }
+        else if(c_strStartsWith(m_conj_type.c_str(), "nt")) {
+            gender_third = 3;
+            std::advance(desinences_iter, 42);
+            
+        }
+        else if(c_strStartsWith(m_conj_type.c_str(), "fem")) {
+            gender_third = 2;
+            std::advance(desinences_iter, 21);
+            std::advance(desinences_iter_end, -21);
+        }
+        
+        if(m_conj_type == "masc_ji" || m_conj_type == "masc_a" || m_conj_type == "masc_a_PV3" || m_conj_type == "masc_ja") {
+            gender_third = 2;
+        }
+
+    }
     std::vector<Inflection> inflected_forms;
     inflected_forms.reserve(64);
 
-    for(const auto& ending_pair : m_active_endings.at(m_outer_map_no)) {
-        Inflection infl = {ending_pair.first, stem + ending_pair.second};
-        inflected_forms.emplace_back(infl);
+    
+    //for(const auto& ending_pair : m_active_endings.at(m_outer_map_no)) {
+    for(;desinences_iter != desinences_iter_end; ++desinences_iter) {
+        Inflection infl = {desinences_iter->first, stem + desinences_iter->second};
+        //inflected_forms.emplace_back(infl);
+        inflected_forms.emplace_back(desinences_iter->first, stem + desinences_iter->second);
     }
 
     return inflected_forms;
@@ -104,6 +147,28 @@ void replaceAll(std::string &source, const std::string yeeted, const std::string
         source = source.replace(yeeted_pos, yeeted_length, replacement); 
         yeeted_pos = source.find(yeeted, yeeted_pos + replacement_length);
     }
+}
+
+bool LcsFlecter::c_strStartsWith(const char *str1, const char *str2) {
+    int strcmp_count = 0;
+    int str2_len = strlen(str2);
+ 
+    int i = -1;
+   
+    while ((*str1 == *str2 || *str2 == '\0') && i < str2_len)
+    {
+        strcmp_count++;
+        str1++;
+        str2++;
+        i++;
+    }
+ 
+    if (strcmp_count == str2_len + 1)
+    {
+        return true;
+    }
+    else
+        return false;
 }
 
 std::string LcsFlecter::class1Clean(std::string flecter_output, bool imperative) {

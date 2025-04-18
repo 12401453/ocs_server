@@ -7,6 +7,7 @@
 #include <fstream>
 #include <unordered_map>
 #include <map>
+#include <cstring>
 
 #define NOUN true
 #define VERB false
@@ -52,6 +53,8 @@ class LcsFlecter {
 
     std::string Dejotate(std::string jotated_form);
     
+    bool c_strStartsWith(const char* str1, const char* str2);
+
 
     private:
         static const std::unordered_map<int, inner_map> m_noun_endings;
