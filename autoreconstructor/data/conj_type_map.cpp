@@ -13,6 +13,7 @@ std::unordered_map<std::string, int> conj_type_map {
     {"nt_o", 121},
     {"long_adj_noun", 121},
     {"adj_soft", 131},
+    {"adj_ij", 131}, //not included in Autoreconstructor conj_type_enum.h because of TOROT strength-marking inaccuracy
     {"adj_soft_comp", 1311},
     {"adj_soft_ord", 131},
     {"adj_hard_ord", 121},

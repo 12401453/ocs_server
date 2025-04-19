@@ -245,13 +245,13 @@ int main() {
     std::ofstream noun_inflections_file("data/noun_inflections.txt");
     std::ofstream verb_inflections_file("data/verb_inflections.txt");
 
-    FlectWriter* flecter = new FlectWriter;
+    FlectWriter* flect_writer = new FlectWriter;
     
-    //noun_inflections_file << "std::unordered_map<int, std::unordered_map<int, std::string>> noun_inflections {";
-    for(const auto& outer_map: flecter->m_noun_classes) {
+    for(const auto& outer_map: flect_writer->m_noun_classes) {
         noun_inflections_file << "\n  {" << outer_map.first << ",{";
         std::vector<std::pair<int, std::string>> endings_vec;
         endings_vec.reserve(64);
+        //should possibly add a check for azъ, ty to take only one-third of the paradigm and also to add short-form datives as alternatives
         for(const auto& inner_map : outer_map.second) {
             endings_vec.emplace_back(inner_map);   
             std::sort(endings_vec.begin(), endings_vec.end(), customLess);          
@@ -262,10 +262,8 @@ int main() {
         noun_inflections_file << "\n    }";
         noun_inflections_file << "\n  },";
     }
-    //noun_inflections_file << "\n};\n";
 
-    //verb_inflections_file << "std::unordered_map<int, std::unordered_map<int, std::string>> verb_inflections {";
-    for(const auto& outer_map: flecter->m_verb_classes) {
+    for(const auto& outer_map: flect_writer->m_verb_classes) {
         verb_inflections_file << "\n  {" << outer_map.first << ",{";
         std::vector<std::pair<int, std::string>> endings_vec;
         endings_vec.reserve(64);
@@ -279,11 +277,10 @@ int main() {
         verb_inflections_file << "\n    }";
         verb_inflections_file << "\n  },";
     }
-    //verb_inflections_file << "\n};\n";
 
 
 
-    delete flecter;
+    delete flect_writer;
     noun_inflections_file.close();
     verb_inflections_file.close();
 

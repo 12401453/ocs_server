@@ -696,6 +696,7 @@ void noun_Flect(Lemma &lemma_ref, short int int_morph_tag[10], std::string cyr_i
     return;
   }
 
+  //божий etc. which are forced to be short-forms regardless of strength-marking due to TOROT's very poor accuracy with them (see Diels 1963:198) 
   if (conj_type == "adj_ij")
   {
     lemma_ref.lemma_form = stem + Nom_[131][row_no];
@@ -772,13 +773,15 @@ void noun_Flect(Lemma &lemma_ref, short int int_morph_tag[10], std::string cyr_i
     return;
   }
 
-  // checks for cheeky PV1 vocatives отьче etc.
+ 
   if (strength == 1)
   {
     flected_word = stem + Nom_[outer_map_no][row_no] + Fetch_Article(row_no);
   }
   else
     flected_word = stem + Nom_[outer_map_no][row_no];
+
+  // checks for PV1 vocatives отьче etc.
   if (((conj_type == "masc_o" || conj_type == "masc_o_PV3" || conj_type == "adj_hard") && row_no == 7 && (Sniff(flected_word, "3", 4) == true || Sniff(flected_word, "g", 3) == true || Sniff(flected_word, "x", 4) == true)) || conj_type == "oko")
   {
     first_velar_clean(flected_word);
@@ -818,6 +821,7 @@ void noun_Flect(Lemma &lemma_ref, short int int_morph_tag[10], std::string cyr_i
     }
     else
       morph_replace_word = stem + Nom_[outer_map_no - 1][row_no];
+    
     if (((conj_type == "masc_o" || conj_type == "masc_o_PV3" || conj_type == "adj_hard") && row_no == 7 && (Sniff(flected_word, "k", 3) == true || Sniff(flected_word, "g", 3) == true || Sniff(flected_word, "x", 3) == true)) || conj_type == "oko")
     {
       first_velar_clean(morph_replace_word);
@@ -825,6 +829,7 @@ void noun_Flect(Lemma &lemma_ref, short int int_morph_tag[10], std::string cyr_i
     lemma_ref.morph_replace = morph_replace_word;
     return;
   }
+  
   if (outer_map_no % 10 == 3)
   {
     lemma_ref.poss_doublet = stem + Nom_[outer_map_no - 2][row_no];

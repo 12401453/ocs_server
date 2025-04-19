@@ -1,0 +1,27 @@
+NOUNS
+
+"long_adj_noun", and possibly "adj_hard_ord", "adj_soft_ord", need to be auto-articled
+
+оходити vs. отъходити variants
+
+the pronouns толикъ, селикъ, коликъ, еликъ (lemma_ids 2092, 139, 3125, 959, 5098) have possible adjectival variant-endings
+
+adj_hard adjectives with soft-form comparative stems (comparatives generally aren't properly dealt with as of yet)
+
+nasal-vowel doublet in 'thousand' (tysętjь/tysǫtjь)
+
+post-prepositional n-variants of jь and jьže
+
+lengthened-grade ablaut in deverbal nouns of pьsati, lemma_ids 1739 and 2607
+
+dative short-forms of ty, azъ and sę (mi, ti, si)
+
+---------------------------------------------------------------------------------------
+VERBS
+
+помѣнѫти vs помѧнѫти doublets
+
+if ((conj_type == "iskati") && (row_no < 10 || mood == 3) && (Sniff(cyr_id, "скѫ", 6) || Sniff(cyr_id, "метѫ", 7) || Sniff(cyr_id, "мете", 7)))
+  {
+    outer_map_no -= 10;
+  }

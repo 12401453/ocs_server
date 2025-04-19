@@ -23,6 +23,8 @@ int conj_type_enum(std::string conj_type) {
         return 121;
   if(conj_type == "adj_soft")
         return 131;
+//if(conj_type == "adj_ij") dealt with separately in noun_Flect.h
+ //     return 131;
   if(conj_type == "adj_soft_comp")
         return 1311;
   if(conj_type == "adj_soft_ord")
