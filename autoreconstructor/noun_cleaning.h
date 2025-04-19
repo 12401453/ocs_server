@@ -3,7 +3,7 @@ void first_velar_clean(std::string &noun)
 
   std::string str1, str2;
   int x, y;
-  for (int letno = 0; letno < 10; letno++)
+  for (int letno = 0; letno < 11; letno++)
   {
 
     switch (letno)
@@ -47,6 +47,10 @@ void first_velar_clean(std::string &noun)
     case 9:
       str1.assign("xь");
       str2.assign("šь");
+      break;
+    case 10:
+      str1.assign("xve"); //Supr. Vita of Kodratos has влъшве
+      str2.assign("šve");
       break;
     }
 

@@ -133,7 +133,7 @@ const std::unordered_map<int, inner_map> FlectWriter::m_verb_classes = {
 
     {211, v_21_c0},
     {212, v_21_c1},
-    {2111, v_211_c0},
+    // {2111, v_211_c0}, this is a complete duplicate of 211 that only exists in the autoreconstructor for a specific reason not needed here
     {2112, v_211_c1},
 
     {401, v_40_c0},
@@ -233,6 +233,9 @@ const std::unordered_map<int, inner_map> FlectWriter::m_verb_classes = {
 
     {4001, v_400_c0},
     {4002, v_400_c1},
+
+    {5001, v_500_c0},
+    {5002, v_500_c1},
 };
 
 struct {

@@ -93,7 +93,7 @@ std::unordered_map<std::string, int> conj_type_map {
 
 
     {"byti", 11},
-    {"pref_byti", 11},
+    {"pref_byti", 5001}, //different from conj_type_enum.h because the autoreconstructor has a different strategy for dealing with pref_byti words; for LcsFlecter we just have separate paradigms
     {"nebyti", 101},
     {"have", 21},
     {"dati", 31},

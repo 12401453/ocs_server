@@ -782,7 +782,7 @@ void noun_Flect(Lemma &lemma_ref, short int int_morph_tag[10], std::string cyr_i
     flected_word = stem + Nom_[outer_map_no][row_no];
 
   // checks for PV1 vocatives отьче etc.
-  if (((conj_type == "masc_o" || conj_type == "masc_o_PV3" || conj_type == "adj_hard") && row_no == 7 && (Sniff(flected_word, "3", 4) == true || Sniff(flected_word, "g", 3) == true || Sniff(flected_word, "x", 4) == true)) || conj_type == "oko")
+  if (((conj_type == "masc_o" || conj_type == "masc_o_PV3" || conj_type == "adj_hard") && row_no == 7 && (Sniff(flected_word, /* was "3" in original version, possibly for a reason*/ "k", 4) == true || Sniff(flected_word, "g", 3) == true || Sniff(flected_word, "x", 4) == true)) || conj_type == "oko")
   {
     first_velar_clean(flected_word);
   }
@@ -829,7 +829,7 @@ void noun_Flect(Lemma &lemma_ref, short int int_morph_tag[10], std::string cyr_i
     lemma_ref.morph_replace = morph_replace_word;
     return;
   }
-  
+
   if (outer_map_no % 10 == 3)
   {
     lemma_ref.poss_doublet = stem + Nom_[outer_map_no - 2][row_no];

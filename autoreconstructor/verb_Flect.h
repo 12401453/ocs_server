@@ -156,7 +156,7 @@ void verb_Flect(Lemma &lemma_ref, short int int_morph_tag[10], std::string cyr_i
       if (outer_map_no == 211 && (row_no < 19 && row_no > 9))
       {
         if (Sniff(cyr_id, "нѫ", 6) || Sniff(cyr_id, "нѭ", 6) || Sniff(cyr_id, "нѹ", 6))
-          outer_map_no = outer_map_no * 10 + 2;
+          outer_map_no = outer_map_no * 10 + 2; //the table v_211_c0 is a copy of v_21_c0, but it is necessary because later on the "non-deviant" variants need to be added to the lemma.morph_replace field by decrementing the current outer_map_no, and thus something has to exist at outer_map_no = 2111. 
       }
 
       if ((conj_type == "11" || conj_type == "14" || conj_type == "15") && outer_map_no % 10 == 1)

@@ -21,7 +21,22 @@ VERBS
 
 помѣнѫти vs помѧнѫти doublets
 
-if ((conj_type == "iskati") && (row_no < 10 || mood == 3) && (Sniff(cyr_id, "скѫ", 6) || Sniff(cyr_id, "метѫ", 7) || Sniff(cyr_id, "мете", 7)))
-  {
-    outer_map_no -= 10;
-  }
+iskati and metati class 5.1 variants should be given as possibilities: 
+  if ((conj_type == "iskati") && (row_no < 10 || mood == 3) && (Sniff(cyr_id, "скѫ", 6) || Sniff(cyr_id, "метѫ", 7) || Sniff(cyr_id, "мете", 7)))
+    {
+      outer_map_no -= 10;
+    }
+
+class 5 ablauting verbs with incorrect non-lengthened-grade in certain forms should be given as possibilities:
+  if ((conj_type == "51_abl" || conj_type == "52_abl" || conj_type == "53_abl") && (row_no < 10 || mood == 3) && Sniff(cyr_id, "жьд", 20) == false && Sniff(cyr_id, "жъд", 20) == false && Sniff(cyr_id, "жʼд", 20) == false)
+      {
+        class_5_ablaut_clean(stem);
+      }
+
+the non-present stems of *pьsati and *žьdati being levelled to *pis, *žid should be given as variants
+
+full-grade stem variants of class 14 verbs in the aorists (except 2nd 3rd sg.) need to be added as possible variants:
+    if (conj_type == "14" && outer_map_no % 10 == 3 && (row_no == 10 || row_no == 13 || row_no == 14 || row_no == 15 || row_no == 16 || row_no == 17 || row_no == 18))
+        {
+          ablaut_clean_14(flected_word);
+        }

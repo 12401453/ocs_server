@@ -1744,6 +1744,68 @@ inner_map v_110_c2 = {
 {18, "bišę"},
 };
 
+//separate pref_byti paradigms added for the LcsFlecter class, whose paradigms are written based on this file; the autoreconstructor itself still relies on the old mixed v_110_c maps to conjugate pref_byti forms
+inner_map v_500_c0 {
+  {1, "bǫdǫ"},
+  {2, "bǫdeši"},
+  {3, "bǫdetQ"},
+  {4, "bǫdevě"},
+  {5, "bǫdeta"},
+  {6, "bǫdete"},
+  {7, "bǫdemъ"},
+  {8, "bǫdete"},
+  {9, "bǫdǫtQ"},
+  {10, "byxъ"},
+  {11, "by"},
+  {12, "by"},
+  {13, "byxově"},
+  {14, "bysta"},
+  {15, "byste"},
+  {16, "byxomъ"},
+  {17, "byste"},
+  {18, "byšę"},
+  {19, "běaxъ"},
+  {20, "běaše"},
+  {21, "běaše"},
+  {22, "běaxově"},
+  {23, "běašeta"},
+  {24, "běašete"},
+  {25, "běaxomъ"},
+  {26, "běašete"},
+  {27, "běaxǫ"},
+  {28, "bǫdǫ"},
+  {29, "bǫdi"},
+  {30, "bǫdi"},
+  {31, "bǫděvě"},
+  {32, "bǫděta"},
+  {33, "bǫdětě"},
+  {34, "bǫděmъ"},
+  {35, "bǫděte"},
+  {36, "bǫdǫ"},
+  {37, "bǫdy̨"},
+  {38, "bǫdǫtj"},
+  {39, "byvъ"},
+  {40, "byl"},
+  {41, "bъven"},
+  {43, "byti"},
+  {44, "bytъ"},
+};
+inner_map v_500_c1 {
+
+  {6, "bǫdeta"},
+
+  {19, "běxъ"},
+  {20, "bě"},
+  {21, "bě"},
+  {22, "běxově"},
+  {23, "běsta"},
+  {24, "běste"},
+  {25, "běxomъ"},
+  {26, "běste"},
+  {27, "běšę"},
+};
+
+
 inner_map v_7_c0 = {
 {1, "xotjǫ"},
 {2, "xotješi"},

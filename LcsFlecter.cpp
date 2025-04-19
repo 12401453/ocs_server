@@ -32,6 +32,10 @@ void LcsFlecter::setConjType(std::string conj_type) {
     }
 }
 
+void LcsFlecter::setStem(std::string stem) {
+    m_stem = stem;
+}
+
 std::string LcsFlecter::getEnding(int desinence_ix) {
     try {
         return m_active_endings.at(m_outer_map_no).at(desinence_ix);
@@ -52,32 +56,67 @@ std::string LcsFlecter::getEnding(std::string conj_type, int desinence_ix) {
     }
 }
 
-Inflection LcsFlecter::addEnding(std::string stem, int desinence_ix) {
-    return {desinence_ix, stem.append(getEnding(desinence_ix))};
+Inflection LcsFlecter::addEnding(int desinence_ix) {
+    return {desinence_ix, m_stem + getEnding(desinence_ix)};
 }
 
-std::string LcsFlecter::postProcess(Inflection &indexed_inflection) {
+void LcsFlecter::postProcess(std::vector<Inflection> &inflected_forms) {
     if(m_noun_verb == NOUN) {
-        
+        if(m_outer_map_no == 301) {
+            firstVelarClean(inflected_forms[6].flected_form);
+        }
+        else if((m_stem.ends_with('k') || m_stem.ends_with('g') || m_stem.ends_with('x') || m_stem.ends_with("xv")) && (m_conj_type == "masc_o" || m_conj_type == "adj_hard")) {
+            firstVelarClean(inflected_forms[6].flected_form);
+        }
     }
-    else {
-        
+    else if(m_noun_verb == VERB) {
+        if(m_conj_type == "51_abl" || m_conj_type == "52_abl" || m_conj_type == "53_abl") {
+            for(int i = 0; i < 9; i++) {
+                class5AblautClean(inflected_forms[i].flected_form);
+            }
+            //imperatives
+            for(int i = 27; i < 36; i++) {
+                class5AblautClean(inflected_forms[i].flected_form);
+            }
+        }
+        else if(m_conj_type == "infix_11") {
+            for(int i = 0; i < 9; i++) {
+                class11InfixClean(inflected_forms[i].flected_form);
+            }
+            //imperatives
+            for(int i = 27; i < 36; i++) {
+                class11InfixClean(inflected_forms[i].flected_form);
+            }
+        }
+        else if(m_conj_type == "byti") {
+            //need to add on future-forms, alternative imperfects, alternative aorist/past subjunctives etc., fucking nightmare
+        }
+        else if(m_outer_map_no == 211) {
+            //add the endings at outer_map_no == 2112 to the possible variants alongside those at m_outer_map_no++;
+        }
+
+        if(m_conj_type == "11" || m_conj_type == "infix_11" || m_conj_type == "infix_12" || m_conj_type == "14" || m_conj_type == "15" || m_conj_type == "21" || m_conj_type == "31" || m_conj_type == "iskati") {
+            for(auto& inflection : inflected_forms) {
+                class1Clean(inflection);
+            }
+            if(m_conj_type == "14") {
+                // change the infinitive and supine to full-grade ablaut
+                class14AblautClean(inflected_forms[42].flected_form);
+                class14AblautClean(inflected_forms[43].flected_form);
+
+                //add full-grade aorists as variants
+                // S-aorists of class 14 have full-grade ablaut so call class14AblautClean() on them as well
+            }
+        }
+
+        if(m_outer_map_no != 1101) {
+            //add imperfSheta()'d variants of desinence_ix 22, 23 and 25 as possible variants
+        }
+
     }
 };
 
-std::vector<Inflection> LcsFlecter::getFullParadigm(std::string stem, std::string conj_type) {
-    setConjType(conj_type);
-    std::vector<Inflection> inflected_forms;
-    inflected_forms.reserve(64);
-
-    for(const auto& ending_pair : m_active_endings.at(m_outer_map_no)) {
-        Inflection infl = {ending_pair.first, stem + ending_pair.second};
-        inflected_forms.emplace_back(infl);
-    }
-
-    return inflected_forms;
-}
-std::vector<Inflection> LcsFlecter::getFullParadigm(std::string stem) {
+std::vector<Inflection> LcsFlecter::getFullParadigm() {
     const auto& desinences = m_active_endings.at(m_outer_map_no);
     auto desinences_iter = desinences.begin();
     auto desinences_iter_end = desinences.end();
@@ -85,7 +124,13 @@ std::vector<Inflection> LcsFlecter::getFullParadigm(std::string stem) {
     short int gender_third = 0; //delete
     std::string suffix = "";
     if(m_noun_verb == NOUN) {
-        if(c_strStartsWith(m_conj_type.c_str(), "masc")) {
+
+        if(m_conj_type == "masc_ji" || m_conj_type == "masc_a" || m_conj_type == "masc_a_PV3" || m_conj_type == "masc_ja") {
+            gender_third = 2;
+            std::advance(desinences_iter, 21);
+            std::advance(desinences_iter_end, -21);
+        }
+        else if(c_strStartsWith(m_conj_type.c_str(), "masc")) {
             gender_third = 1;
             std::advance(desinences_iter_end, -42);
         }
@@ -98,10 +143,6 @@ std::vector<Inflection> LcsFlecter::getFullParadigm(std::string stem) {
             gender_third = 2;
             std::advance(desinences_iter, 21);
             std::advance(desinences_iter_end, -21);
-        }
-        
-        if(m_conj_type == "masc_ji" || m_conj_type == "masc_a" || m_conj_type == "masc_a_PV3" || m_conj_type == "masc_ja") {
-            gender_third = 2;
         }
 
         //requires -std=c++20
@@ -122,11 +163,12 @@ std::vector<Inflection> LcsFlecter::getFullParadigm(std::string stem) {
     
     //for(const auto& ending_pair : m_active_endings.at(m_outer_map_no)) {
     for(;desinences_iter != desinences_iter_end; ++desinences_iter) {
-        Inflection infl = {desinences_iter->first, stem + desinences_iter->second};
+        Inflection infl = {desinences_iter->first, m_stem + desinences_iter->second};
         //inflected_forms.emplace_back(infl);
-        inflected_forms.emplace_back(desinences_iter->first, stem + desinences_iter->second + suffix);
+        inflected_forms.emplace_back(desinences_iter->first, m_stem + desinences_iter->second + suffix);
     }
 
+    postProcess(inflected_forms);
     return inflected_forms;
 }
 
@@ -169,68 +211,64 @@ bool LcsFlecter::c_strStartsWith(const char *str1, const char *str2) {
         return false;
 }
 
-std::string LcsFlecter::class1Clean(std::string flecter_output, bool imperative) {
-    if(imperative) {
-        replaceAll(flecter_output, "eki", "ьki");
-        replaceAll(flecter_output, "ekě", "ьkě");
-        replaceAll(flecter_output, "egi", "ьgi");
-        replaceAll(flecter_output, "egě", "ьgě");
-        replaceAll(flecter_output, "exi", "ьxi");
-        replaceAll(flecter_output, "exě", "ьxě");
-        replaceAll(flecter_output, "skj", "šč");
-
-        return flecter_output;
+void LcsFlecter::class1Clean(Inflection& inflection) {
+    if(inflection.desinence_ix < 37 && inflection.desinence_ix > 27) {
+        replaceAll(inflection.flected_form, "eki", "ьki");
+        replaceAll(inflection.flected_form, "ekě", "ьkě");
+        replaceAll(inflection.flected_form, "egi", "ьgi");
+        replaceAll(inflection.flected_form, "egě", "ьgě");
+        replaceAll(inflection.flected_form, "exi", "ьxi");
+        replaceAll(inflection.flected_form, "exě", "ьxě");
+        replaceAll(inflection.flected_form, "skj", "šč");
     }
 
-    replaceAll(flecter_output, "ę̌", "Z"); //prevent nasalised-jat from being replaced with Ǣ after palatals
+    replaceAll(inflection.flected_form, "ę̌", "Z"); //prevent nasalised-jat from being replaced with Ǣ after palatals
 
-    replaceAll(flecter_output, "eksę", "ěšę");
-    replaceAll(flecter_output, "ekst", "ěst");
-    replaceAll(flecter_output, "egsę", "ěšę");
-    replaceAll(flecter_output, "egst", "ěst");
-    replaceAll(flecter_output, "ebs", "ěbs");
-    replaceAll(flecter_output, "eks", "ěx");
-    replaceAll(flecter_output, "ods", "as");
-    replaceAll(flecter_output, "ogs", "ax");
-    replaceAll(flecter_output, "egs", "ěx");
-    replaceAll(flecter_output, "eds", "ěs");
-    replaceAll(flecter_output, "ess", "ěs");
-    replaceAll(flecter_output, "eps", "ěs");
-    replaceAll(flecter_output, "ksę", "šę");
-    replaceAll(flecter_output, "gsę", "šę");
-    replaceAll(flecter_output, "gst", "st");
-    replaceAll(flecter_output, "kst", "st");
-    replaceAll(flecter_output, "skj", "šč");
-    replaceAll(flecter_output, "ks", "x");
-    replaceAll(flecter_output, "gs", "x");
-    replaceAll(flecter_output, "bt", "t");
-    replaceAll(flecter_output, "pt", "t");
-    replaceAll(flecter_output, "dt", "st");
-    replaceAll(flecter_output, "tt", "st");
-    replaceAll(flecter_output, "zt", "st");
-    replaceAll(flecter_output, "gě", "žǢ");
-    replaceAll(flecter_output, "xě", "šǢ");
-    replaceAll(flecter_output, "kě", "čǢ");
-    replaceAll(flecter_output, "ge", "že");
-    replaceAll(flecter_output, "xe", "še");
-    replaceAll(flecter_output, "ke", "če");
-    replaceAll(flecter_output, "žě", "žǢ");
-    replaceAll(flecter_output, "šě", "šǢ");
-    replaceAll(flecter_output, "čě", "čǢ");
-    replaceAll(flecter_output, "jě", "jǢ");
-    replaceAll(flecter_output, "vt", "t");
-    replaceAll(flecter_output, "zs", "s");
-    replaceAll(flecter_output, "ts", "s");
-    replaceAll(flecter_output, "ds", "s");
-    replaceAll(flecter_output, "bs", "s");
-    replaceAll(flecter_output, "ps", "s");
-    replaceAll(flecter_output, "pn", "n");
+    replaceAll(inflection.flected_form, "eksę", "ěšę");
+    replaceAll(inflection.flected_form, "ekst", "ěst");
+    replaceAll(inflection.flected_form, "egsę", "ěšę");
+    replaceAll(inflection.flected_form, "egst", "ěst");
+    replaceAll(inflection.flected_form, "ebs", "ěbs");
+    replaceAll(inflection.flected_form, "eks", "ěx");
+    replaceAll(inflection.flected_form, "ods", "as");
+    replaceAll(inflection.flected_form, "ogs", "ax");
+    replaceAll(inflection.flected_form, "egs", "ěx");
+    replaceAll(inflection.flected_form, "eds", "ěs");
+    replaceAll(inflection.flected_form, "ess", "ěs");
+    replaceAll(inflection.flected_form, "eps", "ěs");
+    replaceAll(inflection.flected_form, "ksę", "šę");
+    replaceAll(inflection.flected_form, "gsę", "šę");
+    replaceAll(inflection.flected_form, "gst", "st");
+    replaceAll(inflection.flected_form, "kst", "st");
+    replaceAll(inflection.flected_form, "skj", "šč");
+    replaceAll(inflection.flected_form, "ks", "x");
+    replaceAll(inflection.flected_form, "gs", "x");
+    replaceAll(inflection.flected_form, "bt", "t");
+    replaceAll(inflection.flected_form, "pt", "t");
+    replaceAll(inflection.flected_form, "dt", "st");
+    replaceAll(inflection.flected_form, "tt", "st");
+    replaceAll(inflection.flected_form, "zt", "st");
+    replaceAll(inflection.flected_form, "gě", "žǢ");
+    replaceAll(inflection.flected_form, "xě", "šǢ");
+    replaceAll(inflection.flected_form, "kě", "čǢ");
+    replaceAll(inflection.flected_form, "ge", "že");
+    replaceAll(inflection.flected_form, "xe", "še");
+    replaceAll(inflection.flected_form, "ke", "če");
+    replaceAll(inflection.flected_form, "žě", "žǢ");
+    replaceAll(inflection.flected_form, "šě", "šǢ");
+    replaceAll(inflection.flected_form, "čě", "čǢ");
+    replaceAll(inflection.flected_form, "jě", "jǢ");
+    replaceAll(inflection.flected_form, "vt", "t");
+    replaceAll(inflection.flected_form, "zs", "s");
+    replaceAll(inflection.flected_form, "ts", "s");
+    replaceAll(inflection.flected_form, "ds", "s");
+    replaceAll(inflection.flected_form, "bs", "s");
+    replaceAll(inflection.flected_form, "ps", "s");
+    replaceAll(inflection.flected_form, "pn", "n");
 
-    replaceAll(flecter_output, "Z", "ę̌");
-    
-    return flecter_output;
+    replaceAll(inflection.flected_form, "Z", "ę̌");
 }
-std::string LcsFlecter::class1NasalClean(std::string flecter_output) {
+void LcsFlecter::class1NasalClean(std::string& flecter_output) {
     replaceAll(flecter_output, "ьnstъ", "ętъ");
     replaceAll(flecter_output, "ьmstъ", "ętъ");
     replaceAll(flecter_output, "ьns", "ęs");
@@ -243,10 +281,8 @@ std::string LcsFlecter::class1NasalClean(std::string flecter_output) {
     replaceAll(flecter_output, "ьnl", "ęl");
     replaceAll(flecter_output, "ьm", "ę");
     replaceAll(flecter_output, "ьn", "ę");
-
-    return flecter_output;
 }
-std::string LcsFlecter::itiClean(std::string flecter_output) {
+void LcsFlecter::itiClean(std::string& flecter_output) {
     replaceAll(flecter_output, "njь", "ni");
     replaceAll(flecter_output, "zjь", "zi");
     replaceAll(flecter_output, "tjь", "ti");
@@ -255,22 +291,16 @@ std::string LcsFlecter::itiClean(std::string flecter_output) {
     replaceAll(flecter_output, "+š", "š");
     replaceAll(flecter_output, "nš", "š");
     replaceAll(flecter_output, "zš", "sš"); //not strictly speaking correct but better for searching
-
-    return flecter_output;
 }
-std::string LcsFlecter::class14AblautClean(std::string flecter_output) {
+void LcsFlecter::class14AblautClean(std::string& flecter_output) {
     replaceAll(flecter_output, "ĺ̥", "el");
     replaceAll(flecter_output, "ŕ̥", "er");
-
-    return flecter_output;
 }
-std::string LcsFlecter::class15AblautClean(std::string flecter_output) {
+void LcsFlecter::class15AblautClean(std::string& flecter_output) {
     replaceAll(flecter_output, "el", "ĺ̥");
     replaceAll(flecter_output, "er", "ŕ̥");
-
-    return flecter_output;
 }
-std::string LcsFlecter::class3Clean(std::string flecter_output) {
+void LcsFlecter::class3Clean(std::string& flecter_output) {
     replaceAll(flecter_output, "ę̌", "Z"); //prevent nasalised-jat from being replaced with Ǣ after palatals
 
     replaceAll(flecter_output, "žě", "žǢ");
@@ -279,9 +309,8 @@ std::string LcsFlecter::class3Clean(std::string flecter_output) {
     replaceAll(flecter_output, "jě", "jǢ");
 
     replaceAll(flecter_output, "Z",  "ę̌");
-    return flecter_output;
 }
-std::string LcsFlecter::class5AblautClean(std::string flecter_output) {
+void LcsFlecter::class5AblautClean(std::string& flecter_output) {
     replaceAll(flecter_output, "strъg", "strug");
     replaceAll(flecter_output, "stьl", "stel");
     replaceAll(flecter_output, "ĺьv", "lu");
@@ -297,29 +326,22 @@ std::string LcsFlecter::class5AblautClean(std::string flecter_output) {
     replaceAll(flecter_output, "ъv", "ov");
     replaceAll(flecter_output, "ьr", "er");
     replaceAll(flecter_output, "ьj", "ěj");
-
-    return flecter_output;
 }
-std::string LcsFlecter::class11InfixClean(std::string flecter_output) {
+void LcsFlecter::class11InfixClean(std::string& flecter_output) {
     replaceAll(flecter_output, "leg", "lęg");
     replaceAll(flecter_output, "sěd", "sęd");
-
-    return flecter_output;
 }
-std::string LcsFlecter::class12InfixClean(std::string flecter_output) {
+void LcsFlecter::class12InfixClean(std::string& flecter_output) {
     replaceAll(flecter_output, "rět", "ręt");
-
-    return flecter_output;
 }
-std::string LcsFlecter::imperfSheta(std::string flecter_output) {
+void LcsFlecter::imperfSheta(std::string& flecter_output) {
     replaceAll(flecter_output, "šeta", "sta");
     replaceAll(flecter_output, "šete", "ste");
-
-    return flecter_output;
 }
 
-std::string LcsFlecter::firstVelarClean(std::string flecter_output) {
+void LcsFlecter::firstVelarClean(std::string& flecter_output) {
     replaceAll(flecter_output, "ske", "šče");
+    replaceAll(flecter_output, "xve", "šve");
     replaceAll(flecter_output, "ge", "že");
     replaceAll(flecter_output, "ke", "če");
     replaceAll(flecter_output, "xe", "še");
@@ -329,18 +351,13 @@ std::string LcsFlecter::firstVelarClean(std::string flecter_output) {
     replaceAll(flecter_output, "gь", "žь");
     replaceAll(flecter_output, "kь", "čь");
     replaceAll(flecter_output, "xь", "šь");
-
-    return flecter_output;
-
 }
-std::string LcsFlecter::pv1LongE(std::string flecter_output) {
+void LcsFlecter::pv1LongE(std::string& flecter_output) {
     replaceAll(flecter_output, "gě", "žǢ");
     replaceAll(flecter_output, "kě", "čǢ");
     replaceAll(flecter_output, "xě", "šǢ");
-
-    return flecter_output;
 }
-std::string LcsFlecter::Dejotate(std::string jotated_form) {
+void LcsFlecter::Dejotate(std::string& jotated_form) {
     replaceAll(jotated_form, "strj", "šћŕ");
     replaceAll(jotated_form, "stj", "šћ");
     replaceAll(jotated_form, "zdj", "žђ");
@@ -377,8 +394,6 @@ std::string LcsFlecter::Dejotate(std::string jotated_form) {
     replaceAll(jotated_form, "ћj", "ћ");
     replaceAll(jotated_form, "ĺj", "ĺ");
     replaceAll(jotated_form, "ŕj", "ŕ");
-
-    return jotated_form;
 }
 
 
@@ -389,15 +404,13 @@ int main() {
     // std::getline(std::cin, stem);
     // std::getline(std::cin, desinence_ix);
     
-    LcsFlecter* noun_flecter = new LcsFlecter(NOUN, "den");
-    LcsFlecter* verb_flecter = new LcsFlecter(VERB, "11");
+    LcsFlecter* noun_flecter = new LcsFlecter({"vl̥xv", "masc_o", NOUN});
+    LcsFlecter* verb_flecter = new LcsFlecter({"za", "pref_byti", VERB});
 
-    verb_flecter->setConjType("14");
+    std::cout << verb_flecter->addEnding(13).flected_form<< "\n";
+    std::cout << noun_flecter->addEnding(20).flected_form << "\n";
 
-    std::cout << verb_flecter->addEnding("rek", 13).flected_form<< "\n";
-    std::cout << noun_flecter->addEnding("", 20).flected_form << "\n";
-
-    for(const auto& ending : verb_flecter->getFullParadigm("vъvŕ̥g")) {
+    for(const auto& ending : verb_flecter->getFullParadigm()) {
         std::cout << ending.desinence_ix << " " << ending.flected_form << "\n";
     }
     

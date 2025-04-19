@@ -107,4 +107,7 @@ std::unordered_map<int, inner_map> verb_ = {
   {4001, v_400_c0},
   {4002, v_400_c1},
 
+  {5001, v_500_c0},
+  {5002, v_500_c1},
+
 };
