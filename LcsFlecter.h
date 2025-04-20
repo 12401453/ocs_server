@@ -38,9 +38,9 @@ class LcsFlecter {
     void setStem(std::string stem);
 
     Inflection addEnding(int desinence_ix);
-    std::vector<Inflection> getFullParadigm();
+    std::array<std::vector<Inflection>, 3> getFullParadigm();
 
-    void postProcess(std::vector<Inflection> &inflected_forms);
+    void postProcess(std::array<std::vector<Inflection>, 3> &inflected_forms);
 
 
 

@@ -60,32 +60,36 @@ Inflection LcsFlecter::addEnding(int desinence_ix) {
     return {desinence_ix, m_stem + getEnding(desinence_ix)};
 }
 
-void LcsFlecter::postProcess(std::vector<Inflection> &inflected_forms) {
+void LcsFlecter::postProcess(std::array<std::vector<Inflection>, 3> &inflected_forms) {
     if(m_noun_verb == NOUN) {
         if(m_outer_map_no == 301) {
-            firstVelarClean(inflected_forms[6].flected_form);
+            firstVelarClean(inflected_forms[0][6].flected_form);
         }
         else if((m_stem.ends_with('k') || m_stem.ends_with('g') || m_stem.ends_with('x') || m_stem.ends_with("xv")) && (m_conj_type == "masc_o" || m_conj_type == "adj_hard")) {
-            firstVelarClean(inflected_forms[6].flected_form);
+            firstVelarClean(inflected_forms[0][6].flected_form);
         }
     }
     else if(m_noun_verb == VERB) {
         if(m_conj_type == "51_abl" || m_conj_type == "52_abl" || m_conj_type == "53_abl") {
+            //present
             for(int i = 0; i < 9; i++) {
-                class5AblautClean(inflected_forms[i].flected_form);
+                class5AblautClean(inflected_forms[0][i].flected_form);
+                class5AblautClean(inflected_forms[1][i].flected_form);
             }
-            //imperatives
+            //imperatives       
             for(int i = 27; i < 36; i++) {
-                class5AblautClean(inflected_forms[i].flected_form);
+                class5AblautClean(inflected_forms[0][i].flected_form);
+                class5AblautClean(inflected_forms[1][i].flected_form);
             }
         }
         else if(m_conj_type == "infix_11") {
+            //present
             for(int i = 0; i < 9; i++) {
-                class11InfixClean(inflected_forms[i].flected_form);
+                class11InfixClean(inflected_forms[0][i].flected_form);
             }
             //imperatives
             for(int i = 27; i < 36; i++) {
-                class11InfixClean(inflected_forms[i].flected_form);
+                class11InfixClean(inflected_forms[0][i].flected_form);
             }
         }
         else if(m_conj_type == "byti") {
@@ -96,16 +100,24 @@ void LcsFlecter::postProcess(std::vector<Inflection> &inflected_forms) {
         }
 
         if(m_conj_type == "11" || m_conj_type == "infix_11" || m_conj_type == "infix_12" || m_conj_type == "14" || m_conj_type == "15" || m_conj_type == "21" || m_conj_type == "31" || m_conj_type == "iskati") {
-            for(auto& inflection : inflected_forms) {
-                class1Clean(inflection);
+            for(auto& inflections_vec: inflected_forms){
+                for(auto& inflection : inflections_vec) {
+                    class1Clean(inflection);
+                }
             }
             if(m_conj_type == "14") {
                 // change the infinitive and supine to full-grade ablaut
-                class14AblautClean(inflected_forms[42].flected_form);
-                class14AblautClean(inflected_forms[43].flected_form);
+                class14AblautClean(inflected_forms[0][42].flected_form);
+                class14AblautClean(inflected_forms[0][43].flected_form);
 
                 //add full-grade aorists as variants
-                // S-aorists of class 14 have full-grade ablaut so call class14AblautClean() on them as well
+
+                //give S-aorists full-grade ablauts
+                class14AblautClean(inflected_forms[2][9].flected_form);
+                for(int i = 12; i < 18; i++) {
+                    class14AblautClean(inflected_forms[2][i].flected_form);
+                }
+                
             }
         }
 
@@ -116,10 +128,31 @@ void LcsFlecter::postProcess(std::vector<Inflection> &inflected_forms) {
     }
 };
 
-std::vector<Inflection> LcsFlecter::getFullParadigm() {
-    const auto& desinences = m_active_endings.at(m_outer_map_no);
-    auto desinences_iter = desinences.begin();
-    auto desinences_iter_end = desinences.end();
+std::array<std::vector<Inflection>, 3> LcsFlecter::getFullParadigm() {
+    const inner_map* desinences = &m_active_endings.at(m_outer_map_no); 
+    const inner_map* deviant_desinences = nullptr;
+    const inner_map* alternative_desinences = nullptr;
+
+    auto end_iter = m_active_endings.end();
+    auto deviances_iter = m_active_endings.find(m_outer_map_no + 1);
+    
+    int alternative_map_no = m_outer_map_no + 2;
+
+    //should possibly get rid of this check and add an explicit new map at 523 with just those 5.1 forms that actually occur
+    if(m_conj_type == "iskati") {
+        alternative_map_no = m_outer_map_no - 10;
+    }
+    auto alternatives_iter = m_active_endings.find(alternative_map_no);
+
+    if(deviances_iter != end_iter) {
+        deviant_desinences = &deviances_iter->second;
+    }
+    if(alternatives_iter != end_iter) {
+        alternative_desinences = &alternatives_iter->second;
+    }
+
+    auto desinences_iter = desinences->begin();
+    auto desinences_iter_end = desinences->end();
     
     short int gender_third = 0; //delete
     std::string suffix = "";
@@ -157,15 +190,38 @@ std::vector<Inflection> LcsFlecter::getFullParadigm() {
         }
 
     }
-    std::vector<Inflection> inflected_forms;
-    inflected_forms.reserve(64);
+    std::array<std::vector<Inflection>, 3> inflected_forms;
+    inflected_forms[0].reserve(64);
+    inflected_forms[1].reserve(64);
+    inflected_forms[2].reserve(64);
 
     
     //for(const auto& ending_pair : m_active_endings.at(m_outer_map_no)) {
     for(;desinences_iter != desinences_iter_end; ++desinences_iter) {
         Inflection infl = {desinences_iter->first, m_stem + desinences_iter->second};
         //inflected_forms.emplace_back(infl);
-        inflected_forms.emplace_back(desinences_iter->first, m_stem + desinences_iter->second + suffix);
+        inflected_forms[0].emplace_back(desinences_iter->first, m_stem + desinences_iter->second + suffix);
+    }
+
+    if(deviant_desinences != nullptr) {
+        for(const auto& base_inflection : inflected_forms[0]) {
+            if(deviant_desinences->contains(base_inflection.desinence_ix)) {
+                inflected_forms[1].emplace_back(base_inflection.desinence_ix, m_stem + deviant_desinences->at(base_inflection.desinence_ix) + suffix);
+            }
+            else {
+                inflected_forms[1].emplace_back(base_inflection.desinence_ix, "");
+            }         
+        }
+    }
+    if(alternative_desinences != nullptr) {
+        for(const auto& base_inflection : inflected_forms[0]) {
+            if(alternative_desinences->contains(base_inflection.desinence_ix)) {
+                inflected_forms[2].emplace_back(base_inflection.desinence_ix, m_stem + alternative_desinences->at(base_inflection.desinence_ix) + suffix);
+            }
+            else {
+                inflected_forms[2].emplace_back(base_inflection.desinence_ix, "");
+            }         
+        }
     }
 
     postProcess(inflected_forms);
@@ -220,6 +276,8 @@ void LcsFlecter::class1Clean(Inflection& inflection) {
         replaceAll(inflection.flected_form, "exi", "ьxi");
         replaceAll(inflection.flected_form, "exě", "ьxě");
         replaceAll(inflection.flected_form, "skj", "šč");
+
+        return;
     }
 
     replaceAll(inflection.flected_form, "ę̌", "Z"); //prevent nasalised-jat from being replaced with Ǣ after palatals
@@ -404,14 +462,17 @@ int main() {
     // std::getline(std::cin, stem);
     // std::getline(std::cin, desinence_ix);
     
-    LcsFlecter* noun_flecter = new LcsFlecter({"vl̥xv", "masc_o", NOUN});
-    LcsFlecter* verb_flecter = new LcsFlecter({"za", "pref_byti", VERB});
+    LcsFlecter* noun_flecter = new LcsFlecter({"", "azъ", NOUN});
+    LcsFlecter* verb_flecter = new LcsFlecter({"jьsk", "iskati", VERB});
 
     std::cout << verb_flecter->addEnding(13).flected_form<< "\n";
     std::cout << noun_flecter->addEnding(20).flected_form << "\n";
 
-    for(const auto& ending : verb_flecter->getFullParadigm()) {
-        std::cout << ending.desinence_ix << " " << ending.flected_form << "\n";
+    for(const auto& inflections : verb_flecter->getFullParadigm()) {
+        for(const auto& inflection : inflections) {
+            std::cout << inflection.desinence_ix << " " << inflection.flected_form << "\n";
+        }
+        std::cout << "\n";
     }
     
     delete noun_flecter;
