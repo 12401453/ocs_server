@@ -124,17 +124,31 @@ void LcsFlecter::postProcess(std::array<std::vector<Inflection>, 3> &inflected_f
 
         //class 12 and 16 (nasal- and liquid stems, jęti and kolti etc.)
         else if(m_outer_map_no == 121 || m_outer_map_no == 161) {
-            for(auto& inflections_vec: inflected_forms){
-                for(int i = 12; i < 18; i++) {
-                    class1NasalClean(inflections_vec[i].flected_form);
+            for(int i = 0; i < 2; i++){
+                for(int j = 9; j < 18; j++) {
+                    class1NasalClean(inflected_forms[i][j].flected_form);
                 }
-                //crashes due to looping through an empty third vector in the std::array
-                class1NasalClean(inflections_vec[42].flected_form);
-                class1NasalClean(inflections_vec[43].flected_form);
-
+                class1NasalClean(inflected_forms[i][42].flected_form);
+                class1NasalClean(inflected_forms[i][43].flected_form);
             }
         }
+        //jьti
+        else if(m_outer_map_no == 81) {
+            for(auto& inflections_vec : inflected_forms) {
+                for(auto& inflection : inflections_vec) {
+                    itiClean(inflection.flected_form);
+                }
+            }
 
+            //really we should add some variants with prepositions ending on -ъ
+        }
+
+    }
+
+    for(auto& inflections_vec : inflected_forms) {
+        for(auto& inflection : inflections_vec) {
+            Dejotate(inflection.flected_form);
+        }
     }
 };
 
@@ -173,16 +187,16 @@ std::array<std::vector<Inflection>, 3> LcsFlecter::getFullParadigm() {
             std::advance(desinences_iter, 21);
             std::advance(desinences_iter_end, -21);
         }
-        else if(c_strStartsWith(m_conj_type.c_str(), "masc")) {
+        else if(c_strStartsWith(m_conj_type.c_str(), "masc") && desinences->size() > 21) {
             gender_third = 1;
             std::advance(desinences_iter_end, -42);
         }
-        else if(c_strStartsWith(m_conj_type.c_str(), "nt")) {
+        else if(c_strStartsWith(m_conj_type.c_str(), "nt") && desinences->size() > 21) {
             gender_third = 3;
             std::advance(desinences_iter, 42);
             
         }
-        else if(c_strStartsWith(m_conj_type.c_str(), "fem")) {
+        else if(c_strStartsWith(m_conj_type.c_str(), "fem") && desinences->size() > 21) {
             gender_third = 2;
             std::advance(desinences_iter, 21);
             std::advance(desinences_iter_end, -21);
@@ -462,28 +476,54 @@ void LcsFlecter::Dejotate(std::string& jotated_form) {
     replaceAll(jotated_form, "ћj", "ћ");
     replaceAll(jotated_form, "ĺj", "ĺ");
     replaceAll(jotated_form, "ŕj", "ŕ");
+    replaceAll(jotated_form, "ћъ", "ћь");
+    replaceAll(jotated_form, "ђъ", "ђь");
 }
 
 
 int main() {
 
-    // std::string conj_type, stem, desinence_ix;
-    // std::getline(std::cin, conj_type);
-    // std::getline(std::cin, stem);
-    // std::getline(std::cin, desinence_ix);
+    std::string conj_type, stem, noun_verb_str;
+
+    LcsFlecter* noun_flecter = new LcsFlecter(NOUN);
+    LcsFlecter* verb_flecter = new LcsFlecter(VERB);
     
-    LcsFlecter* noun_flecter = new LcsFlecter({"", "azъ", NOUN});
-    LcsFlecter* verb_flecter = new LcsFlecter({"žьn", "16", VERB});
+    while(stem != "99") {
+        std::getline(std::cin, stem);
+        if(stem == "99") break;
+        std::getline(std::cin, conj_type);
+        std::getline(std::cin, noun_verb_str);
 
-    std::cout << verb_flecter->addEnding(13).flected_form<< "\n";
-    std::cout << noun_flecter->addEnding(20).flected_form << "\n";
+        bool noun_verb = noun_verb_str == "noun" ? true : false;
 
-    for(const auto& inflections : verb_flecter->getFullParadigm()) {
-        for(const auto& inflection : inflections) {
-            std::cout << inflection.desinence_ix << " " << inflection.flected_form << "\n";
+        auto& my_flecter = noun_verb ? noun_flecter : verb_flecter;
+
+        my_flecter->setConjType(conj_type);
+        my_flecter->setStem(stem);
+
+        for(const auto& inflections : my_flecter->getFullParadigm()) {
+            for(const auto& inflection : inflections) {
+                std::cout << inflection.desinence_ix << " " << inflection.flected_form << "\n";
+            }
+            std::cout << "\n";
         }
-        std::cout << "\n";
     }
+    
+    
+    //LcsFlecter* noun_flecter = new LcsFlecter({"", "azъ", NOUN});
+    //LcsFlecter* verb_flecter = new LcsFlecter({"žьn", "16", VERB});
+
+    
+
+    // std::cout << verb_flecter->addEnding(13).flected_form<< "\n";
+    // std::cout << noun_flecter->addEnding(20).flected_form << "\n";
+
+    // for(const auto& inflections : verb_flecter->getFullParadigm()) {
+    //     for(const auto& inflection : inflections) {
+    //         std::cout << inflection.desinence_ix << " " << inflection.flected_form << "\n";
+    //     }
+    //     std::cout << "\n";
+    // }
     
     delete noun_flecter;
     delete verb_flecter;

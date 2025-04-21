@@ -103,7 +103,7 @@ std::string Dejotate(std::string cs_word)
 
   std::string str1, str2;
   int x, y;
-  for (int letno = 0; letno < 36; letno++)
+  for (int letno = 0; letno < 38; letno++)
   {
 
     switch (letno)
@@ -252,6 +252,14 @@ std::string Dejotate(std::string cs_word)
     case 35:
       str1.assign("ŕj");
       str2.assign("ŕ");
+      break;
+    case 36:
+      str1.assign("ћъ");
+      str2.assign("ћь");
+      break;
+    case 37:
+      str1.assign("ђъ");
+      str2.assign("ђь");
       break;
     }
 

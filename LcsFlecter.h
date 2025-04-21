@@ -27,10 +27,21 @@ struct Lemma {
 
 class LcsFlecter {
     public:
-        LcsFlecter(Lemma lcs_lemma) : m_active_endings(lcs_lemma.noun_verb ? m_noun_endings : m_verb_endings), m_noun_verb(lcs_lemma.noun_verb) {
+        LcsFlecter(Lemma lcs_lemma={"gord", "masc_o", NOUN}) : m_active_endings(lcs_lemma.noun_verb ? m_noun_endings : m_verb_endings), m_noun_verb(lcs_lemma.noun_verb) {
             setConjType(lcs_lemma.conj_type);
             setStem(lcs_lemma.stem);
         };
+
+        LcsFlecter(bool noun_verb) : m_active_endings(noun_verb ? m_noun_endings : m_verb_endings), m_noun_verb(noun_verb) {
+            if(noun_verb == NOUN) {
+                setConjType("masc_o");
+                setStem("gord");
+            }
+            else {
+                setConjType("40");
+                setStem("tvor");
+            }
+        }
 
     std::string getEnding(int desinence_ix);
     std::string getEnding(std::string conj_type, int desinence_ix);
