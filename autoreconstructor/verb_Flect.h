@@ -357,7 +357,7 @@ void verb_Flect(Lemma &lemma_ref, short int int_morph_tag[10], std::string cyr_i
 
       if (conj_type == "12" || conj_type == "16")
       {
-
+        //tense == 2 = aorist
         if (tense == 2 || /* row_no == 40 || row_no == 41 || */ row_no == 43 || row_no == 44)
         {
           class_I_nasal_clean(flected_word);

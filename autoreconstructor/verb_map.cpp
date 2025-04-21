@@ -600,6 +600,8 @@ inner_map v_16_c0 = {
 {8, "jete"},
 {9, "jǫtQ"},
 {10, "sъ"},
+{11, ""}, //empty 2nd and 3rd sg aorist endings added to make LcsFlecter work
+{12, ""},
 {13, "sově"},
 {14, "sta"},
 {15, "ste"},
