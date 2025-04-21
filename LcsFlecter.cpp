@@ -70,6 +70,7 @@ void LcsFlecter::postProcess(std::array<std::vector<Inflection>, 3> &inflected_f
         }
     }
     else if(m_noun_verb == VERB) {
+        //NB the imperf_sheta() function from the autoreconstructor will need to just be added on in the JS, since it affects the 2nd 3rd dual and 3pl imperfect of all verbs and is thus not captured in inflection-class-specific alternate conjugation-tables 
         if(m_conj_type == "51_abl" || m_conj_type == "52_abl" || m_conj_type == "53_abl") {
             //present
             for(int i = 0; i < 9; i++) {
@@ -121,8 +122,17 @@ void LcsFlecter::postProcess(std::array<std::vector<Inflection>, 3> &inflected_f
             }
         }
 
-        if(m_outer_map_no != 1101) {
-            //add imperfSheta()'d variants of desinence_ix 22, 23 and 25 as possible variants
+        //class 12 and 16 (nasal- and liquid stems, jęti and kolti etc.)
+        else if(m_outer_map_no == 121 || m_outer_map_no == 161) {
+            for(auto& inflections_vec: inflected_forms){
+                for(int i = 12; i < 18; i++) {
+                    class1NasalClean(inflections_vec[i].flected_form);
+                }
+                //crashes due to looping through an empty third vector in the std::array
+                class1NasalClean(inflections_vec[42].flected_form);
+                class1NasalClean(inflections_vec[43].flected_form);
+
+            }
         }
 
     }
@@ -463,7 +473,7 @@ int main() {
     // std::getline(std::cin, desinence_ix);
     
     LcsFlecter* noun_flecter = new LcsFlecter({"", "azъ", NOUN});
-    LcsFlecter* verb_flecter = new LcsFlecter({"jьsk", "iskati", VERB});
+    LcsFlecter* verb_flecter = new LcsFlecter({"žьn", "16", VERB});
 
     std::cout << verb_flecter->addEnding(13).flected_form<< "\n";
     std::cout << noun_flecter->addEnding(20).flected_form << "\n";
