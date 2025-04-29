@@ -4528,31 +4528,35 @@ bool OcsServer::generateInflection(std::string _POST[3], int clientSocket) {
 
 
     std::ostringstream post_response;
-    post_response << "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: " << 6 << "\r\n\r\n" << "did it";
-    if(noun_verb) {
-        //since the inflection-tables are static they should be initialised only once on startup not for each class instance
-        LcsFlecter noun_flecter({stem, conj_type, noun_verb}); 
+    std::ostringstream json_response;
+    
+    //since the inflection-tables are static they should be initialised only once on startup not for each class instance
+    LcsFlecter lcs_flecter({stem, conj_type, noun_verb});
 
-        for(const auto& inflections : noun_flecter.getFullParadigm()) {
-            for(const auto& inflection : inflections) {
-                std::cout << inflection.desinence_ix << " " << inflection.flected_form << "\n";
-            }
-            std::cout << "\n";
+    json_response << "[";
+    int i = 0;
+    for(const auto& inflections : lcs_flecter.getFullParadigm()) {
+        json_response << "{";
+        int j = 0;
+        for(const auto& inflection : inflections) {
+            //std::cout << inflection.desinence_ix << " " << inflection.flected_form << "\n";
+            json_response << '\"' << inflection.desinence_ix << "\":\"" << inflection.flected_form << "\",";
+            j++;
         }
+        if(j > 0) json_response.seekp(-1, std::ios_base::cur);
+        json_response << "},";
+        //std::cout << "\n";
+        i++;
     }
-    else {
-        LcsFlecter verb_flecter({stem, conj_type, noun_verb});
+    if(i > 0) json_response.seekp(-1, std::ios_base::cur);
+    json_response << "]";
 
-        for(const auto& inflections : verb_flecter.getFullParadigm()) {
-            for(const auto& inflection : inflections) {
-                std::cout << inflection.desinence_ix << " " << inflection.flected_form << "\n";
-            }
-            std::cout << "\n";
-        }
-    }
 
-    int length = post_response.str().size() + 1;
-    sendToClient(clientSocket, post_response.str().c_str(), length);
+    int content_length = json_response.str().length();
+    post_response << "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: " << content_length << "\r\n\r\n" << json_response.str();
+
+    
+    sendToClient(clientSocket, post_response.str().c_str(), post_response.str().length() + 1);
 
     return true;
 

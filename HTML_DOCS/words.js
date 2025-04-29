@@ -154,10 +154,14 @@ const generateInflection = (stem, conj_type, noun_verb) => {
   fetch("generate_inflection.php", options)
   .then((response) => {
     //alert("first response");
-    return response.text();
+    return response.json();
   })
   .then(response => {
-    console.log(response);
+    for(const obj of response) {
+      for(const infl in obj) {
+        if(obj[infl] != "") console.log(convertToOCS(obj[infl]));
+      }
+    }
   })
   .finally(() => {;});
 };

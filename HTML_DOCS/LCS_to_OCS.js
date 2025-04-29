@@ -156,7 +156,15 @@ const chu_mappings = {
   'ń' : 'н҄',
   'ĺ' : 'л҄',
   'ŕ' : 'р҄',
-}
+};
+
+const inflection_class_map = new Map( [
+  ["nt_o_PV3", 1013],
+  ["masc_o_PV3", 1029],
+  ["fem_a_PV3", 1036],
+  ["masc_a_PV3", 1057],
+  //and so wider and so forth
+]);
 
 const convertToOCS = (lcs_word, inflexion_class_id) => {
 

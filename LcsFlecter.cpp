@@ -89,13 +89,16 @@ void LcsFlecter::postProcess(std::array<std::vector<Inflection>, 3> &inflected_f
             //should change tables to have all present-participles contiguous
             class5AblautClean(inflected_forms[0][41].flected_form);
 
-            //add lengthened-grade past participles and infinitives as variants (possibly overgeneralising)
+            //add lengthened-grade past participles and infinitives as variants (certainly happens with pьsati and but not bьrati)
             //due to intervening pres-part. this would be two for-loops so better unrolled
-            inflected_forms[1][38].flected_form = class5AblautCleanCopy(inflected_forms[0][38].flected_form);
-            inflected_forms[1][39].flected_form = class5AblautCleanCopy(inflected_forms[0][39].flected_form);
-            inflected_forms[1][40].flected_form = class5AblautCleanCopy(inflected_forms[0][40].flected_form);
-            inflected_forms[1][42].flected_form = class5AblautCleanCopy(inflected_forms[0][42].flected_form);
-            inflected_forms[1][43].flected_form = class5AblautCleanCopy(inflected_forms[0][43].flected_form);
+            if(m_conj_type == "52_abl" && m_stem.ends_with("pьs")) {
+                inflected_forms[1][38].flected_form = class5AblautCleanCopy(inflected_forms[0][38].flected_form);
+                inflected_forms[1][39].flected_form = class5AblautCleanCopy(inflected_forms[0][39].flected_form);
+                inflected_forms[1][40].flected_form = class5AblautCleanCopy(inflected_forms[0][40].flected_form);
+                inflected_forms[1][42].flected_form = class5AblautCleanCopy(inflected_forms[0][42].flected_form);
+                inflected_forms[1][43].flected_form = class5AblautCleanCopy(inflected_forms[0][43].flected_form);
+            }
+            
 
             //for *pьsati and *žьdati lengthened-grade aorist stems should be added as alternatives
             //for žьdati zero-grade present stems should be added
