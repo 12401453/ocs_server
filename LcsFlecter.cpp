@@ -82,6 +82,24 @@ void LcsFlecter::postProcess(std::array<std::vector<Inflection>, 3> &inflected_f
                 class5AblautClean(inflected_forms[0][i].flected_form);
                 class5AblautClean(inflected_forms[1][i].flected_form);
             }
+            //present-participles which don't have zero-grade alternants
+            class5AblautClean(inflected_forms[0][36].flected_form);
+            class5AblautClean(inflected_forms[0][37].flected_form);
+            class5AblautClean(inflected_forms[1][36].flected_form);
+            //should change tables to have all present-participles contiguous
+            class5AblautClean(inflected_forms[0][41].flected_form);
+
+            //add lengthened-grade past participles and infinitives as variants (possibly overgeneralising)
+            //due to intervening pres-part. this would be two for-loops so better unrolled
+            inflected_forms[1][38].flected_form = class5AblautCleanCopy(inflected_forms[0][38].flected_form);
+            inflected_forms[1][39].flected_form = class5AblautCleanCopy(inflected_forms[0][39].flected_form);
+            inflected_forms[1][40].flected_form = class5AblautCleanCopy(inflected_forms[0][40].flected_form);
+            inflected_forms[1][42].flected_form = class5AblautCleanCopy(inflected_forms[0][42].flected_form);
+            inflected_forms[1][43].flected_form = class5AblautCleanCopy(inflected_forms[0][43].flected_form);
+
+            //for *pьsati and *žьdati lengthened-grade aorist stems should be added as alternatives
+            //for žьdati zero-grade present stems should be added
+           
         }
         else if(m_conj_type == "infix_11") {
             //present
@@ -92,6 +110,12 @@ void LcsFlecter::postProcess(std::array<std::vector<Inflection>, 3> &inflected_f
             for(int i = 27; i < 36; i++) {
                 class11InfixClean(inflected_forms[0][i].flected_form);
             }
+            //pres. part.
+            class11InfixClean(inflected_forms[0][36].flected_form);
+            class11InfixClean(inflected_forms[0][37].flected_form);
+            class11InfixClean(inflected_forms[0][41].flected_form);
+            class11InfixClean(inflected_forms[1][36].flected_form);
+            
         }
         else if(m_conj_type == "byti") {
             //need to add on future-forms, alternative imperfects, alternative aorist/past subjunctives etc., fucking nightmare
@@ -119,6 +143,14 @@ void LcsFlecter::postProcess(std::array<std::vector<Inflection>, 3> &inflected_f
                     class14AblautClean(inflected_forms[2][i].flected_form);
                 }
                 
+            }
+            else if(m_conj_type == "15") {
+                // Diels p.247-8 claims that only the PAPs PPPs and l-participles of this class have Reduktionsstufe, but enough counterexamples are given to make it impossible to tell which was Common Slavonic, so I give both
+                for(int i = 38; i < 41; i++) {
+                    inflected_forms[1][i].flected_form = inflected_forms[0][i].flected_form;
+
+                    class15AblautClean(inflected_forms[0][i].flected_form);
+                }
             }
         }
 
@@ -301,6 +333,7 @@ void LcsFlecter::class1Clean(Inflection& inflection) {
         replaceAll(inflection.flected_form, "exě", "ьxě");
         replaceAll(inflection.flected_form, "skj", "šč");
 
+        //Old Russian has present-participle forms of решти with zero-grade рькуштий etc., but unsure whether this is Russian-specific (or caused by Bytovaja Orfografija etc.)
         return;
     }
 
@@ -409,6 +442,25 @@ void LcsFlecter::class5AblautClean(std::string& flecter_output) {
     replaceAll(flecter_output, "ъv", "ov");
     replaceAll(flecter_output, "ьr", "er");
     replaceAll(flecter_output, "ьj", "ěj");
+}
+std::string LcsFlecter::class5AblautCleanCopy(std::string flecter_output) {
+    replaceAll(flecter_output, "strъg", "strug");
+    replaceAll(flecter_output, "stьl", "stel");
+    replaceAll(flecter_output, "ĺьv", "lu");
+    replaceAll(flecter_output, "zьd", "zid");
+    replaceAll(flecter_output, "žьd", "žid");
+    replaceAll(flecter_output, "pьs", "pis");
+    replaceAll(flecter_output, "jьm", "jem");
+    replaceAll(flecter_output, "nьm", "nem");
+    replaceAll(flecter_output, "tьm", "tem");
+    replaceAll(flecter_output, "bьm", "bem");
+    replaceAll(flecter_output, "zьm", "zem");
+    replaceAll(flecter_output, "gъn", "žen");
+    replaceAll(flecter_output, "ъv", "ov");
+    replaceAll(flecter_output, "ьr", "er");
+    replaceAll(flecter_output, "ьj", "ěj");
+
+    return flecter_output;
 }
 void LcsFlecter::class11InfixClean(std::string& flecter_output) {
     replaceAll(flecter_output, "leg", "lęg");
