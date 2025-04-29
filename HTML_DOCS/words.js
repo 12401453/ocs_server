@@ -143,6 +143,25 @@ const dumpLemmasFetch = () => {
   .finally(() => {removeLoadingButton()});
 };
 
+
+const generateInflection = (stem, conj_type, noun_verb) => {
+  let send_data = "stem="+stem+"&conj_type="+conj_type+"&noun_verb="+noun_verb;
+  const myheaders = new Headers();
+  myheaders.append('Content-Type', 'application/x-www-form-urlencoded');
+  myheaders.append('Cache-Control', 'no-cache');
+  const options = {method: "POST", headers: myheaders, cache: "no-store", body: send_data};
+  
+  fetch("generate_inflection.php", options)
+  .then((response) => {
+    //alert("first response");
+    return response.text();
+  })
+  .then(response => {
+    console.log(response);
+  })
+  .finally(() => {;});
+};
+
 document.getElementById("langselect").addEventListener('input', dumpLemmas);
 
 const displayLemmas = (lemmas=lemmas_object) => {

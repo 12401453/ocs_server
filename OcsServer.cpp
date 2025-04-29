@@ -771,6 +771,9 @@ void OcsServer::handlePOSTedData(const char* post_data, int clientSocket) {
     else if(!strcmp(m_url, "/greek_tooltips.php")) {
         bool php_func_success = greekTooltips(post_values, clientSocket);
     }
+    else if(!strcmp(m_url, "/generate_inflection.php")) {
+        bool php_func_success = generateInflection(post_values, clientSocket);
+    }
 
     std::cout << "m_url: " << m_url << std::endl;
     
@@ -824,6 +827,7 @@ int OcsServer::getPostFields(const char* url) {
     else if(!strcmp(url, "/lemma_tooltip_mw.php")) return 3;
     else if(!strcmp(url, "/lcs_regex_search.php")) return 3;
     else if(!strcmp(url, "/greek_tooltips.php")) return 2;
+    else if(!strcmp(url, "/generate_inflection.php")) return 3;
     else return -1;
 }
 
@@ -4515,4 +4519,41 @@ bool OcsServer::greekTooltips(std::string _POST[2], int clientSocket) {
         std::cout << "Database connection failed in greekTooltips()" << std::endl;
         return false;
     }
+}
+
+bool OcsServer::generateInflection(std::string _POST[3], int clientSocket) {
+    std::string stem = _POST[0];
+    std::string conj_type = _POST[1];
+    bool noun_verb = bool(safeStrToInt(_POST[2]));
+
+
+    std::ostringstream post_response;
+    post_response << "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: " << 6 << "\r\n\r\n" << "did it";
+    if(noun_verb) {
+        //since the inflection-tables are static they should be initialised only once on startup not for each class instance
+        LcsFlecter noun_flecter({stem, conj_type, noun_verb}); 
+
+        for(const auto& inflections : noun_flecter.getFullParadigm()) {
+            for(const auto& inflection : inflections) {
+                std::cout << inflection.desinence_ix << " " << inflection.flected_form << "\n";
+            }
+            std::cout << "\n";
+        }
+    }
+    else {
+        LcsFlecter verb_flecter({stem, conj_type, noun_verb});
+
+        for(const auto& inflections : verb_flecter.getFullParadigm()) {
+            for(const auto& inflection : inflections) {
+                std::cout << inflection.desinence_ix << " " << inflection.flected_form << "\n";
+            }
+            std::cout << "\n";
+        }
+    }
+
+    int length = post_response.str().size() + 1;
+    sendToClient(clientSocket, post_response.str().c_str(), length);
+
+    return true;
+
 }

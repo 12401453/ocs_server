@@ -534,52 +534,36 @@ void LcsFlecter::Dejotate(std::string& jotated_form) {
 }
 
 
-int main() {
+// int main() {
 
-    std::string conj_type, stem, noun_verb_str;
+//     std::string conj_type, stem, noun_verb_str;
 
-    LcsFlecter* noun_flecter = new LcsFlecter(NOUN);
-    LcsFlecter* verb_flecter = new LcsFlecter(VERB);
+//     LcsFlecter* noun_flecter = new LcsFlecter(NOUN);
+//     LcsFlecter* verb_flecter = new LcsFlecter(VERB);
     
-    while(stem != "99") {
-        std::getline(std::cin, stem);
-        if(stem == "99") break;
-        std::getline(std::cin, conj_type);
-        std::getline(std::cin, noun_verb_str);
+//     while(stem != "99") {
+//         std::getline(std::cin, stem);
+//         if(stem == "99") break;
+//         std::getline(std::cin, conj_type);
+//         std::getline(std::cin, noun_verb_str);
 
-        bool noun_verb = noun_verb_str == "noun" ? true : false;
+//         bool noun_verb = noun_verb_str == "noun" ? true : false;
 
-        auto& my_flecter = noun_verb ? noun_flecter : verb_flecter;
+//         auto& my_flecter = noun_verb ? noun_flecter : verb_flecter;
 
-        my_flecter->setConjType(conj_type);
-        my_flecter->setStem(stem);
+//         my_flecter->setConjType(conj_type);
+//         my_flecter->setStem(stem);
 
-        for(const auto& inflections : my_flecter->getFullParadigm()) {
-            for(const auto& inflection : inflections) {
-                std::cout << inflection.desinence_ix << " " << inflection.flected_form << "\n";
-            }
-            std::cout << "\n";
-        }
-    }
+//         for(const auto& inflections : my_flecter->getFullParadigm()) {
+//             for(const auto& inflection : inflections) {
+//                 std::cout << inflection.desinence_ix << " " << inflection.flected_form << "\n";
+//             }
+//             std::cout << "\n";
+//         }
+//     }
     
-    
-    //LcsFlecter* noun_flecter = new LcsFlecter({"", "azъ", NOUN});
-    //LcsFlecter* verb_flecter = new LcsFlecter({"žьn", "16", VERB});
+//     delete noun_flecter;
+//     delete verb_flecter;
 
-    
-
-    // std::cout << verb_flecter->addEnding(13).flected_form<< "\n";
-    // std::cout << noun_flecter->addEnding(20).flected_form << "\n";
-
-    // for(const auto& inflections : verb_flecter->getFullParadigm()) {
-    //     for(const auto& inflection : inflections) {
-    //         std::cout << inflection.desinence_ix << " " << inflection.flected_form << "\n";
-    //     }
-    //     std::cout << "\n";
-    // }
-    
-    delete noun_flecter;
-    delete verb_flecter;
-
-    return 0;
-}
+//     return 0;
+// }
