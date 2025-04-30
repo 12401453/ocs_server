@@ -122,6 +122,29 @@ void LcsFlecter::postProcess(std::array<std::vector<Inflection>, 3> &inflected_f
         }
         else if(m_conj_type == "byti") {
             //need to add on future-forms, alternative imperfects, alternative aorist/past subjunctives etc., fucking nightmare
+            const inner_map &desinences = m_active_endings.at(1101); 
+            const inner_map &deviant_desinences = m_active_endings.at(1102); 
+            const inner_map &alternative_desinences = m_active_endings.at(1103);
+
+            // std::array<std::vector<Inflection>, 6> byti_inflected_forms;
+            // byti_inflected_forms[0] = std::move(inflected_forms[0]);
+            // byti_inflected_forms[1] = std::move(inflected_forms[1]);
+            // byti_inflected_forms[2] = std::move(inflected_forms[2]);
+            // byti_inflected_forms[3].reserve(32);
+            // byti_inflected_forms[4].reserve(32);
+            // byti_inflected_forms[5].reserve(32);
+
+            //this leaves empty slots in the secondary-desinence tables, which is not allowed for other paradigms because the more generalised cleaning and altering postProcessing often relies on specific table-numbers, which is fine if those keys exist and just point to empty-strings, but not if they don't exist at all
+            for(const auto& infl_pair : desinences) {
+                inflected_forms[0].emplace_back(infl_pair.first + 44, infl_pair.second);
+            }
+            for(const auto& infl_pair : deviant_desinences) {
+                inflected_forms[1].emplace_back(infl_pair.first + 44, infl_pair.second);
+            }
+            for(const auto& infl_pair : alternative_desinences) {
+                inflected_forms[2].emplace_back(infl_pair.first + 44, infl_pair.second);
+            }
+
         }
         else if(m_outer_map_no == 211) {
             //add the endings at outer_map_no == 2112 to the possible variants alongside those at m_outer_map_no++;
@@ -249,6 +272,7 @@ std::array<std::vector<Inflection>, 3> LcsFlecter::getFullParadigm() {
         }
 
     }
+
     std::array<std::vector<Inflection>, 3> inflected_forms;
     inflected_forms[0].reserve(64);
     inflected_forms[1].reserve(64);

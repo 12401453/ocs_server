@@ -158,10 +158,12 @@ const generateInflection = (stem, conj_type, noun_verb) => {
   })
   .then(response => {
     for(const obj of response) {
+      console.log(obj);
       for(const infl in obj) {
         if(obj[infl] != "") console.log(convertToOCS(obj[infl]));
-        //if(obj[infl] != "") console.log(convertToORV(obj[infl]));
+        if(obj[infl] != "") console.log(convertToORV(obj[infl]));
       }
+      console.log("_________________________");
     }
   })
   .finally(() => {;});
