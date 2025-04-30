@@ -68,6 +68,7 @@ const simplifyLongAdj = (lcs_form) => {
 
 const chu_mappings = {
   'sš' : 'ш',
+  'ss' : 'с',
   'bv' : 'б',
   'ŕǢ' : 'рꙗ',
   'ńǢ' : 'нꙗ',
