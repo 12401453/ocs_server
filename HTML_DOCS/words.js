@@ -143,7 +143,7 @@ const dumpLemmasFetch = () => {
   .finally(() => {removeLoadingButton()});
 };
 
-
+let raw_lcs_paradigm = Object.create(null);
 const generateInflection = (stem, conj_type, noun_verb) => {
   let send_data = "stem="+stem+"&conj_type="+conj_type+"&noun_verb="+noun_verb;
   const myheaders = new Headers();
@@ -157,16 +157,36 @@ const generateInflection = (stem, conj_type, noun_verb) => {
     return response.json();
   })
   .then(response => {
+    raw_lcs_paradigm = response;
+    let lcs_paradigm = raw_lcs_paradigm;
+    for(const idx in lcs_paradigm[0]) {
+      //need to add also nom. sg. PRAP variant in ǫћь- in table-2
+      if(noun_verb == "0" && (idx == 38 || (idx > 39 && idx < 43))) {
+          const jer = idx == 38 ? "ь" : "ъ";
+          const raw_participle = lcs_paradigm[0][idx];
+          lcs_paradigm[0][idx] = raw_participle.concat(jer);
+      }
+    }
+    writeTable(lcs_paradigm[0], conj_type);
     for(const obj of response) {
       console.log(obj);
       for(const infl in obj) {
-        if(obj[infl] != "") console.log(convertToOCS(obj[infl]));
-        if(obj[infl] != "") console.log(convertToORV(obj[infl]));
+        //if(obj[infl] != "") console.log(convertToOCS(obj[infl]));
+        //if(obj[infl] != "") console.log(convertToORV(obj[infl]));
       }
       console.log("_________________________");
     }
   })
   .finally(() => {;});
+};
+
+const writeTable = (lcs_paradigm, conj_type) => {
+  const grid = document.getElementById("verb-grid");
+  grid.innerHTML = "";
+  for(const idx in lcs_paradigm) {
+    const flect_cell = document.createRange().createContextualFragment("<div class='grid-child' title='"+lcs_paradigm[idx]+"'>"+convertToORV(lcs_paradigm[idx], inflection_class_map.get(conj_type))+"</div>");
+    grid.append(flect_cell);
+  }
 };
 
 document.getElementById("langselect").addEventListener('input', dumpLemmas);

@@ -22,7 +22,7 @@
   <!--<div id="other_link" class="toplink-buttons">Other shit</div> -->
 </div>
 
-<div id="main_words_box">
+<div id="main_words_box" style="display: none">
     <span id="lang_button">
     <label for="langselect">Language:</label>
     <select id="langselect" name="langselect" form="formid">
@@ -52,7 +52,11 @@
         <div id="words_results"></div>
     </div>
 </div>
+
+<div id="main_words_box">
+  <div id="verb-grid"></div>
 </div>
+
 <span id="spoofspan" style="display: inline;"></span>
 <span id="spoofspan2"><span id="hidden_searchbox"></span></span>
 </body>

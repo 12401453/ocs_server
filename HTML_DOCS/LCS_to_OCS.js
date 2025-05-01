@@ -230,6 +230,9 @@ const orv_bare_nasal_regex = new RegExp(/[^ščžћђǯj]ę/ug);
 const denasalise = (lcs_form) => {
 
   lcs_form = lcs_form.replaceAll("ǫ", "u");
+  //Russian-specific soft /z'/ and /s'/ retained from PV3 need to be introduced here to get nasal-randomised
+  lcs_form = lcs_form.replaceAll("ʒa", "ʒǢ");
+  lcs_form = lcs_form.replaceAll("śa", "śǢ");
   let match_counting_string = lcs_form;
   
   let regex_res = lcs_form.match(orv_shipyashi_nasal_regex);
@@ -302,12 +305,14 @@ const orv_mappings = {
   'ŕǢ' : 'рꙗ',
   'ńǢ' : 'нꙗ',
   'ĺǢ' : 'лꙗ',
-  'śa' : 'сꙗ',
+  'śa' : 'сꙗ', // 'śa' => 'śǢ' is done in the denasalisatin-function so this is unnecessary
   'jǢ' : 'ꙗ',
   'ŕu' : 'рю',
   'ńu' : 'ню',
   'ĺu' : 'лю',
   'śu' : 'сю',
+  'ʒu' : 'зю',
+  'ʒa' : 'зꙗ', // 'ʒa' => 'ʒǢ' is done in the denasalisatin-function so this is unnecessary
   'ju' : 'ю',
   'ŕǫ' : 'рѭ',
   'ńǫ' : 'нѭ',
