@@ -164,6 +164,7 @@ const inflection_class_map = new Map( [
   ["masc_o_PV3", 1029],
   ["fem_a_PV3", 1036],
   ["masc_a_PV3", 1057],
+  ["vьxь", 1017]
   //and so wider and so forth
 ]);
 
@@ -190,7 +191,7 @@ const convertToOCS = (lcs_word, inflexion_class_id) => {
     lcs_word = lcs_word.slice(0, PV2_pos) + PV2_map.get(PV2_cons) + lcs_word.slice(PV2_pos + 1);
     PV2_pos = lcs_word.search(PV2_regex);
   }
-  if(inflexion_class_id == 1013 || inflexion_class_id == 1029 || inflexion_class_id == 1036 || inflexion_class_id == 1057) lcs_word = applyPV3(lcs_word);
+  if(inflexion_class_id == 1013 || inflexion_class_id == 1017 || inflexion_class_id == 1029 || inflexion_class_id == 1036 || inflexion_class_id == 1057) lcs_word = applyPV3(lcs_word);
 
   lcs_word = simplifyLongAdj(lcs_word);
 
@@ -224,7 +225,7 @@ const restoreTextOCS = () => {
 };
 
 const orv_shipyashi_nasal_regex = new RegExp(/[ščžћђǯj]ę/ug);
-const orv_shipyashi_a_regex = new RegExp(/[ščžћђǯj]Ǣ/ug);
+const orv_shipyashi_a_regex = new RegExp(/[ščžћђǯjʒś]Ǣ/ug);
 const orv_bare_nasal_regex = new RegExp(/[^ščžћђǯj]ę/ug);
 
 const denasalise = (lcs_form) => {
@@ -305,14 +306,14 @@ const orv_mappings = {
   'ŕǢ' : 'рꙗ',
   'ńǢ' : 'нꙗ',
   'ĺǢ' : 'лꙗ',
-  'śa' : 'сꙗ', // 'śa' => 'śǢ' is done in the denasalisatin-function so this is unnecessary
+  'śǢ' : 'сꙗ', // 'śa' => 'śǢ' is done in the denasalisatin-function
   'jǢ' : 'ꙗ',
   'ŕu' : 'рю',
   'ńu' : 'ню',
   'ĺu' : 'лю',
   'śu' : 'сю',
   'ʒu' : 'зю',
-  'ʒa' : 'зꙗ', // 'ʒa' => 'ʒǢ' is done in the denasalisatin-function so this is unnecessary
+  'ʒǢ' : 'зꙗ', // 'ʒa' => 'ʒǢ' is done in the denasalisation-function
   'ju' : 'ю',
   'ŕǫ' : 'рѭ',
   'ńǫ' : 'нѭ',

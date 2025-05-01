@@ -462,14 +462,32 @@ a {
 /*------------------------------OCS SERVER STUFF----------------------------------------------------*/
 #verb-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  grid-template-rows: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(9, 1fr);
+  grid-auto-flow: column;
   color:#cbd9f4;
   font-size: 23px;
+  font-family: Bukyvede;
+  column-gap: 3px;
+  row-gap: 5px;
+}
+#noun-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(7, 1fr);
+  grid-auto-flow: column;
+  color:#cbd9f4;
+  font-size: 23px;
+  line-height: 70%;
   font-family: Bukyvede;
   column-gap: 3px;
 }
 .grid-child {
   padding-left: 2px;
   padding-right: 2px;
+  text-align: center;
+}
+.infl_variants {
+  font-size: 15px;
+  opacity: 0.8;
 }

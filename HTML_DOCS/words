@@ -55,6 +55,7 @@
 
 <div id="main_words_box">
   <div id="verb-grid"></div>
+  <div id="noun-grid"></div>
 </div>
 
 <span id="spoofspan" style="display: inline;"></span>

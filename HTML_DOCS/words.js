@@ -167,7 +167,7 @@ const generateInflection = (stem, conj_type, noun_verb) => {
           lcs_paradigm[0][idx] = raw_participle.concat(jer);
       }
     }
-    writeTable(lcs_paradigm[0], conj_type);
+    writeTable(lcs_paradigm, conj_type, noun_verb);
     for(const obj of response) {
       console.log(obj);
       for(const infl in obj) {
@@ -180,11 +180,33 @@ const generateInflection = (stem, conj_type, noun_verb) => {
   .finally(() => {;});
 };
 
-const writeTable = (lcs_paradigm, conj_type) => {
-  const grid = document.getElementById("verb-grid");
-  grid.innerHTML = "";
-  for(const idx in lcs_paradigm) {
-    const flect_cell = document.createRange().createContextualFragment("<div class='grid-child' title='"+lcs_paradigm[idx]+"'>"+convertToORV(lcs_paradigm[idx], inflection_class_map.get(conj_type))+"</div>");
+const convertFunction = convertToOCS;
+
+const writeTable = (lcs_paradigm, conj_type, noun_verb) => {
+  const verb_grid = document.getElementById("verb-grid");
+  const noun_grid = document.getElementById("noun-grid");
+  verb_grid.innerHTML = "";
+  noun_grid.innerHTML = "";
+
+  const grid = noun_verb == "1" ? noun_grid : verb_grid;
+  for(const idx in lcs_paradigm[0]) {
+    let cell_html = "<div class='grid-child' title='"+lcs_paradigm[0][idx]+"'>"+convertFunction(lcs_paradigm[0][idx], inflection_class_map.get(conj_type));
+    cell_html += "<div class='infl_variants'>";
+    
+    let variants_written = false;
+    for(let i = 1; i < lcs_paradigm.length; i++) {
+      const lcs_variant = lcs_paradigm[i][idx];
+      console.log(lcs_variant);
+      if(lcs_variant != "" && lcs_variant != undefined) {
+        cell_html += "<span title='" + lcs_variant + "'>" + convertFunction(lcs_variant) + "</span>, ";
+        variants_written = true;
+      }
+    }
+    if(variants_written) cell_html = cell_html.slice(0, -2);
+
+    cell_html += "</div>";
+    cell_html += "</div>";
+    const flect_cell = document.createRange().createContextualFragment(cell_html);
     grid.append(flect_cell);
   }
 };
