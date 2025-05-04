@@ -68,6 +68,8 @@ void LcsFlecter::postProcess(std::array<std::vector<Inflection>, 3> &inflected_f
         else if((m_stem.ends_with('k') || m_stem.ends_with('g') || m_stem.ends_with('x') || m_stem.ends_with("xv")) && (m_conj_type == "masc_o" || m_conj_type == "adj_hard")) {
             firstVelarClean(inflected_forms[0][6].flected_form);
         }
+
+        //need to remove the u-stem variants of o-stems when the conj_type is adj_hard (and probably similar for adj_soft too)
     }
     else if(m_noun_verb == VERB) {
         //NB the imperf_sheta() function from the autoreconstructor will need to just be added on in the JS, since it affects the 2nd 3rd dual and 3pl imperfect of all verbs and is thus not captured in inflection-class-specific alternate conjugation-tables 
@@ -149,6 +151,8 @@ void LcsFlecter::postProcess(std::array<std::vector<Inflection>, 3> &inflected_f
         else if(m_outer_map_no == 211) {
             //add the endings at outer_map_no == 2112 to the possible variants alongside those at m_outer_map_no++;
         }
+
+        //probably should check the ablaut-grades of kviti-verbs
 
         if(m_conj_type == "11" || m_conj_type == "infix_11" || m_conj_type == "infix_12" || m_conj_type == "14" || m_conj_type == "15" || m_conj_type == "21" || m_conj_type == "31" || m_conj_type == "iskati") {
             for(auto& inflections_vec: inflected_forms){
@@ -272,6 +276,7 @@ std::array<std::vector<Inflection>, 3> LcsFlecter::getFullParadigm() {
         }
 
     }
+    //add something to merge the Nsg. and other PRAP desinences, and get rid of the alternative Nsg. ending because for the base inflection-table we are not considering case/number/gender of participles at all; we just need to show in the table both stems of the PRAP
 
     std::array<std::vector<Inflection>, 3> inflected_forms;
     inflected_forms[0].reserve(64);

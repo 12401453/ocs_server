@@ -241,6 +241,8 @@ const output_filename = "lemlist_2.h";
 
 let cpp_lemma_list = "std::set<Lemma> lemma_list = {\n";
 
+let lemma_json = "[";
+
 const new_ids_map = new Map();
 
 async function readChuLemmasFile() {
@@ -278,17 +280,25 @@ async function readLemmasSpreadsheet() {
     const poss_doublet = row[6];
     
     if(noun_verb != 99) {
+      let lemma_stem = "";
+
       cpp_lemma_list += "  {"+new_id+",\"";
       if(conj_type == "11" || conj_type == "12" || conj_type == "15" || conj_type == "16" || conj_type == "infix_11" || conj_type == "infix_12") {
         cpp_lemma_list += root_2;
+        lemma_stem = root_2;
       }
       else if(conj_type == "14") {
         cpp_lemma_list += root_1;
+        lemma_stem = root_1;
       }
       else if(pre_jot == "") {
         cpp_lemma_list += cs_lemma.slice(0, cs_lemma.length-conj_type_Trunc(conj_type));
+        lemma_stem = cs_lemma.slice(0, cs_lemma.length-conj_type_Trunc(conj_type));
       }
-      else cpp_lemma_list += pre_jot.slice(0, pre_jot.length-conj_type_Trunc(conj_type));
+      else {
+        cpp_lemma_list += pre_jot.slice(0, pre_jot.length-conj_type_Trunc(conj_type));
+        lemma_stem = pre_jot.slice(0, pre_jot.length-conj_type_Trunc(conj_type));
+      }
 
       cpp_lemma_list += "\",";
       cpp_lemma_list += "\""+morph_replace+"\",";
@@ -299,10 +309,17 @@ async function readLemmasSpreadsheet() {
       cpp_lemma_list += "\""+conj_type+"\",";
       
       cpp_lemma_list += noun_verb+"},\n";
+
+      //write just the inflectable lemmas to lemmas_json.json for use with the paradigm-generator
+      if(noun_verb != 0) {
+        lemma_json += "\n  [" + new_id +",\"" + lemma_stem + "\",\"" + noun_verb + "\",\"" + conj_type + "\"],";
+      }
     }
     
   };
   cpp_lemma_list += "};";
+  lemma_json = lemma_json.slice(0,-1);
+  lemma_json += "\n]";
   lemma_spreadsheet_file.close();
 }
 
@@ -314,6 +331,7 @@ async function generateCppLemlist() {
   await readLemmasSpreadsheet();
   //fs.appendFileSync(output_filename, cpp_lemma_list);
   fs.writeFileSync(output_filename, cpp_lemma_list);
+  fs.writeFileSync("../HTML_DOCS/lemmas_json.json", lemma_json);
   //console.log(cpp_lemma_list);
 
 }

@@ -2,7 +2,7 @@ const dl_tl_regex = /[dt][ĺl][^̥]/;
 const ORT_regex = /[eo][rl]([tŕrpsšdfgћђklĺzžxčvbnńmǯ\+]|$)/
 const PV2_regex = /[kgx]v?([ěęeiь]|ŕ̥|ĺ̥)/;
 const PV3_regex = /[ьię][kgx][auǫ]/;
-const tense_jer_regex = /[ьъ]j[Ǣeiьęǫu]/;
+const tense_jer_regex = /[ьъ]j[Ǣeiьęǫuě]/; //I know that /ě/ cannot follow /j/ etymologically but my current analysis (probably wrong) of dealing with glagoĺěte etc. imperatives after palatal consonants is to assume analogy with the hard-stems, so the alternative 2pl. imperative of покръіти has a theoretical deviant form *pokrъjěte that needs to have its tense back-jer lengthened in accordance with my orthographic policy for normalised OCS
 
 const PV2_map = new Map();
 PV2_map.set('k', 'c');
@@ -168,7 +168,7 @@ const inflection_class_map = new Map( [
   //and so wider and so forth
 ]);
 
-const convertToOCS = (lcs_word, inflexion_class_id) => {
+const convertToOCS = (lcs_word, inflexion_class_id, lemma_id) => {
 
   lcs_word = lcs_word.replaceAll("ę̌", "ę").replaceAll("y̨", "y").replaceAll("Q", "ъ");
 
@@ -191,7 +191,7 @@ const convertToOCS = (lcs_word, inflexion_class_id) => {
     lcs_word = lcs_word.slice(0, PV2_pos) + PV2_map.get(PV2_cons) + lcs_word.slice(PV2_pos + 1);
     PV2_pos = lcs_word.search(PV2_regex);
   }
-  if(inflexion_class_id == 1013 || inflexion_class_id == 1017 || inflexion_class_id == 1029 || inflexion_class_id == 1036 || inflexion_class_id == 1057) lcs_word = applyPV3(lcs_word);
+  if(inflexion_class_id == 1013 || inflexion_class_id == 1017 || inflexion_class_id == 1029 || inflexion_class_id == 1036 || inflexion_class_id == 1057 || lemma_id == 362 || lemma_id == 2608 /*vьxakъ and vьxako*/) lcs_word = applyPV3(lcs_word);
 
   lcs_word = simplifyLongAdj(lcs_word);
 
@@ -208,9 +208,10 @@ const original_ocs_forms = new Array();
 const normaliseOCS = () => {
   original_ocs_forms.length = 0;
   document.querySelectorAll("[data-lcs_recon]").forEach(tt => {
-    const ocs_form = tt.firstChild.textContent
+    const ocs_form = tt.firstChild.textContent;
+    const lemma_id = Number(tt.dataset.lemma_id);
     original_ocs_forms.push(ocs_form);
-    tt.firstChild.textContent = convertToOCS(tt.dataset.lcs_recon, tt.dataset.inflexion);
+    tt.firstChild.textContent = convertToOCS(tt.dataset.lcs_recon, tt.dataset.inflexion, lemma_id);
     tt.classList.add("converted");
   });
   ttPosition();
@@ -394,7 +395,7 @@ const orv_mappings = {
   'ŕ' : 'р҄',
 }
 
-const convertToORV = (lcs_word, inflexion_class_id) => {
+const convertToORV = (lcs_word, inflexion_class_id, lemma_id) => {
 
   lcs_word = lcs_word.replaceAll("ę̌", "ě").replaceAll("y̨", "a").replaceAll("Q", "ь");
   lcs_word = lcs_word.replaceAll("ĺ̥", "l̥");
@@ -402,7 +403,7 @@ const convertToORV = (lcs_word, inflexion_class_id) => {
   lcs_word = lcs_word.replace(/^ak/, "jǢk").replace(/^av/, "jǢv");
   lcs_word = yeetTlDl(lcs_word);
 
-  if(inflexion_class_id == 1013 || inflexion_class_id == 1029 || inflexion_class_id == 1036 || inflexion_class_id == 1057 || inflexion_class_id == 1017) lcs_word = applyPV3(lcs_word);
+  if(inflexion_class_id == 1013 || inflexion_class_id == 1029 || inflexion_class_id == 1036 || inflexion_class_id == 1057 || inflexion_class_id == 1017 || lemma_id == 362 || lemma_id == 2608 /*vьxakъ and vьxako*/) lcs_word = applyPV3(lcs_word);
   lcs_word = denasalise(lcs_word);
   lcs_word = russifyDoublets(lcs_word);
 
@@ -440,8 +441,9 @@ const russifyOCS = () => {
   original_ocs_forms.length = 0;
   document.querySelectorAll("[data-lcs_recon]").forEach(tt => {
     const ocs_form = tt.firstChild.textContent
+    const lemma_id = Number(tt.dataset.lemma_id);
     original_ocs_forms.push(ocs_form);
-    tt.firstChild.textContent = convertToORV(tt.dataset.lcs_recon, Number(tt.dataset.inflexion));
+    tt.firstChild.textContent = convertToORV(tt.dataset.lcs_recon, Number(tt.dataset.inflexion), lemma_id);
     tt.classList.add("converted");
   });
   ttPosition();

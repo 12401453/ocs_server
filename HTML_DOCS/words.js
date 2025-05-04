@@ -143,8 +143,25 @@ const dumpLemmasFetch = () => {
   .finally(() => {removeLoadingButton()});
 };
 
+//----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+let lemmas_json = Object.create(null);
+
+fetch("lemmas_json.json")
+.then(response => {
+  return response.json()
+})
+.then(response => lemmas_json = response);
+
+const randomLemma = () => {
+  const idx = Math.floor(Math.random() * 3031);
+  let [lemma_id, stem, noun_verb, conj_type] = lemmas_json[idx];
+  noun_verb = noun_verb == "1" ? "0" : "1";
+  generateInflection(stem, conj_type, noun_verb, lemma_id);
+  console.log(stem, conj_type, noun_verb);
+};
+
 let raw_lcs_paradigm = Object.create(null);
-const generateInflection = (stem, conj_type, noun_verb) => {
+const generateInflection = (stem, conj_type, noun_verb, lemma_id) => {
   let send_data = "stem="+stem+"&conj_type="+conj_type+"&noun_verb="+noun_verb;
   const myheaders = new Headers();
   myheaders.append('Content-Type', 'application/x-www-form-urlencoded');
@@ -167,14 +184,14 @@ const generateInflection = (stem, conj_type, noun_verb) => {
           lcs_paradigm[0][idx] = raw_participle.concat(jer);
       }
     }
-    writeTable(lcs_paradigm, conj_type, noun_verb);
+    writeTable(lcs_paradigm, conj_type, noun_verb, lemma_id);
     for(const obj of response) {
-      console.log(obj);
+      //console.log(obj);
       for(const infl in obj) {
         //if(obj[infl] != "") console.log(convertToOCS(obj[infl]));
         //if(obj[infl] != "") console.log(convertToORV(obj[infl]));
       }
-      console.log("_________________________");
+      //console.log("_________________________");
     }
   })
   .finally(() => {;});
@@ -182,7 +199,7 @@ const generateInflection = (stem, conj_type, noun_verb) => {
 
 const convertFunction = convertToOCS;
 
-const writeTable = (lcs_paradigm, conj_type, noun_verb) => {
+const writeTable = (lcs_paradigm, conj_type, noun_verb, lemma_id) => {
   const verb_grid = document.getElementById("verb-grid");
   const noun_grid = document.getElementById("noun-grid");
   verb_grid.innerHTML = "";
@@ -190,15 +207,15 @@ const writeTable = (lcs_paradigm, conj_type, noun_verb) => {
 
   const grid = noun_verb == "1" ? noun_grid : verb_grid;
   for(const idx in lcs_paradigm[0]) {
-    let cell_html = "<div class='grid-child' title='"+lcs_paradigm[0][idx]+"'>"+convertFunction(lcs_paradigm[0][idx], inflection_class_map.get(conj_type));
+    let cell_html = "<div class='grid-child' title='"+lcs_paradigm[0][idx]+"'>"+convertFunction(lcs_paradigm[0][idx], inflection_class_map.get(conj_type), lemma_id);
     cell_html += "<div class='infl_variants'>";
     
     let variants_written = false;
     for(let i = 1; i < lcs_paradigm.length; i++) {
-      const lcs_variant = lcs_paradigm[i][idx];
-      console.log(lcs_variant);
+      const lcs_variant = lcs_paradigm[i][idx]; //this often returns undefineds and it really shouldn't
+      //console.log(lcs_variant);
       if(lcs_variant != "" && lcs_variant != undefined) {
-        cell_html += "<span title='" + lcs_variant + "'>" + convertFunction(lcs_variant) + "</span>, ";
+        cell_html += "<span title='" + lcs_variant + "'>" + convertFunction(lcs_variant, inflection_class_map.get(conj_type), lemma_id) + "</span>, ";
         variants_written = true;
       }
     }
@@ -210,6 +227,8 @@ const writeTable = (lcs_paradigm, conj_type, noun_verb) => {
     grid.append(flect_cell);
   }
 };
+//---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 
 document.getElementById("langselect").addEventListener('input', dumpLemmas);
 
