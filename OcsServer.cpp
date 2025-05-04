@@ -50,7 +50,7 @@ void OcsServer::onMessageReceived(int clientSocket, const char* msg, int length)
         msg_url[lb_pos - 13] = '\0';
 
         short int page_type = 0;
-        if(!strcmp(msg_url, "/text_viewer")) page_type = 1;
+        if(!strcmp(msg_url, "/texts")) page_type = 1;
         else if(!strcmp(msg_url, "/add_texts")) page_type = 2;
         else if(!strcmp(msg_url, "/words")) page_type = 3;
 
@@ -4524,7 +4524,7 @@ bool OcsServer::greekTooltips(std::string _POST[2], int clientSocket) {
 bool OcsServer::generateInflection(std::string _POST[3], int clientSocket) {
     std::string stem = _POST[0];
     std::string conj_type = _POST[1];
-    bool noun_verb = bool(safeStrToInt(_POST[2]));
+    bool noun_verb = _POST[2] == "2" ? true : false;
 
 
     std::ostringstream post_response;

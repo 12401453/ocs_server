@@ -90,7 +90,7 @@ a {
   display: flex;
   flex-flow: row wrap;
   justify-content: flex-start;
-  font-family: Calibri;
+  font-family: IBM_Plex_Sans;
   background-color: #172136;
   color: #cbd9f4a6;
   border-top-right-radius: 5px;

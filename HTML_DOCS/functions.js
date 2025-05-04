@@ -459,7 +459,7 @@ function loadText() {
     if(xhttp.readyState == 4)  {
       loadingbutton.innerHTML = "&nbsp;&nbsp;Done&nbsp;&nbsp;"; //not really needed
       //location.reload(); /* window.open("update_db.php"); */
-      window.location = "/text_viewer";
+      window.location = "/texts";
     }
   }
    xhttp.send(send_data);

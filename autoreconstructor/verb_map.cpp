@@ -588,7 +588,15 @@ inner_map v_13_c1 = {
 {11, "ertъ"},
 {12, "ertъ"},
 {15, "ersta"},
-{24, "erěašeta"},
+{19, "ьrěaxъ"}, //19-27 is imperfects based on the present-stem rather than the unmetathesised aorist stem (Supr. мь҆рѣꙿхѫ) but it's unclear where the (weak and fallen) jer in such forms is actually from the present-stem or just an orthographic contamination of the metathesised aorist-stem; see Diels p.236 for discussion
+{20, "ьrěaše"},
+{21, "ьrěaše"},
+{22, "ьrěaxově"},
+{23, "ьrěašeta"},
+{24, "ьrěašete"},
+{25, "ьrěaxomъ"},
+{26, "ьrěašete"},
+{27, "ьrěaxǫ"},
 {37, "ьrǫtj"},
 };
 inner_map v_16_c0 = {
@@ -645,7 +653,15 @@ inner_map v_16_c1 = {
 {15, "sta"},
 {16, "xomъ"},
 {18, "šę"},
-{24, "ěašeta"},
+{19, "jǢaxъ"}, //19-27 is imperfects based on the present-stem rather than the unmetathesised aorist stem, to account for e.g. Supr. мелꙗаше
+{20, "jǢaše"},
+{21, "jǢaše"},
+{22, "jǢaxově"},
+{23, "jǢašeta"},
+{24, "jǢašete"},
+{25, "jǢaxomъ"},
+{26, "jǢašete"},
+{27, "jǢaxǫ"},
 {31, "jěvě"},
 {32, "jěta"},
 {33, "jěte"},

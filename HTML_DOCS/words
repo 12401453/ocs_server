@@ -17,7 +17,7 @@
   <br>
 <div id="main_box">
 <div id="toplinks-flexbox"> 
-  <a href="text_viewer"><div id="texts_link" class="toplink-buttons">Texts</div></a>
+  <a href="texts"><div id="texts_link" class="toplink-buttons">Texts</div></a>
   <a href="words"><div id="words_link" class="toplink-buttons current">Words</div></a>
   <!--<div id="other_link" class="toplink-buttons">Other shit</div> -->
 </div>

@@ -73,11 +73,19 @@ void class_I_clean(std::string &verb, bool imperative)
     verb.replace(x, y, str2);
   } while (x != -1);
 
-  for (int letno = 0; letno < 41; letno++)
+  for (int letno = -2; letno < 41; letno++)
   {
 
     switch (letno)
     {
+    case -2:
+      str1.assign("ogsę");
+      str2.assign("ašę");
+      break;
+    case -1:
+      str1.assign("oksę");
+      str2.assign("ašę");
+      break;
     case 0:
       str1.assign("eksę");
       str2.assign("ěšę");

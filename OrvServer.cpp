@@ -50,7 +50,7 @@ void OcsServer::onMessageReceived(int clientSocket, const char* msg, int length)
         msg_url[lb_pos - 13] = '\0';
 
         short int page_type = 0;
-        if(!strcmp(msg_url, "/text_viewer")) page_type = 1;
+        if(!strcmp(msg_url, "/texts")) page_type = 1;
         else if(!strcmp(msg_url, "/add_texts")) page_type = 2;
         else if(!strcmp(msg_url, "/words")) page_type = 3;
 

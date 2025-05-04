@@ -374,6 +374,8 @@ void LcsFlecter::class1Clean(Inflection& inflection) {
     replaceAll(inflection.flected_form, "eksę", "ěšę");
     replaceAll(inflection.flected_form, "ekst", "ěst");
     replaceAll(inflection.flected_form, "egsę", "ěšę");
+    replaceAll(inflection.flected_form, "ogsę", "ašę");
+    replaceAll(inflection.flected_form, "oksę", "ašę");
     replaceAll(inflection.flected_form, "egst", "ěst");
     replaceAll(inflection.flected_form, "ebs", "ěbs");
     replaceAll(inflection.flected_form, "eks", "ěx");

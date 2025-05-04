@@ -154,14 +154,13 @@ fetch("lemmas_json.json")
 
 const randomLemma = () => {
   const idx = Math.floor(Math.random() * 3031);
-  let [lemma_id, stem, noun_verb, conj_type] = lemmas_json[idx];
-  noun_verb = noun_verb == "1" ? "0" : "1";
-  generateInflection(stem, conj_type, noun_verb, lemma_id);
-  console.log(stem, conj_type, noun_verb);
+  generateInflection(lemma);
+  let [lemma_id, stem, noun_verb, conj_type] = lemma;
+  console.log(lemma_id, stem, noun_verb, conj_type);
 };
 
 let raw_lcs_paradigm = Object.create(null);
-const generateInflection = (stem, conj_type, noun_verb, lemma_id) => {
+const generateInflection = ([lemma_id, stem, noun_verb, conj_type]) => {
   let send_data = "stem="+stem+"&conj_type="+conj_type+"&noun_verb="+noun_verb;
   const myheaders = new Headers();
   myheaders.append('Content-Type', 'application/x-www-form-urlencoded');
@@ -178,7 +177,7 @@ const generateInflection = (stem, conj_type, noun_verb, lemma_id) => {
     let lcs_paradigm = raw_lcs_paradigm;
     for(const idx in lcs_paradigm[0]) {
       //need to add also nom. sg. PRAP variant in ǫћь- in table-2
-      if(noun_verb == "0" && (idx == 38 || (idx > 39 && idx < 43))) {
+      if(noun_verb == "1" && (idx == 38 || (idx > 39 && idx < 43))) {
           const jer = idx == 38 ? "ь" : "ъ";
           const raw_participle = lcs_paradigm[0][idx];
           lcs_paradigm[0][idx] = raw_participle.concat(jer);
@@ -205,7 +204,7 @@ const writeTable = (lcs_paradigm, conj_type, noun_verb, lemma_id) => {
   verb_grid.innerHTML = "";
   noun_grid.innerHTML = "";
 
-  const grid = noun_verb == "1" ? noun_grid : verb_grid;
+  const grid = noun_verb == "2" ? noun_grid : verb_grid;
   for(const idx in lcs_paradigm[0]) {
     let cell_html = "<div class='grid-child' title='"+lcs_paradigm[0][idx]+"'>"+convertFunction(lcs_paradigm[0][idx], inflection_class_map.get(conj_type), lemma_id);
     cell_html += "<div class='infl_variants'>";
