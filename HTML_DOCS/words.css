@@ -487,6 +487,12 @@ a {
   text-align: center;
 }
 .infl_variants {
-  font-size: 15px;
+}
+.deviance {
   opacity: 0.8;
+  font-size: 15px;
+}
+.variant {
+  opacity: 1;
+  font-size: 20px;
 }

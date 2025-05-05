@@ -154,8 +154,9 @@ fetch("lemmas_json.json")
 
 const randomLemma = () => {
   const idx = Math.floor(Math.random() * 3031);
+  const lemma = lemmas_json[idx];
   generateInflection(lemma);
-  let [lemma_id, stem, noun_verb, conj_type] = lemma;
+  const [lemma_id, stem, noun_verb, conj_type] = lemma;
   console.log(lemma_id, stem, noun_verb, conj_type);
 };
 
@@ -213,8 +214,9 @@ const writeTable = (lcs_paradigm, conj_type, noun_verb, lemma_id) => {
     for(let i = 1; i < lcs_paradigm.length; i++) {
       const lcs_variant = lcs_paradigm[i][idx]; //this often returns undefineds and it really shouldn't
       //console.log(lcs_variant);
+      let variant_type = i == 2 ? "variant" : "deviance";
       if(lcs_variant != "" && lcs_variant != undefined) {
-        cell_html += "<span title='" + lcs_variant + "'>" + convertFunction(lcs_variant, inflection_class_map.get(conj_type), lemma_id) + "</span>, ";
+        cell_html += "<span class='"+variant_type+"' title='" + lcs_variant + "'>" + convertFunction(lcs_variant, inflection_class_map.get(conj_type), lemma_id) + "</span>, ";
         variants_written = true;
       }
     }

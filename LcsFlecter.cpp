@@ -65,8 +65,11 @@ void LcsFlecter::postProcess(std::array<std::vector<Inflection>, 3> &inflected_f
         if(m_outer_map_no == 301) {
             firstVelarClean(inflected_forms[0][6].flected_form);
         }
-        else if((m_stem.ends_with('k') || m_stem.ends_with('g') || m_stem.ends_with('x') || m_stem.ends_with("xv")) && (m_conj_type == "masc_o" || m_conj_type == "adj_hard")) {
-            firstVelarClean(inflected_forms[0][6].flected_form);
+        else if((m_stem.ends_with('k') || m_stem.ends_with('g') || m_stem.ends_with('x') || m_stem.ends_with("xv")) && (m_conj_type.starts_with("masc") || m_conj_type == "adj_hard")) {
+            
+            if(m_conj_type == "masc_o" || m_conj_type == "adj_hard") firstVelarClean(inflected_forms[0][6].flected_form);
+            else if(m_conj_type == "masc_u") firstVelarClean(inflected_forms[1][6].flected_form);
+            //need to add the cleaning of masc_u stem o-stem alternative vocative-endings (vŕ̥xe currently => врьсе)
         }
 
         //need to remove the u-stem variants of o-stems when the conj_type is adj_hard (and probably similar for adj_soft too)
@@ -227,6 +230,7 @@ std::array<std::vector<Inflection>, 3> LcsFlecter::getFullParadigm() {
     //should possibly get rid of this check and add an explicit new map at 523 with just those 5.1 forms that actually occur
     if(m_conj_type == "iskati") {
         alternative_map_no = m_outer_map_no - 10;
+        //need to get rid of the duplicates in the alternative map or it looks retarded
     }
     auto alternatives_iter = m_active_endings.find(alternative_map_no);
 
