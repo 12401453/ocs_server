@@ -64,7 +64,7 @@ int TcpListener::run() {
                     
                     
                     int client = accept(m_socket, nullptr, nullptr);
-                    printf("accepted client: %d\n", client);
+                    //printf("accepted client: %d\n", client);
                     //FD_SET(client, &m_master);
                     
                     //std::thread(onClientConnected, client).detach();
