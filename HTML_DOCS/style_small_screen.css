@@ -735,8 +735,8 @@ a {
   flex-flow: row nowrap;
   justify-content: flex-start;
   font-family: IBM_PLEX_SANS;
-  background-color: #172136;
-  color: #cbd9f4a6;
+  /* background-color: #172136;
+  color: #cbd9f4a6; */
   border-top-right-radius: 5px;
   border-top-left-radius: 5px;
   border-bottom: 1px solid black;
@@ -754,18 +754,18 @@ a {
   text-align: center;
   border-right: 1px solid black;
   cursor: pointer;
-  background-color: #172136
+  /* background-color: #172136 */
 }
 .toplink-buttons.current {
-  background-color: #040a16;
+  /* background-color: #040a16; */
   color: #cbd9f4;
 }
 .toplink-buttons:hover {
-  background-color: #071022;
+  /* background-color: #071022; */
   color: #cbd9f4d3;
 }
 .toplink-buttons.current:hover {
-  background-color: #040a16;
+  /* background-color: #040a16; */
   color: #cbd9f4;
 }
 #topbar_placefiller {

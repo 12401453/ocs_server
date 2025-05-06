@@ -274,7 +274,10 @@ int main() {
             endings_vec.emplace_back(inner_map);   
             std::sort(endings_vec.begin(), endings_vec.end(), customLess);       
         }
-        for(const auto& inner_map : endings_vec) {
+        for(auto& inner_map : endings_vec) {
+            if(inner_map.first == 37 && outer_map.first%10 == 2) {
+                continue;
+            }
             verb_inflections_file << "\n    {" << inner_map.first << ",\"" << inner_map.second << "\"},";
         }
         verb_inflections_file << "\n    }";

@@ -738,8 +738,8 @@ border-bottom: 2px solid rgb(23, 33, 54, 0);
   flex-flow: row nowrap;
   justify-content: flex-start;
   font-family: "IBM_PLEX_SANS";
-  background-color: #172136;
-  color: #cbd9f4a6;
+  /* background-color: #172136;
+  color: #cbd9f4a6; */
   border-top-right-radius: 5px;
   border-top-left-radius: 5px;
   border-bottom: 1px solid black;
@@ -748,6 +748,10 @@ border-bottom: 2px solid rgb(23, 33, 54, 0);
   border-top-left-radius: 5px;
 }
 .toplink-buttons {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /*above is how you centre text vertically and horizontally in an element (the bare text itself will act like a child of the flexbox)*/
   font-size: 21px;
   width: fit-content;
   max-width: 97%;
@@ -757,19 +761,22 @@ border-bottom: 2px solid rgb(23, 33, 54, 0);
   text-align: center;
   border-right: 1px solid black;
   cursor: pointer;
-  background-color: #172136
+  /* background-color: #172136 */
 }
 .toplink-buttons.current {
-  background-color: #040a16;
+  /* background-color: #040a16; */
   color: #cbd9f4;
 }
 .toplink-buttons:hover {
-  background-color: #071022;
+  /* background-color: #071022; */
   color: #cbd9f4d3;
 }
 .toplink-buttons.current:hover {
-  background-color: #040a16;
+  /* background-color: #040a16; */
   color: #cbd9f4;
+}
+.toplinks-ahref  {
+  display: flex;
 }
 
 #topbar_placefiller {
@@ -780,10 +787,10 @@ border-bottom: 2px solid rgb(23, 33, 54, 0);
   width: 30px;
   opacity: 85%;
   font-size: 21px;
-  padding: 4px; /* setting this to 6px looks more square but it increases the height of the topbar so that the Texts and Words buttons no longer fill it (I should fix those instead so they always fill the bar but I think their height is hardcoded in order to vertically-centre the text, which again is bad) */
+  padding: 6px; /* setting this to 6px looks more square but it increases the height of the topbar so that the Texts and Words buttons no longer fill it (I should fix those instead so they always fill the bar but I think their height is hardcoded in order to vertically-centre the text, which again is bad) */
   text-align: center;
   user-select: none;
-  border-top-right-radius: 4px;
+  border-top-right-radius: 5px;
   border-left: 1px solid black;
   cursor: pointer;
 }

@@ -13,7 +13,9 @@ a {
 #main_text {
   background-color: white;  
 }
-
+#main_words_box {
+  background-color: white;  
+}
 
 #new_text{
   background-color: #f0c36dbd;

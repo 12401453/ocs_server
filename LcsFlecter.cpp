@@ -72,7 +72,14 @@ void LcsFlecter::postProcess(std::array<std::vector<Inflection>, 3> &inflected_f
             //need to add the cleaning of masc_u stem o-stem alternative vocative-endings (vŕ̥xe currently => врьсе)
         }
 
-        //need to remove the u-stem variants of o-stems when the conj_type is adj_hard (and probably similar for adj_soft too)
+        //remove u-stem etc. variants from adjectivals
+        if(m_conj_type.starts_with("adj")) {
+            inflected_forms[1][3].flected_form = "";
+            inflected_forms[1][14].flected_form = "";
+            inflected_forms[1][16].flected_form = "";
+            inflected_forms[1][19].flected_form = "";
+            inflected_forms[1][20].flected_form = "";
+        }
     }
     else if(m_noun_verb == VERB) {
         //NB the imperf_sheta() function from the autoreconstructor will need to just be added on in the JS, since it affects the 2nd 3rd dual and 3pl imperfect of all verbs and is thus not captured in inflection-class-specific alternate conjugation-tables 

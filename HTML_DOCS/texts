@@ -23,7 +23,7 @@
 <div id="main_box">
 <div id="toplinks-flexbox"> 
   <div id="texts_link" class="toplink-buttons current">Texts</div>
-  <a href="words"><div id="words_link" class="toplink-buttons">Words</div></a>
+  <a href="words" class="toplinks-ahref"><div id="words_link" class="toplink-buttons">Words</div></a>
   <div id="topbar_placefiller"></div>
   <img id="theme_switcher" src="moon-stars.svg" title="Switch to light theme" draggable="false"></img>
   <!--<div id="other_link" class="toplink-buttons">Other shit</div> -->
