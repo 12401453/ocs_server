@@ -278,7 +278,7 @@ inner_map N_adj_hard_c1 = {
 };
 
 inner_map N_oko_c0 = {
-{1, ""},
+//{1, ""}, //used to have {1, ""} here, but it messes up LcsFlecter
 {43, "o"},
 {44, "o"},
 {45, "ese"},
@@ -1940,8 +1940,8 @@ inner_map N_kyj_c0 = {
 {5, "ojemь"},
 {6, "ъjimь"},
 {7, "ъjь"},
-{8, "ajA"},
-{9, "ajA"},
+{8, "ajǢ"},
+{9, "ajǢ"},
 {10, "oju"},
 {11, "ъjima"},
 {12, "oju"},

@@ -2737,9 +2737,9 @@ const lemmaTooltip = function (show_load_spinner) {
         });
 
         document.getElementById("lcs_mode").classList.remove("active");
-        torot_btn.classList.add("active");
         if(show_load_spinner) torot_btn.removeChild(btn_load_spinner);
-        // document.getElementById("tt_toggle").disabled = false;
+        torot_btn.classList.add("active");
+	// document.getElementById("tt_toggle").disabled = false;
         setTimeout(ttPosition, 200);
         app_state.annotation_mode = "torot";
         

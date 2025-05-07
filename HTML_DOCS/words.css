@@ -155,3 +155,64 @@ a {
   opacity: 1;
   font-size: 23px;
 }
+
+#lcs_lemma_searchbox {
+  display: block;
+  background-color: #040a16;
+  color: #cbd9f4;
+  padding: 5px;
+  border: 2px solid black;
+  border-radius: 5px;
+  resize: none;
+  width: 175px;
+  height: 27px;
+  font-size: 17px;
+  font-family: IBM_Plex_Sans;
+  outline: none;
+}
+#search_candidates_box {
+  display: none;
+  flex-flow: column nowrap;
+  justify-content: start;
+  align-items: stretch;
+  height: fit-content;
+
+  background-color: #071022;
+  border-left: 2px solid black;
+  border-right: 2px solid black;
+  border-bottom: 2px solid black;
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+  z-index: 1;
+  opacity: 0.95;
+  position: absolute;
+  top: 100%;
+}
+.search_candidate {
+  width: 175px;
+  padding: 5px;
+  height: 20px;
+  font-size: 17px;
+  font-family: Bukyvede;
+  color: #cbd9f4;
+  border-bottom: 1px solid black;
+  cursor: pointer;
+}
+.search_candidate:last-child {
+  width: 175px;
+  padding: 5px;
+  height: 20px;
+  font-size: 17px;
+  font-family: Bukyvede;
+  color: #cbd9f4;
+  border-bottom: none;
+}
+.search_candidate:hover {
+  background-color: black;
+}
+.search_candidate.keyboard_selected{
+  background-color: black;
+}
+#search_container {
+  position: relative;
+}

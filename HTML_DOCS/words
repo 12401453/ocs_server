@@ -59,6 +59,14 @@
 </div>
 
 <div id="main_words_box">
+  <div id="search_container">  
+    <textarea id="lcs_lemma_searchbox" autocomplete="off" placeholder="Search LCS lemmas..."></textarea>
+    <div id="search_candidates_box">
+      <!-- <div class="search_candidate">решти</div>
+      <div class="search_candidate">решти</div>
+      <div class="search_candidate">решти</div> -->
+    </div>
+  </div>
   <!-- <div class="infl-grid" id="verb-grid"></div>
   <div class="infl-grid" id="noun-grid"></div> -->
   <div id="grids-container">

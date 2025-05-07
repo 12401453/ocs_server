@@ -65,6 +65,13 @@ void LcsFlecter::postProcess(std::array<std::vector<Inflection>, 3> &inflected_f
         if(m_outer_map_no == 301) {
             firstVelarClean(inflected_forms[0][6].flected_form);
         }
+        else if(m_conj_type == "oko") {
+            for(auto& inflections_vec : inflected_forms) {
+                for(auto& inflection : inflections_vec) {
+                    firstVelarClean(inflection.flected_form);
+                }
+            }
+        }
         else if((m_stem.ends_with('k') || m_stem.ends_with('g') || m_stem.ends_with('x') || m_stem.ends_with("xv")) && (m_conj_type.starts_with("masc") || m_conj_type == "adj_hard")) {
             
             if(m_conj_type == "masc_o" || m_conj_type == "adj_hard") firstVelarClean(inflected_forms[0][6].flected_form);
@@ -137,14 +144,6 @@ void LcsFlecter::postProcess(std::array<std::vector<Inflection>, 3> &inflected_f
             const inner_map &desinences = m_active_endings.at(1101); 
             const inner_map &deviant_desinences = m_active_endings.at(1102); 
             const inner_map &alternative_desinences = m_active_endings.at(1103);
-
-            // std::array<std::vector<Inflection>, 6> byti_inflected_forms;
-            // byti_inflected_forms[0] = std::move(inflected_forms[0]);
-            // byti_inflected_forms[1] = std::move(inflected_forms[1]);
-            // byti_inflected_forms[2] = std::move(inflected_forms[2]);
-            // byti_inflected_forms[3].reserve(32);
-            // byti_inflected_forms[4].reserve(32);
-            // byti_inflected_forms[5].reserve(32);
 
             //this leaves empty slots in the secondary-desinence tables, which is not allowed for other paradigms because the more generalised cleaning and altering postProcessing often relies on specific table-numbers, which is fine if those keys exist and just point to empty-strings, but not if they don't exist at all
             for(const auto& infl_pair : desinences) {
@@ -220,6 +219,16 @@ void LcsFlecter::postProcess(std::array<std::vector<Inflection>, 3> &inflected_f
     for(auto& inflections_vec : inflected_forms) {
         for(auto& inflection : inflections_vec) {
             Dejotate(inflection.flected_form);
+        }
+    }
+
+    //get rid of duplicates caused by things like alternatively jotated and non-jotated verb endings on already-soft stems which end up the same
+    int paradigm_length = inflected_forms[0].size();
+    for(int i = 1; i < 3; i++) {
+        for(int j = 0; j < paradigm_length; j++) {
+            if(inflected_forms[0][j].flected_form == inflected_forms[i][j].flected_form) {
+                inflected_forms[i][j].flected_form = "";
+            }
         }
     }
 };
@@ -426,6 +435,7 @@ void LcsFlecter::class1Clean(Inflection& inflection) {
     replaceAll(inflection.flected_form, "bs", "s");
     replaceAll(inflection.flected_form, "ps", "s");
     replaceAll(inflection.flected_form, "pn", "n");
+    replaceAll(inflection.flected_form, "sč", "šč");
 
     replaceAll(inflection.flected_form, "Z", "ę̌");
 }

@@ -2147,7 +2147,7 @@ inner_map v_311_c0 = {
 {25, "ěaxomъ"},
 {26, "ěašete"},
 {27, "ěaxǫ"},
-{28, "jimь"},
+{28, "imь"}, //used to be "jimь" here, probably just a mistake but worth checking
 {29, "jь"},
 {30, "i"},
 {31, "ivę"},

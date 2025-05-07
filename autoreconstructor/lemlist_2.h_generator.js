@@ -312,7 +312,7 @@ async function readLemmasSpreadsheet() {
 
       //write just the inflectable lemmas to lemmas_json.json for use with the paradigm-generator
       if(noun_verb != 0) {
-        lemma_json += "\n  [" + new_id +",\"" + lemma_stem + "\",\"" + noun_verb + "\",\"" + conj_type + "\"],";
+        lemma_json += "\n  [" + new_id +",\"" + lemma_stem + "\",\"" + noun_verb + "\",\"" + conj_type + "\",\"" + cs_lemma + "\"],";
       }
     }
     
