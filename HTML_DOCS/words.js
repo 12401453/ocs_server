@@ -76,11 +76,11 @@ const writeTable = (lcs_paradigm, conj_type, noun_verb, lemma_id) => {
       //console.log(lcs_variant);
       let variant_type = i == 2 ? "variant" : "deviance";
       if(lcs_variant != "" && lcs_variant != undefined) {
-        cell_html += "<span class='"+variant_type+"' title='" + lcs_variant + "'>" + convertFunction(lcs_variant, inflection_class_map.get(conj_type), lemma_id) + "</span>, ";
+        cell_html += "<span class='"+variant_type+"' title='" + lcs_variant + "'>" + convertFunction(lcs_variant, inflection_class_map.get(conj_type), lemma_id) + "</span> ";
         variants_written = true;
       }
     }
-    if(variants_written) cell_html = cell_html.slice(0, -2);
+    if(variants_written) cell_html = cell_html.slice(0, -1);
 
     cell_html += "</div>";
     cell_html += "</div>";
