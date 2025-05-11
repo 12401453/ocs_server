@@ -19,6 +19,7 @@ const randomLemma = () => {
 
 let raw_lcs_paradigm = Object.create(null);
 const generateInflection = ([lemma_id, stem, noun_verb, conj_type]) => {
+  console.log(lemma_id, stem, noun_verb, conj_type);
   let send_data = "stem="+stem+"&conj_type="+conj_type+"&noun_verb="+noun_verb;
   const myheaders = new Headers();
   myheaders.append('Content-Type', 'application/x-www-form-urlencoded');
@@ -139,25 +140,15 @@ const removeSearchCandidates = () => {
 }
 
 const filterLemmas = (event) => {
-
-
-  console.log(event);
-  
+ 
   const search_word = lemma_searchbox.value.trim();
   
   console.log(search_word);
-  
 
   if(search_word == "") {
-    // lemma_searchbox.style.borderBottomLeftRadius = "";
-    // lemma_searchbox.style.borderBottomRightRadius = "";
-    // search_candidates.innerHTML = "";
-    // search_candidates.style.display = "";
     removeSearchCandidates();
     return;
-
   }
-  //console.log(search_word);
 
   const filtered_lemmas = lemmas_json.filter(lemma_arr => lemma_arr[4].startsWith(search_word) || lemma_arr[1].startsWith(search_word));
 
@@ -168,10 +159,6 @@ const filterLemmas = (event) => {
     search_candidates.style.display = "flex";
   }
   else {
-    // lemma_searchbox.style.borderBottomLeftRadius = "";
-    // lemma_searchbox.style.borderBottomRightRadius = "";
-    // search_candidates.innerHTML = "";
-    // search_candidates.style.display = "";
     removeSearchCandidates();
     return;
   }
@@ -179,13 +166,14 @@ const filterLemmas = (event) => {
   let results_html = "";
 
   for(let i = 0; i < filtered_lemmas.length && i < 10; i++) {
-    results_html += "<div class=\"search_candidate\" data-idx=\"" + filtered_lemmas[i][0] +"\">" + convertFunction(filtered_lemmas[i][4]) + "</div>";
+    //console.log("search_candidate data: ", filtered_lemmas[i][4], inflection_class_map.get(filtered_lemmas[i][3]), filtered_lemmas[i][0]);
+    results_html += "<div class=\"search_candidate\" data-idx=\"" + filtered_lemmas[i][0] +"\">" + convertFunction(filtered_lemmas[i][4], inflection_class_map.get(filtered_lemmas[i][3]), filtered_lemmas[i][0]) + "</div>";
   }
   const results_elem = document.createRange().createContextualFragment(results_html);
   search_candidates.append(results_elem);
 
   search_candidates.querySelectorAll(".search_candidate").forEach(elem => elem.addEventListener('click', showTable));
-}
+};
 
 const showTable = (event) => {
   const lemma_id = Number(event.target.dataset.idx);

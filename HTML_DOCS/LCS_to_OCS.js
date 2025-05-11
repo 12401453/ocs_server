@@ -170,6 +170,12 @@ const inflection_class_map = new Map( [
 
 const convertToOCS = (lcs_word, inflexion_class_id, lemma_id) => {
 
+  //extremely disgusting jo-stem variants of gospodь possible only under a system with Russian-style secondary palatalisation of dentals
+  if(lemma_id == 342) {
+    if(lcs_word == "gospoda") return "господꙗ";
+    else if(lcs_word == "gospodu") return "господю";
+  }
+
   lcs_word = lcs_word.replaceAll("ę̌", "ę").replaceAll("y̨", "y").replaceAll("Q", "ъ");
 
   lcs_word = lcs_word.replace(/^ak/, "jǢk"); //not really justified other than by the extreme rarity of ак- spellings in OCS

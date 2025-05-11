@@ -193,6 +193,14 @@ void LcsFlecter::postProcess(std::array<std::vector<Inflection>, 3> &inflected_f
             }
         }
 
+        else if(m_conj_type == "51") {
+            for(auto& inflections_vec : inflected_forms) {
+                for(auto& inflection : inflections_vec) {
+                    class51VelarClean(inflection);
+                }
+            }
+        }
+
         //class 12 and 16 (nasal- and liquid stems, jęti and kolti etc.)
         else if(m_outer_map_no == 121 || m_outer_map_no == 161) {
             for(int i = 0; i < 2; i++){
@@ -266,7 +274,7 @@ std::array<std::vector<Inflection>, 3> LcsFlecter::getFullParadigm() {
     std::string suffix = "";
     if(m_noun_verb == NOUN) {
 
-        if(m_conj_type == "masc_ji" || m_conj_type == "masc_a" || m_conj_type == "masc_a_PV3" || m_conj_type == "masc_ja") {
+        if(m_conj_type == "masc_a" || m_conj_type == "masc_a_PV3" || m_conj_type == "masc_ja") {
             gender_third = 2;
             std::advance(desinences_iter, 21);
             std::advance(desinences_iter_end, -21);
@@ -378,6 +386,8 @@ bool LcsFlecter::c_strStartsWith(const char *str1, const char *str2) {
 }
 
 void LcsFlecter::class1Clean(Inflection& inflection) {
+    replaceAll(inflection.flected_form, "pn", "n"); //class 2.1 -nǫti verbs  
+
     if(inflection.desinence_ix < 37 && inflection.desinence_ix > 27) {
         replaceAll(inflection.flected_form, "eki", "ьki");
         replaceAll(inflection.flected_form, "ekě", "ьkě");
@@ -436,7 +446,7 @@ void LcsFlecter::class1Clean(Inflection& inflection) {
     replaceAll(inflection.flected_form, "ds", "s");
     replaceAll(inflection.flected_form, "bs", "s");
     replaceAll(inflection.flected_form, "ps", "s");
-    replaceAll(inflection.flected_form, "pn", "n");
+    //pn -> n moved before the imperative-check
     replaceAll(inflection.flected_form, "sč", "šč");
 
     replaceAll(inflection.flected_form, "Z", "ę̌");
@@ -488,7 +498,7 @@ void LcsFlecter::class3Clean(std::string& flecter_output) {
 void LcsFlecter::class5AblautClean(std::string& flecter_output) {
     replaceAll(flecter_output, "strъg", "strug");
     replaceAll(flecter_output, "stьl", "stel");
-    replaceAll(flecter_output, "ĺьv", "lu");
+    replaceAll(flecter_output, "ĺьv", "ĺu");
     replaceAll(flecter_output, "zьd", "zid");
     replaceAll(flecter_output, "žьd", "žid");
     replaceAll(flecter_output, "pьs", "pis");
@@ -518,8 +528,17 @@ std::string LcsFlecter::class5AblautCleanCopy(std::string flecter_output) {
     replaceAll(flecter_output, "ъv", "ov");
     replaceAll(flecter_output, "ьr", "er");
     replaceAll(flecter_output, "ьj", "ěj");
-
     return flecter_output;
+}
+void LcsFlecter::class51VelarClean(Inflection& inflection) {
+    if(inflection.desinence_ix < 37 && inflection.desinence_ix > 27) {
+        return;
+    }
+    replaceAll(inflection.flected_form, "ske", "šče");
+    replaceAll(inflection.flected_form, "xve", "šve");
+    replaceAll(inflection.flected_form, "ge", "že");
+    replaceAll(inflection.flected_form, "ke", "če");
+    replaceAll(inflection.flected_form, "xe", "še");
 }
 void LcsFlecter::class11InfixClean(std::string& flecter_output) {
     replaceAll(flecter_output, "leg", "lęg");
@@ -547,6 +566,7 @@ void LcsFlecter::firstVelarClean(std::string& flecter_output) {
     replaceAll(flecter_output, "xь", "šь");
 }
 void LcsFlecter::pv1LongE(std::string& flecter_output) {
+    //this seems to be used in the Autoreconstructor only for -ěj comparatives of adjectives which I haven't added yet
     replaceAll(flecter_output, "gě", "žǢ");
     replaceAll(flecter_output, "kě", "čǢ");
     replaceAll(flecter_output, "xě", "šǢ");

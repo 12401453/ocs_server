@@ -63,6 +63,7 @@ class LcsFlecter {
     void class3Clean(std::string& flecter_output);
     void class5AblautClean(std::string& flecter_output);
     std::string class5AblautCleanCopy(std::string flecter_output);
+    void class51VelarClean(Inflection& inflection);
     void class11InfixClean(std::string& flecter_output);
     void class12InfixClean(std::string& flecter_output);
     void imperfSheta(std::string& flecter_output);
