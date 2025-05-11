@@ -56,6 +56,7 @@ class OcsServer : public TcpListener {
         bool lemmaTooltips(std::string _POST[1], int clientSocket);
         bool lcsSearch(std::string _POST[3], int clientSocket);
         bool lcsRegexSearch(std::string _POST[3], int clientSocket);
+        bool lcsTrigramSearch(std::string _POST[3], int clientSocket);
         
         
         bool lemmaTooltipsMW(std::string _POST[3], int clientSocket);

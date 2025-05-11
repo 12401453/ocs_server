@@ -6,7 +6,7 @@ void class_I_clean(std::string &verb, bool imperative)
 
     std::string str1, str2;
     int x, y;
-    for (int letno = 0; letno < 7; letno++)
+    for (int letno = 0; letno < 8; letno++)
     {
 
       switch (letno)
@@ -38,6 +38,10 @@ void class_I_clean(std::string &verb, bool imperative)
       case 6:
         str1.assign("skj");
         str2.assign("šč");
+        break;
+      case 7:
+        str1.assign("pn"); //imperatives of top-nǫti verbs should still be cleaned
+        str2.assign("n");
         break;
       }
 
@@ -73,7 +77,7 @@ void class_I_clean(std::string &verb, bool imperative)
     verb.replace(x, y, str2);
   } while (x != -1);
 
-  for (int letno = -2; letno < 41; letno++)
+  for (int letno = -2; letno < 44; letno++)
   {
 
     switch (letno)
@@ -144,112 +148,124 @@ void class_I_clean(std::string &verb, bool imperative)
       str2.assign("šę");
       break;
     case 14:
+      str1.assign("vsę");
+      str2.assign("šę");
+      break;
+    case 15:
       str1.assign("gst");
       str2.assign("st");
       break;
-    case 15:
+    case 16:
       str1.assign("kst");
       str2.assign("st");
       break;
-    case 16:
+    case 17:
+      str1.assign("vst");
+      str2.assign("st");
+      break;
+    case 18:
       str1.assign("skj");
       str2.assign("šč");
       break;
-    case 17:
+    case 19:
       str1.assign("ks");
       str2.assign("x");
       break;
-    case 18:
+    case 20:
       str1.assign("gs");
       str2.assign("x");
       break;
-    case 19:
+    case 21:
       str1.assign("bt");
       str2.assign("t");
       break;
-    case 20:
+    case 22:
       str1.assign("pt");
       str2.assign("t");
       break;
-    case 21:
+    case 23:
       str1.assign("dt");
       str2.assign("st");
       break;
-    case 22:
+    case 24:
       str1.assign("tt");
       str2.assign("st");
       break;
-    case 23:
+    case 25:
       str1.assign("zt");
       str2.assign("st");
       break;
-    case 24:
+    case 26:
       str1.assign("gě");
       str2.assign("žǢ");
       break;
-    case 25:
+    case 27:
       str1.assign("xě");
       str2.assign("šǢ");
       break;
-    case 26:
+    case 28:
       str1.assign("kě");
       str2.assign("čǢ");
       break;
-    case 27:
+    case 29:
       str1.assign("ge");
       str2.assign("že");
       break;
-    case 28:
+    case 30:
       str1.assign("xe");
       str2.assign("še");
       break;
 
-    case 29:
+    case 31:
       str1.assign("ke");
       str2.assign("če");
       break;
-    case 30:
+    case 32:
       str1.assign("žě");
       str2.assign("žǢ");
       break;
-    case 31:
+    case 33:
       str1.assign("šě");
       str2.assign("šǢ");
       break;
 
-    case 32:
+    case 34:
       str1.assign("čě");
       str2.assign("čǢ");
       break;
-    case 33:
+    case 35:
       str1.assign("jě");
       str2.assign("jǢ");
       break;
-    case 34:
+    case 36:
       str1.assign("vt");
       str2.assign("t");
       break;
-    case 35:
+    case 37:
+      str1.assign("vs");
+      str2.assign("x");
+      break;
+    case 38:
       str1.assign("zs");
       str2.assign("s");
       break;
-    case 36:
+    case 39:
       str1.assign("ts");
       str2.assign("s");
       break;
-    case 37:
+    case 40:
       str1.assign("ds");
       str2.assign("s");
       break;
-    case 38:
+    case 41:
       str1.assign("bs");
       str2.assign("s");
       break;
-    case 39:
+    case 42:
       str1.assign("ps");
       str2.assign("s");
       break;
-    case 40:
+    case 43:
       str1.assign("pn");
       str2.assign("n");
       break;

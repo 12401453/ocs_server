@@ -3005,7 +3005,7 @@ const removeSearchLoadSpinner = () => {
 }
 
 const lcsSearch = (query, regex=false) => {
-  let url = "lcs_search.php";
+  let url = "lcs_trigram_search.php";
   if(regex) url = "lcs_regex_search.php";
   
   resetLcsPageSearch();

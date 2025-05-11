@@ -420,8 +420,10 @@ void LcsFlecter::class1Clean(Inflection& inflection) {
     replaceAll(inflection.flected_form, "eps", "ěs");
     replaceAll(inflection.flected_form, "ksę", "šę");
     replaceAll(inflection.flected_form, "gsę", "šę");
+    replaceAll(inflection.flected_form, "vsę", "šę"); //I'm assuming that the /v/ in the stem of жити was a RUKI-sound
     replaceAll(inflection.flected_form, "gst", "st");
     replaceAll(inflection.flected_form, "kst", "st");
+    replaceAll(inflection.flected_form, "vst", "st");  //I'm assuming that the /v/ in the stem of жити was a RUKI-sound
     replaceAll(inflection.flected_form, "skj", "šč");
     replaceAll(inflection.flected_form, "ks", "x");
     replaceAll(inflection.flected_form, "gs", "x");
@@ -441,6 +443,7 @@ void LcsFlecter::class1Clean(Inflection& inflection) {
     replaceAll(inflection.flected_form, "čě", "čǢ");
     replaceAll(inflection.flected_form, "jě", "jǢ");
     replaceAll(inflection.flected_form, "vt", "t");
+    replaceAll(inflection.flected_form, "vs", "x"); //I'm assuming that the /v/ in the stem of жити was a RUKI-sound
     replaceAll(inflection.flected_form, "zs", "s");
     replaceAll(inflection.flected_form, "ts", "s");
     replaceAll(inflection.flected_form, "ds", "s");
@@ -448,6 +451,7 @@ void LcsFlecter::class1Clean(Inflection& inflection) {
     replaceAll(inflection.flected_form, "ps", "s");
     //pn -> n moved before the imperative-check
     replaceAll(inflection.flected_form, "sč", "šč");
+    replaceAll(inflection.flected_form, "vl", "l"); //only needed for past. part. of žiti and possibly will mess up other things
 
     replaceAll(inflection.flected_form, "Z", "ę̌");
 }
