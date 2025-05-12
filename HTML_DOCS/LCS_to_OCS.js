@@ -197,7 +197,10 @@ const convertToOCS = (lcs_word, inflexion_class_id, lemma_id) => {
     lcs_word = lcs_word.slice(0, PV2_pos) + PV2_map.get(PV2_cons) + lcs_word.slice(PV2_pos + 1);
     PV2_pos = lcs_word.search(PV2_regex);
   }
-  if(inflexion_class_id == 1013 || inflexion_class_id == 1017 || inflexion_class_id == 1029 || inflexion_class_id == 1036 || inflexion_class_id == 1057 || lemma_id == 362 || lemma_id == 2608 /*vьxakъ and vьxako*/) lcs_word = applyPV3(lcs_word);
+  if(inflexion_class_id == 1013 || inflexion_class_id == 1017 || inflexion_class_id == 1029 || inflexion_class_id == 1036 || inflexion_class_id == 1057 || lemma_id == 362 || lemma_id == 2608 /*vьxakъ and vьxako*/ || lemma_id == 68 || lemma_id == 2858 || lemma_id == 1576 || lemma_id == 2661 || lemma_id == 3091 || lemma_id == 2960 || lemma_id == 7200 || lemma_id == 7242) {
+    //this type of word-level specification would be partly reduced if the lemmas-system was broken down by stem and prefix more
+    lcs_word = applyPV3(lcs_word);
+  }
 
   lcs_word = simplifyLongAdj(lcs_word);
 

@@ -7,6 +7,7 @@
 #include <math.h>
 #include <sys/stat.h>
 #include <vector>
+#include <algorithm>
 
 void OcsServer::onMessageReceived(int clientSocket, const char* msg, int length) {
 
@@ -4683,6 +4684,8 @@ bool OcsServer::lcsTrigramSearch(std::string _POST[3], int clientSocket) {
         std::string chu_word_torot = "";
         std::string present_before = "";
         std::string presentation_after = "";
+
+        std::sort(result_toknos_vec.begin(), result_toknos_vec.end());
 
         for(const int& result_tokno : result_toknos_vec) {
             sqlite3_bind_int(statement1, 1, result_tokno);
