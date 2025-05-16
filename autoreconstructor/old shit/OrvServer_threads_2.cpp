@@ -3,13 +3,12 @@
 //run with
 //  ./webserv <portnumber> [silent]
 #include <sstream>
-#include "OcsServer.h"
+#include "OcsServer_threads.h"
 #include <math.h>
 #include <sys/stat.h>
 #include <vector>
-#include <algorithm>
 
-void OcsServer::onMessageReceived(int clientSocket, const char* msg, int length) {
+void OcsServer::onMessageReceived(int clientSocket, const char *msg, int length, int get_or_post, int headers_length, int content_length) {
 
 
     #define GET 3
@@ -22,19 +21,19 @@ void OcsServer::onMessageReceived(int clientSocket, const char* msg, int length)
     std::cout << "Size of the above message is " << length << " bytes\n\n";
   
     int lb_pos = checkHeaderEnd(msg);
-    int get_or_post = getRequestType(msg);
+    // int get_or_post = getRequestType(msg);
   
     std::cout << get_or_post << std::endl;
 
-    if(get_or_post == -1 && lb_pos == -1) {
-        buildPOSTedData(msg, false, length);
+    // if(get_or_post == -1 && lb_pos == -1) {
+    //     buildPOSTedData(msg, false, length);
 
-        if(m_POST_continue == false) {
-            handlePOSTedData(m_post_data, clientSocket);
-        }
-    }
+    //     if(m_POST_continue == false) {
+    //         handlePOSTedData(m_post_data, clientSocket);
+    //     }
+    // }
 
-    else if (get_or_post == GET)
+    if (get_or_post == GET)
     {
         std::cout << "This is a GET request" << std::endl;
 
@@ -140,66 +139,66 @@ void OcsServer::onMessageReceived(int clientSocket, const char* msg, int length)
 
         std::cout << "This is a POST request" << std::endl;
         
-       buildPOSTedData(msg, true, length);
-       if(m_POST_continue == false) {
-            handlePOSTedData(m_post_data, clientSocket);
-       } 
+        const char* post_data_c_str = msg + headers_length + 4; //no need for size-checking because if this is from a big std::string it still points to heap-allocated data that will stay alive as long as the original std::string is in scope (which it is, within the TcpListener::onClientConnected() function)
+        char url[50];
+        getURL(msg, url);
+        handlePOSTedData(post_data_c_str, clientSocket, (const char*)url);
     } 
     
 }
 
 
-bool OcsServer::c_strStartsWith(const char *str1, const char *str2)
-{
-    int strcmp_count = 0;
-    int str2_len = strlen(str2);
+// bool OcsServer::c_strStartsWith(const char *str1, const char *str2)
+// {
+//     int strcmp_count = 0;
+//     int str2_len = strlen(str2);
  
-    int i = -1;
+//     int i = -1;
    
-    while ((*str1 == *str2 || *str2 == '\0') && i < str2_len)
-    {
-        strcmp_count++;
-        str1++;
-        str2++;
-        i++;
-    }
+//     while ((*str1 == *str2 || *str2 == '\0') && i < str2_len)
+//     {
+//         strcmp_count++;
+//         str1++;
+//         str2++;
+//         i++;
+//     }
  
-    if (strcmp_count == str2_len + 1)
-    {
-        return true;
-    }
-    else
-        return false;
-}
+//     if (strcmp_count == str2_len + 1)
+//     {
+//         return true;
+//     }
+//     else
+//         return false;
+// }
 
-int OcsServer::c_strFind(const char* haystack, const char* needle) {
+// int OcsServer::c_strFind(const char* haystack, const char* needle) {
 
-    int needle_startpos = 0;
-    int needle_length = strlen(needle);
-    int haystack_length = strlen(haystack);
-    if(haystack_length < needle_length) return -1;
-    char needle_buf[needle_length + 1]; //yes I'm stack-allocating variable-length arrays because g++ lets me and I want the efficiency; it will segfault just the same if I pre-allocate an arbitrary length array which the data is too big for anyway, and I absolutely will not use any of the heap-allocated C++ containers for the essential HTTP message parsing, which needs to be imperceptibly fast
+//     int needle_startpos = 0;
+//     int needle_length = strlen(needle);
+//     int haystack_length = strlen(haystack);
+//     if(haystack_length < needle_length) return -1;
+//     char needle_buf[needle_length + 1]; //yes I'm stack-allocating variable-length arrays because g++ lets me and I want the efficiency; it will segfault just the same if I pre-allocate an arbitrary length array which the data is too big for anyway, and I absolutely will not use any of the heap-allocated C++ containers for the essential HTTP message parsing, which needs to be imperceptibly fast
 
-    needle_buf[needle_length] = '\0';
-    for(int i = 0; i < haystack_length; i++) {
-        for(int j = 0 ; j < needle_length; j++) {
-            needle_buf[j] = haystack[j];
-        }
+//     needle_buf[needle_length] = '\0';
+//     for(int i = 0; i < haystack_length; i++) {
+//         for(int j = 0 ; j < needle_length; j++) {
+//             needle_buf[j] = haystack[j];
+//         }
        
-        if(c_strStartsWith(needle_buf, needle)) {
-            break;
-        }
-        needle_startpos++;
-        haystack++;
-    }
+//         if(c_strStartsWith(needle_buf, needle)) {
+//             break;
+//         }
+//         needle_startpos++;
+//         haystack++;
+//     }
     
-    if(needle_startpos == haystack_length) {
-        return -1;
-        }
-    else {
-        return needle_startpos;
-    } 
-}
+//     if(needle_startpos == haystack_length) {
+//         return -1;
+//         }
+//     else {
+//         return needle_startpos;
+//     } 
+// }
 
 int OcsServer::c_strFindNearest(const char* haystack, const char* needle1, const char* needle2) {
     int needles_startpos = 0;
@@ -232,16 +231,16 @@ int OcsServer::c_strFindNearest(const char* haystack, const char* needle1, const
 }
 
 
-int OcsServer::getRequestType(const char* msg ) {
+// int OcsServer::getRequestType(const char* msg ) {
 
-    if(c_strStartsWith(msg, "GET")) {
-        return 3;
-    }
-    else if(c_strStartsWith(msg, "POST")) {
-        return 4;
-    }
-    else return -1;
-}
+//     if(c_strStartsWith(msg, "GET")) {
+//         return 3;
+//     }
+//     else if(c_strStartsWith(msg, "POST")) {
+//         return 4;
+//     }
+//     else return -1;
+// }
 
 int OcsServer::checkHeaderEnd(const char* msg) {
     int lb_pos = c_strFind(msg, "\x0d");
@@ -420,61 +419,61 @@ void OcsServer::insertLangSelect(std::ostringstream &html) {
     }
 }
 
-void OcsServer::buildPOSTedData(const char* msg, bool headers_present, int length) {
+// void OcsServer::buildPOSTedData(const char* msg, bool headers_present, int length) {
 
-    if(headers_present) {
+//     if(headers_present) {
 
-        setURL(msg);
+//         setURL(msg);
         
-        int content_length_start = c_strFind(msg, "Content-Length:") + 16;
+//         int content_length_start = c_strFind(msg, "Content-Length:") + 16;
         
-        int cl_figures = 0;
-        char next_nl = 'c';
-        while(next_nl != '\x0d') {
-            next_nl = msg[content_length_start + cl_figures];
-            cl_figures++;
-        }
-        cl_figures--;
-        std::cout << "Number of digits in content-length: " << cl_figures << std::endl;
+//         int cl_figures = 0;
+//         char next_nl = 'c';
+//         while(next_nl != '\x0d') {
+//             next_nl = msg[content_length_start + cl_figures];
+//             cl_figures++;
+//         }
+//         cl_figures--;
+//         std::cout << "Number of digits in content-length: " << cl_figures << std::endl;
 
-        char content_length_str[cl_figures + 1];
-        for(int i = 0; i < cl_figures; i++) {
-            content_length_str[i] = msg[content_length_start + i];
-        }
-        content_length_str[cl_figures] = '\0';
-        int content_length = atoi(content_length_str);
-        std::cout << "Parsed-out content-length: " << content_length << std::endl;
+//         char content_length_str[cl_figures + 1];
+//         for(int i = 0; i < cl_figures; i++) {
+//             content_length_str[i] = msg[content_length_start + i];
+//         }
+//         content_length_str[cl_figures] = '\0';
+//         int content_length = atoi(content_length_str);
+//         std::cout << "Parsed-out content-length: " << content_length << std::endl;
 
-        int headers_length = c_strFind(msg, "\r\n\r\n");
-        m_POST_continue = false;
-        m_bytes_handled = 0;
-        m_total_post_bytes = headers_length + 4 + content_length;
-        if(m_total_post_bytes > length) {
-            std::string post_data {msg + headers_length + 4}; //strcat won't work unless I use malloc() to allocate heap-memory of appropriate size for the stuck-together c-strings, so may as well use std::string if I'm forced to heap-allocate anyway
-            //at least I'm only heap-allocating in those instances where the POST data makes the message over 4096 bytes
-           m_post_data_incomplete = post_data;
-           // std::cout << "headers_length + 4 + content_length > length" << std::endl;
-           m_POST_continue = true;
-           m_bytes_handled += length;
+//         int headers_length = c_strFind(msg, "\r\n\r\n");
+//         m_POST_continue = false;
+//         m_bytes_handled = 0;
+//         m_total_post_bytes = headers_length + 4 + content_length;
+//         if(m_total_post_bytes > length) {
+//             std::string post_data {msg + headers_length + 4}; //strcat won't work unless I use malloc() to allocate heap-memory of appropriate size for the stuck-together c-strings, so may as well use std::string if I'm forced to heap-allocate anyway
+//             //at least I'm only heap-allocating in those instances where the POST data makes the message over 4096 bytes
+//            m_post_data_incomplete = post_data;
+//            // std::cout << "headers_length + 4 + content_length > length" << std::endl;
+//            m_POST_continue = true;
+//            m_bytes_handled += length;
             
-        }
-        else {
-            m_post_data = msg + headers_length + 4;
-        }
+//         }
+//         else {
+//             m_post_data = msg + headers_length + 4;
+//         }
   
-    }
-    else {
+//     }
+//     else {
         
-        std::string post_data_cont {msg};
-        m_post_data_incomplete.append(post_data_cont);
-        m_post_data = m_post_data_incomplete.c_str();
-        m_bytes_handled += length;
-        if(m_total_post_bytes == m_bytes_handled) {
-            m_POST_continue = false;
-        }    
-    }
+//         std::string post_data_cont {msg};
+//         m_post_data_incomplete.append(post_data_cont);
+//         m_post_data = m_post_data_incomplete.c_str();
+//         m_bytes_handled += length;
+//         if(m_total_post_bytes == m_bytes_handled) {
+//             m_POST_continue = false;
+//         }    
+//     }
 
-}
+// }
 
 std::string OcsServer::URIDecode(std::string &text) //stolen off a rando on stackexchange who forgot to null-terminate the char-array before he strtol()'d it, which caused big problems
 {
@@ -601,10 +600,10 @@ std::string OcsServer::applySuperscripts(const std::string &database_text) {
 }
 
 //in order to avoid using std::vector I cannot save the array of the POSTed data into a variable which persists outside this function, because the size of the array is only known if I know which POST data I am processing, which means the code to create an array out of the m_post_data has to be repeated everytime a function to handle it is called
-void OcsServer::handlePOSTedData(const char* post_data, int clientSocket) {
+void OcsServer::handlePOSTedData(const char* post_data, int clientSocket, const char* url) {
     std::cout << "------------------------COMPLETE POST DATA------------------------\n" << post_data << "\n-------------------------------------------------------\n";
     
-    int post_fields = getPostFields(m_url);
+    int post_fields = getPostFields(url);
 
     if(post_fields == -1) {
         std::string bad_post_response = "HTTP/1.1 400 Bad Request\r\nContent-Type: text/html\r\nContent-Length: 30\r\n\r\nUnrecognised POST url - repent";
@@ -612,8 +611,8 @@ void OcsServer::handlePOSTedData(const char* post_data, int clientSocket) {
         return;
     }
 
-    if(post_fields == 0 && !strcmp(m_url, "/clear_table.php")) { //clearing the table could be ruinous so adding the extra condition is prudent and should never be run except if post_fields == 0
-        std::cout << "m_url: " << m_url << std::endl;
+    if(post_fields == 0 && !strcmp(url, "/clear_table.php")) { //clearing the table could be ruinous so adding the extra condition is prudent and should never be run except if post_fields == 0
+        std::cout << "url: " << url << std::endl;
         bool php_func_success = clearTable(clientSocket);
         return;
     }
@@ -685,101 +684,95 @@ void OcsServer::handlePOSTedData(const char* post_data, int clientSocket) {
        std::cout << "POST value no." << i << ": " << post_values[i] << std::endl;
     }
 
-    if(!strcmp(m_url, "/get_lang_id.php")) {
+    if(!strcmp(url, "/get_lang_id.php")) {
         bool php_func_success = getLangId(post_values, clientSocket);
     }
-    else if(!strcmp(m_url, "/retrieve_subtitle.php")) {
+    else if(!strcmp(url, "/retrieve_subtitle.php")) {
         bool php_func_success = retrieveTextSubtitle(post_values, clientSocket);
     }
-    else if(!strcmp(m_url, "/retrieve_engword.php")) {
+    else if(!strcmp(url, "/retrieve_engword.php")) {
         bool php_func_success = retrieveEngword(post_values, clientSocket);
     }
-    else if(!strcmp(m_url, "/retrieve_meanings.php")) {
+    else if(!strcmp(url, "/retrieve_meanings.php")) {
         bool php_func_success = retrieveMeanings(post_values, clientSocket);
     }
-    else if(!strcmp(m_url, "/lemma_tooltip.php")) {
+    else if(!strcmp(url, "/lemma_tooltip.php")) {
         bool php_func_success = lemmaTooltips(post_values, clientSocket);
     }
-    else if(!strcmp(m_url, "/lcs_search.php")) {
+    else if(!strcmp(url, "/lcs_search.php")) {
         bool php_func_success = lcsSearch(post_values, clientSocket);
     }
-    else if(!strcmp(m_url, "/lcs_trigram_search.php")) {
-        bool php_func_success = lcsTrigramSearch(post_values, clientSocket);
-    }
-    else if(!strcmp(m_url, "/lemma_tooltip_mw.php")) {
+    else if(!strcmp(url, "/lemma_tooltip_mw.php")) {
         bool php_func_success = lemmaTooltipsMW(post_values, clientSocket);
     }
-    else if(!strcmp(m_url, "/lemma_delete.php")) {
+    else if(!strcmp(url, "/lemma_delete.php")) {
         bool php_func_success = deleteLemma(post_values, clientSocket);
     }
-    else if(!strcmp(m_url, "/lemma_record.php")) {
+    else if(!strcmp(url, "/lemma_record.php")) {
         bool php_func_success = recordLemma(post_values, clientSocket);
     }
-    else if(!strcmp(m_url, "/retrieve_text.php")) {
+    else if(!strcmp(url, "/retrieve_text.php")) {
         bool php_func_success = retrieveText(post_values, clientSocket);
     }
-    else if(!strcmp(m_url, "/retrieve_text_pageno.php")) {
+    else if(!strcmp(url, "/retrieve_text_pageno.php")) {
         bool php_func_success = retrieveTextPageNo(post_values, clientSocket);
     }
-    else if (!strcmp(m_url, "/retrieve_text_search.php")) {
+    else if (!strcmp(url, "/retrieve_text_search.php")) {
         bool php_func_success = retrieveTextFromSearch(post_values, clientSocket);
     }
-    else if(!strcmp(m_url, "/delete_text.php")) {
+    else if(!strcmp(url, "/delete_text.php")) {
         bool php_func_success = deleteText(post_values, clientSocket);
     }
-    else if(!strcmp(m_url, "/update_db.php")) {
+    else if(!strcmp(url, "/update_db.php")) {
         bool php_func_success = addText(post_values, clientSocket);  
     }
-    else if(!strcmp(m_url, "/pull_lemma.php")) {
+    else if(!strcmp(url, "/pull_lemma.php")) {
         bool php_func_success = pullInLemma(post_values, clientSocket);
     }
-    else if(!strcmp(m_url, "/retrieve_multiword.php")) {
+    else if(!strcmp(url, "/retrieve_multiword.php")) {
         bool php_func_success = retrieveMultiword(post_values, clientSocket);
     }
-    else if(!strcmp(m_url, "/retrieve_MW_meanings.php")) {
+    else if(!strcmp(url, "/retrieve_MW_meanings.php")) {
         bool php_func_success = retrieveMultiwordMeanings(post_values, clientSocket);
     }
-    else if(!strcmp(m_url, "/record_multiword.php")) {
+    else if(!strcmp(url, "/record_multiword.php")) {
         bool php_func_success = recordMultiword(post_values, clientSocket);
     }
-    else if(!strcmp(m_url, "/delete_multiword.php")) {
+    else if(!strcmp(url, "/delete_multiword.php")) {
         bool php_func_success = deleteMultiword(post_values, clientSocket);
     }
-    else if(!strcmp(m_url, "/pull_multiword.php")) {
+    else if(!strcmp(url, "/pull_multiword.php")) {
         bool php_func_success = pullInMultiword(post_values, clientSocket);
     }
-    else if(!strcmp(m_url, "/pull_mw_by_form.php")) {
+    else if(!strcmp(url, "/pull_mw_by_form.php")) {
         bool php_func_success = pullInMultiwordByForm(post_values, clientSocket);
     }
-    else if(!strcmp(m_url, "/update_MW_translations.php")) {
+    else if(!strcmp(url, "/update_MW_translations.php")) {
         bool php_func_success = updateMultiwordTranslations(post_values, clientSocket);
     }
-    else if(!strcmp(m_url, "/curl_lookup.php")) {
+    else if(!strcmp(url, "/curl_lookup.php")) {
         bool php_func_success = curlLookup(post_values, clientSocket);
     }
-    else if(!strcmp(m_url, "/disregard_word.php")) {
+    else if(!strcmp(url, "/disregard_word.php")) {
         bool php_func_success = disregardWord(post_values, clientSocket);
     }
-    else if(!strcmp(m_url, "/dump_lemmas.php")) {
+    else if(!strcmp(url, "/dump_lemmas.php")) {
         bool php_func_success = dumpLemmaTable(post_values, clientSocket);
     }
-    else if(!strcmp(m_url, "/add_text_OE.php")) {
+    else if(!strcmp(url, "/add_text_OE.php")) {
         bool php_func_success = addTextOldEnglish(post_values, clientSocket);
     }
-    else if(!strcmp(m_url, "/update_displayWord.php")) {
+    else if(!strcmp(url, "/update_displayWord.php")) {
         bool php_func_success = updateDisplayWord(post_values, clientSocket);
     }
-    else if(!strcmp(m_url, "/lcs_regex_search.php")) {
+    else if(!strcmp(url, "/lcs_regex_search.php")) {
         bool php_func_success = lcsRegexSearch(post_values, clientSocket);
     }
-    else if(!strcmp(m_url, "/greek_tooltips.php")) {
+    else if(!strcmp(url, "/greek_tooltips.php")) {
         bool php_func_success = greekTooltips(post_values, clientSocket);
     }
-    // else if(!strcmp(m_url, "/generate_inflection.php")) {
-    //     bool php_func_success = generateInflection(post_values, clientSocket);
-    // }
 
-    std::cout << "m_url: " << m_url << std::endl;
+    std::cout << "url: " << url << std::endl;
     
 }
 
@@ -799,13 +792,27 @@ void OcsServer::setURL(const char* msg) {
     
     strcpy(m_url, url); //m_url is max 50 chars but this is allowed because I tightly control what the POST urls are; using std::string would be wasteful
 }
+void OcsServer::getURL(const char* msg, char* url) {
+    int url_start = c_strFind(msg, "/");
+  //  printf("url_start: %i\n", url_start);
+    int url_end = c_strFind(msg + url_start, " ") + url_start;
+  //  printf("url_end: %i\n", url_end);
+    //char url[url_end - url_start + 1];
+    memset(url, '\0', 50);
+    for (int i = 0; i < url_end - url_start && i < 49; i++)
+    {
+        url[i] = msg[url_start + i];
+    }
+    //url[url_end - url_start] = '\0';
+    
+    //url is max 50 chars but this is allowed because I tightly control what the POST urls are; using std::string would be wasteful
+}
 
 int OcsServer::getPostFields(const char* url) {
     if(!strcmp(url, "/update_db.php")) return 3;
     else if(!strcmp(url, "/retrieve_subtitle.php")) return 2;
     else if(!strcmp(url, "/lemma_tooltip.php")) return 1;
     else if(!strcmp(url, "/lcs_search.php")) return 3;
-    else if(!strcmp(url, "/lcs_trigram_search.php")) return 3;
     else if(!strcmp(url, "/retrieve_text.php")) return 1;
     else if(!strcmp(url, "/retrieve_text_pageno.php")) return 2;
     else if (!strcmp(url, "/retrieve_text_search.php")) return 1;
@@ -832,7 +839,6 @@ int OcsServer::getPostFields(const char* url) {
     else if(!strcmp(url, "/lemma_tooltip_mw.php")) return 3;
     else if(!strcmp(url, "/lcs_regex_search.php")) return 3;
     else if(!strcmp(url, "/greek_tooltips.php")) return 2;
-    //else if(!strcmp(url, "/generate_inflection.php")) return 3;
     else return -1;
 }
 
@@ -1385,7 +1391,7 @@ bool OcsServer::lcsSearch(std::string _POST[3], int clientSocket) {
 }
 
 void OcsServer::writeTextBody(std::ostringstream &html, sqlite3* DB, int tokno_start, int tokno_end) {
-    const char* sql_text = "SELECT chu_word_torot, presentation_before, presentation_after, sentence_no, lemma_id, morph_tag, autoreconstructed_lcs, inflexion_class_id, tokno, auto_tagged FROM corpus WHERE tokno >= ? AND tokno <= ?";
+    const char* sql_text = "SELECT chu_word_torot, presentation_before, presentation_after, sentence_no, lemma_id, morph_tag, autoreconstructed_lcs FROM corpus WHERE tokno >= ? AND tokno <= ?";
     sqlite3_stmt* statement;
     sqlite3_prepare_v2(DB, sql_text, -1, &statement, NULL);
     sqlite3_bind_int(statement, 1, tokno_start);
@@ -1398,18 +1404,12 @@ void OcsServer::writeTextBody(std::ostringstream &html, sqlite3* DB, int tokno_s
     int lemma_id = 0;
     int sentence_number_previous = 0;
     int sentence_no_current = 0;
-    int inflexion_class_id = 0;
-    int tokno = 0;
-    int auto_tagged = 0;
     while(sqlite3_step(statement) == SQLITE_ROW) {
         chu_word_torot = (const char*)sqlite3_column_text(statement, 0);
         presentation_before = (const char*)sqlite3_column_text(statement, 1);
         presentation_after = (const char*)sqlite3_column_text(statement, 2);
         sentence_no_current = sqlite3_column_int(statement, 3);
         lemma_id = sqlite3_column_int(statement, 4);
-        inflexion_class_id = sqlite3_column_int(statement, 7);
-        tokno = sqlite3_column_int(statement, 8);
-        auto_tagged = sqlite3_column_int(statement, 9);
         if(sqlite3_column_type(statement, 5) == SQLITE_NULL) morph_tag = "";
         else morph_tag = (const char*)sqlite3_column_text(statement, 5);
         if(sqlite3_column_type(statement, 6) == SQLITE_NULL) autoreconstructed_lcs = "";
@@ -1419,14 +1419,14 @@ void OcsServer::writeTextBody(std::ostringstream &html, sqlite3* DB, int tokno_s
             html << "  |  ";
         }
 
-        html << "<span class=\"chunk\">" << applySuperscripts(presentation_before) << "<span class=\"tooltip\" data-tokno=\"" << tokno << "\" data-sentence_no=\"" << sentence_no_current << "\" data-auto_tagged=\"" << auto_tagged << "\""; 
+        html << "<span class=\"chunk\">" << presentation_before << "<span class=\"tooltip\" data-sentence_no=\"" << sentence_no_current << "\" data-lemma_id=\"" << lemma_id << "\"";
         if(lemma_id > 0) {
-            html << " data-lemma_id=\"" << lemma_id << "\"" " data-morph_tag=\"" << morph_tag << "\"";
+            html << " data-morph_tag=\"" << morph_tag << "\"";
         }
         if(!autoreconstructed_lcs.empty()) {
-            html << " data-lcs_recon=\"" << autoreconstructed_lcs << "\" data-inflexion=\"" << inflexion_class_id << "\"";
+            html << " data-lcs_recon=\"" << autoreconstructed_lcs << "\"";
         }
-        html << ">" << applySuperscripts(chu_word_torot) << "</span>" << applySuperscripts(presentation_after) << "</span>";
+        html << ">" << chu_word_torot << "</span>" << presentation_after << "</span>";
         sentence_number_previous = sentence_no_current;
         autoreconstructed_lcs.clear();
 
@@ -4522,233 +4522,6 @@ bool OcsServer::greekTooltips(std::string _POST[2], int clientSocket) {
     }
     else {
         std::cout << "Database connection failed in greekTooltips()" << std::endl;
-        return false;
-    }
-}
-
-// bool OcsServer::generateInflection(std::string _POST[3], int clientSocket) {
-//     std::string stem = _POST[0];
-//     std::string conj_type = _POST[1];
-//     bool noun_verb = _POST[2] == "2" ? true : false;
-
-
-//     std::ostringstream post_response;
-//     std::ostringstream json_response;
-    
-//     //since the inflection-tables are static they should be initialised only once on startup not for each class instance
-//     LcsFlecter lcs_flecter({stem, conj_type, noun_verb});
-
-//     json_response << "[";
-//     int i = 0;
-//     for(const auto& inflections : lcs_flecter.getFullParadigm()) {
-//         json_response << "{";
-//         int j = 0;
-//         for(const auto& inflection : inflections) {
-//             //std::cout << inflection.desinence_ix << " " << inflection.flected_form << "\n";
-//             json_response << '\"' << inflection.desinence_ix << "\":\"" << inflection.flected_form << "\",";
-//             j++;
-//         }
-//         if(j > 0) json_response.seekp(-1, std::ios_base::cur);
-//         json_response << "},";
-//         //std::cout << "\n";
-//         i++;
-//     }
-//     if(i > 0) json_response.seekp(-1, std::ios_base::cur);
-//     json_response << "]";
-
-
-//     int content_length = json_response.str().length();
-//     post_response << "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: " << content_length << "\r\n\r\n" << json_response.str();
-
-    
-//     sendToClient(clientSocket, post_response.str().c_str(), post_response.str().length() + 1);
-
-//     return true;
-
-// }
-
-
-
-bool OcsServer::lcsTrigramSearch(std::string _POST[3], int clientSocket) {
-    //this is a trick to get wildcarded (LIKE '%query%') SELECT statements to use a database-index, which ordinarily they can't do, because otherwise such queries over the full corpus would scale linearly with corpus-size
-    sqlite3* DB;
-
-    if(!sqlite3_open("orv.db", &DB)) {
-        
-        std::cout << "PRAGMA return_code: " << sqlite3_exec(DB, "PRAGMA case_sensitive_like = ON", nullptr, nullptr, nullptr) << "\n";
-
-        std::string query = URIDecode(_POST[0]);
-        int tokno_start = safeStrToInt(_POST[1]);
-        int tokno_end = safeStrToInt(_POST[2]);
-
-        icu::UnicodeString unicode_query = query.c_str();
-        int32_t num_chars = unicode_query.countChar32();
-
-        std::vector<int> result_toknos_vec;
-        result_toknos_vec.reserve(256);
-
-        sqlite3_stmt* trigram_stmt;
-        const char* sql_trigram_select;
-        if(num_chars < 3) {
-            sql_trigram_select = "SELECT tokno FROM lcs_trigrams WHERE tokno >= ? AND tokno <= ? AND trigram LIKE ?";
-            query = query.append("%");
-
-            sqlite3_prepare_v2(DB, sql_trigram_select, -1, &trigram_stmt, NULL);
-            sqlite3_bind_int(trigram_stmt, 1, tokno_start);
-            sqlite3_bind_int(trigram_stmt, 2, tokno_end);
-            sqlite3_bind_text(trigram_stmt, 3, query.c_str(), -1, SQLITE_STATIC);
-            int prev_tokno = 0;
-            while(sqlite3_step(trigram_stmt) == SQLITE_ROW) {
-                int result_tokno = sqlite3_column_int(trigram_stmt, 0);
-                if(result_tokno != prev_tokno) {
-                    result_toknos_vec.emplace_back(result_tokno);
-                }
-            }
-            sqlite3_finalize(trigram_stmt);
-        }
-        else {
-            sql_trigram_select = "SELECT tokno FROM lcs_trigrams WHERE tokno >= ? AND tokno <= ? AND trigram = ?";
-            sqlite3_prepare_v2(DB, sql_trigram_select, -1, &trigram_stmt, NULL);
-
-            std::string query_trigram;
-            int32_t trigram_start_offset = 0;
-
-            int num_of_trigrams = num_chars - 2;
-            std::unordered_map<int, int> tokno_trigram_matches_map;
-            while(trigram_start_offset + 2 < num_chars) {
-                sqlite3_bind_int(trigram_stmt, 1, tokno_start);
-                sqlite3_bind_int(trigram_stmt, 2, tokno_end);
-                unicode_query.tempSubString(trigram_start_offset, 3).toUTF8String(query_trigram);
-                sqlite3_bind_text(trigram_stmt, 3, query_trigram.c_str(), -1, SQLITE_STATIC);
-
-                while(sqlite3_step(trigram_stmt) == SQLITE_ROW) {
-                    int result_tokno = sqlite3_column_int(trigram_stmt, 0);
-                    if(tokno_trigram_matches_map.contains(result_tokno)) {
-                        tokno_trigram_matches_map[result_tokno]++;
-                    }
-                    else {
-                        tokno_trigram_matches_map.emplace(result_tokno, 1);
-                    }
-                }
-                sqlite3_reset(trigram_stmt);
-                sqlite3_clear_bindings(trigram_stmt);
-
-                query_trigram.clear();
-                trigram_start_offset++;
-            }
-            sqlite3_finalize(trigram_stmt);
-
-            for(const auto& tokno_trigram_match : tokno_trigram_matches_map) {
-                if(tokno_trigram_match.second == num_of_trigrams) {
-                    result_toknos_vec.emplace_back(tokno_trigram_match.first);
-                }
-            }
-        }
-
-        int results_count = result_toknos_vec.size();
-
-        if(results_count > 5000) {
-
-            std::cout << "too many results\n";
-            std::string json_str = "{\"error\":\"Too many results, please narrow the search query\"}";
-            int content_length = json_str.size();
-
-            std::ostringstream post_response;
-            post_response << "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: " << content_length << "\r\n\r\n" << json_str;
-
-            int length = post_response.str().size() + 1;
-            sendToClient(clientSocket, post_response.str().c_str(), length);
-
-            sqlite3_close(DB);
-            return true;
-        }
-
-
-        sqlite3_stmt* statement1;
-        sqlite3_stmt* statement2;     
-
-        const char* sql_text1 = "SELECT autoreconstructed_lcs, sentence_no FROM corpus WHERE tokno = ?";
-        const char* sql_text2 = "SELECT tokno, chu_word_torot, presentation_before, presentation_after FROM corpus WHERE sentence_no = ? AND tokno <= ? AND tokno >= ?";
-        sqlite3_prepare_v2(DB, sql_text1, -1, &statement1, NULL);
-        sqlite3_prepare_v2(DB, sql_text2, -1, &statement2, NULL);
-        
-
-        std::ostringstream lcs_results;
-        lcs_results << "[";
-        std::ostringstream text_results;
-        text_results << "[";
-        std::ostringstream tokno_results;
-        tokno_results << "[";
-
-        std::string lcs_result = "";
-        std::string chu_word_torot = "";
-        std::string present_before = "";
-        std::string presentation_after = "";
-
-        std::sort(result_toknos_vec.begin(), result_toknos_vec.end());
-
-        for(const int& result_tokno : result_toknos_vec) {
-            sqlite3_bind_int(statement1, 1, result_tokno);
-            sqlite3_step(statement1);
-            const unsigned char* raw_lcs = sqlite3_column_text(statement1, 0);
-            if(raw_lcs != nullptr) lcs_result = (const char*)raw_lcs;
-            int sentence_no = sqlite3_column_int(statement1, 1);
-
-            // std::cout << "lcs_result: " << lcs_result << "\n";
-            // std::cout << "sentence_no: " << sentence_no << "\n";
-
-            sqlite3_reset(statement1);
-            sqlite3_clear_bindings(statement1);
-
-            lcs_results << "\"" << lcs_result << "\"" << ",";
-            tokno_results << result_tokno << ",";
-
-            std::ostringstream text_content_result_oss;
-            sqlite3_bind_int(statement2, 1, sentence_no);
-            sqlite3_bind_int(statement2, 2, result_tokno + 5);
-            sqlite3_bind_int(statement2, 3, result_tokno - 5);
-
-            while(sqlite3_step(statement2) == SQLITE_ROW) {
-                text_content_result_oss << applySuperscripts((const char*)sqlite3_column_text(statement2, 2));
-                if(sqlite3_column_int(statement2, 0) == result_tokno) {
-                    text_content_result_oss << "<span class=\"result_word\">" + applySuperscripts((const char*)sqlite3_column_text(statement2, 1)) + "</span>";
-                }
-                else text_content_result_oss << applySuperscripts((const char*)sqlite3_column_text(statement2, 1));
-                
-                text_content_result_oss << applySuperscripts((const char*)sqlite3_column_text(statement2, 3));
-            }
-            text_results << "\"" << escapeQuotes(text_content_result_oss.str()) << "\",";
-
-            sqlite3_reset(statement2);
-            sqlite3_clear_bindings(statement2);
-        }
-        sqlite3_finalize(statement1);
-        sqlite3_finalize(statement2);
-                
-        if(results_count > 0) {
-            lcs_results.seekp(-1, std::ios_base::cur);
-            text_results.seekp(-1, std::ios_base::cur);
-            tokno_results.seekp(-1, std::ios_base::cur);
-        }
-
-        lcs_results << "]";
-        text_results << "]";
-        tokno_results << "]";    
-
-        std::string json_str = "[" + lcs_results.str() + "," + text_results.str() + "," + tokno_results.str() + "]";
-        int content_length = json_str.size();
-
-        std::ostringstream post_response;
-        post_response << "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: " << content_length << "\r\n\r\n" << json_str;
-
-        int length = post_response.str().size() + 1;
-        sendToClient(clientSocket, post_response.str().c_str(), length);
-        sqlite3_close(DB);
-       
-        return true;
-    }
-    else {
-        std::cout << "Database connection failed in lcsTrigramSearch()" << std::endl;
         return false;
     }
 }
