@@ -1165,7 +1165,6 @@ border-bottom: 2px solid rgb(23, 33, 54, 0);
   display: flex;
   flex-flow: column nowrap;
   justify-content: center;
-  text-align: center;
 }
 .search_link:hover {
   color: white;
