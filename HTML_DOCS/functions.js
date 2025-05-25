@@ -3079,7 +3079,7 @@ const lcsSearch = (query, regex=false) => {
 
         let search_results_html = "";
         for(let i = 0; i < results_count; i++) {            
-          search_results_html += '<div class="dict_row"><div class="dict_cell left">'+lcs_results[i].replace("Q", "ъ")+'</div><div class="dict_cell middle">'+text_results[i]+'</div><div class="dict_cell right search_link" data-search_tokno=\"' + tokno_results[i] + '\">'+getShortTextLocation(tokno_results[i])+'</div></div>';
+          search_results_html += '<div class="dict_row"><div class="dict_cell left">'+lcs_results[i].replace("Q", "ъ")+'</div><div class="dict_cell middle ' + getTextResultFont(tokno_results[i]) + '">'+text_results[i]+'</div><div class="dict_cell right search_link" data-search_tokno=\"' + tokno_results[i] + '\">'+getShortTextLocation(tokno_results[i])+'</div></div>';
         }
         search_results.appendChild(document.createRange().createContextualFragment(search_results_html));
 
@@ -3099,6 +3099,15 @@ const lcsSearch = (query, regex=false) => {
 
 const getShortTextLocation = (tokno) => {
   return app_state.titles_info.find(title => title[1] < tokno && title[2] > tokno)[0];
+}
+const getTextResultFont = (tokno) => {
+  //this should be replaced with a simple "script" field in the texts table in the DB which would return glag or cyr, not bullshit switching on title-strings
+  const title = app_state.titles_info.find(title => title[1] < tokno && title[2] > tokno)[0];
+
+  if(title == "Codex Suprasliensis" || title == "Vita Constantini" || title == "Vita Methodii" || title == "Treatise on the letters") {
+    return "cyr";
+  }
+  else return "glag";
 }
 
 const retrieveTextFromSearch = (tokno) => {

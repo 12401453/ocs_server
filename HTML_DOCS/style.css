@@ -1064,6 +1064,16 @@ border-bottom: 2px solid rgb(23, 33, 54, 0);
   width: 50%;
   font-family: Menaion;
 }
+.dict_cell.middle.cyr {
+  font-family: Menaion;
+  font-size: 13px;
+  letter-spacing: 0px;
+}
+.dict_cell.middle.glag {
+  font-family: Bukyvede;
+  font-size: 16px;
+  letter-spacing: 2px;
+}
 .dict_cell.right {
   border-left: 1px solid black;
   border-right: 2px solid black;
