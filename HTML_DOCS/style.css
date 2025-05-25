@@ -1159,6 +1159,13 @@ border-bottom: 2px solid rgb(23, 33, 54, 0);
 
 .search_link {
   cursor: pointer;
+  text-overflow: clip;
+  word-break: keep-all;
+  overflow: hidden;
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: center;
+  text-align: center;
 }
 .search_link:hover {
   color: white;

@@ -4581,6 +4581,25 @@ bool OcsServer::lcsTrigramSearch(std::string _POST[3], int clientSocket) {
         int tokno_start = safeStrToInt(_POST[1]);
         int tokno_end = safeStrToInt(_POST[2]);
 
+        //start by getting the text_title information so we can say which text the results come from on the front-end (wasteful to do it every search but this way will stop us having to update Javascript whenever the database changes)
+
+        sqlite3_stmt* titles_stmt;
+        const char* sql_titles_select = "SELECT text_title, tokno_start, tokno_end FROM texts";
+        sqlite3_prepare_v2(DB, sql_titles_select, -1, &titles_stmt, NULL);
+
+        std::ostringstream text_title_info;
+        std::string text_title;
+        int title_tokno_start = 0;
+        int title_tokno_end = 0;
+        text_title_info << '[';
+        while(sqlite3_step(titles_stmt) == SQLITE_ROW) {
+            text_title_info << "[\"" << (const char*)sqlite3_column_text(titles_stmt, 0) << "\",";
+            text_title_info << sqlite3_column_int(titles_stmt, 1) << ',' << sqlite3_column_int(titles_stmt, 2) << "],";
+        }
+        text_title_info.seekp(-1, std::ios_base::cur);
+        text_title_info << ']';
+        sqlite3_finalize(titles_stmt);
+
         icu::UnicodeString unicode_query = query.c_str();
         int32_t num_chars = unicode_query.countChar32();
 
@@ -4735,7 +4754,7 @@ bool OcsServer::lcsTrigramSearch(std::string _POST[3], int clientSocket) {
         text_results << "]";
         tokno_results << "]";    
 
-        std::string json_str = "[" + lcs_results.str() + "," + text_results.str() + "," + tokno_results.str() + "]";
+        std::string json_str = "[" + lcs_results.str() + "," + text_results.str() + "," + tokno_results.str() + "," + text_title_info.str() + "]";
         int content_length = json_str.size();
 
         std::ostringstream post_response;

@@ -53,7 +53,8 @@ const app_state = {
   search_scope: 1,
   search_box_minimised: true,
   regex_search: false,
-  search_type: 1
+  search_type: 1,
+  titles_info: []
 }
 
 function selectText() {
@@ -3066,6 +3067,8 @@ const lcsSearch = (query, regex=false) => {
         const text_results = xhttp.response[1];
         const tokno_results = xhttp.response[2];
 
+        app_state.titles_info = xhttp.response[3];
+
         const results_count = xhttp.response[0].length;
 
         if(results_count == 0) {
@@ -3076,7 +3079,7 @@ const lcsSearch = (query, regex=false) => {
 
         let search_results_html = "";
         for(let i = 0; i < results_count; i++) {            
-          search_results_html += '<div class="dict_row"><div class="dict_cell left">'+lcs_results[i].replace("Q", "ъ")+'</div><div class="dict_cell middle">'+text_results[i]+'</div><div class="dict_cell right search_link">'+getShortTextLocation(tokno_results[i])+'</div></div>';  
+          search_results_html += '<div class="dict_row"><div class="dict_cell left">'+lcs_results[i].replace("Q", "ъ")+'</div><div class="dict_cell middle">'+text_results[i]+'</div><div class="dict_cell right search_link" data-search_tokno=\"' + tokno_results[i] + '\">'+getShortTextLocation(tokno_results[i])+'</div></div>';
         }
         search_results.appendChild(document.createRange().createContextualFragment(search_results_html));
 
@@ -3095,7 +3098,7 @@ const lcsSearch = (query, regex=false) => {
 };
 
 const getShortTextLocation = (tokno) => {
-  return tokno;
+  return app_state.titles_info.find(title => title[1] < tokno && title[2] > tokno)[0];
 }
 
 const retrieveTextFromSearch = (tokno) => {
@@ -3161,7 +3164,7 @@ const retrieveTextFromSearch = (tokno) => {
 
 document.getElementById("search_results"),addEventListener('click', (event) => {
   if(event.target.classList.contains("search_link")) {
-    retrieveTextFromSearch(event.target.textContent);
+    retrieveTextFromSearch(event.target.dataset.search_tokno);
   }
 });
 
