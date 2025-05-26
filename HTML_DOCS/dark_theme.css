@@ -6,10 +6,6 @@ body {
   color: lightgrey;;
 }
 
-a {
-  color: #cbd9f4a6;
-}
-
 #main_text {
   background-color: #172136;  
 }
@@ -195,6 +191,9 @@ color: #cbd9f4;
   background-color: #040a16;
   color: #cbd9f4;
 }
+.toplinks-ahref  {
+  color: #cbd9f4a6;
+}
 
 #theme_switcher {
   background-color: #040a16;
@@ -256,4 +255,24 @@ color: #cbd9f4;
 }
 .tooltip.converted:hover {
   color: rgb(255 115 205);;
+}
+
+#gorazd_box {
+  background-color: #071022;
+}
+#viewboxcontent {
+  scrollbar-color: #040a16 #172136;
+  color: #cbd9f4;
+}
+.sjs span[aip-type="la_preklad"],
+.sjs span[aip-type="el_preklad"],
+.sjs span[aip-type="ru_preklad"]{
+    color: yellow;
+}
+.snsp span[aip-type="latina"],
+.snsp span[aip-type="rectina"],
+.snsp span[aip-type="rustina"],
+.snsp span[aip-type="anglictina"],
+.snsp span[aip-type="cestina"]{
+    color: yellow;
 }

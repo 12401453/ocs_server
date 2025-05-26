@@ -6,10 +6,6 @@ body {
   color: black;;
 }
 
-a {
-  color: black;
-}
-
 #main_text {
   background-color: white;  
 }
@@ -208,6 +204,9 @@ color: #cbd9f4;
   background-color: #f1ad2e;
   color: black;
 }
+.toplinks-ahref  {
+  color: black;
+}
 
 #theme_switcher {
   background-color: #f1ad2e;
@@ -270,4 +269,23 @@ color: #cbd9f4;
 }
 .tooltip.converted:hover {
   color: red;
+}
+
+#gorazd_box {
+  background-color: white;
+}
+#viewboxcontent {
+  color: black;
+}
+.sjs span[aip-type="la_preklad"],
+.sjs span[aip-type="el_preklad"],
+.sjs span[aip-type="ru_preklad"]{
+    color: red;
+}
+.snsp span[aip-type="latina"],
+.snsp span[aip-type="rectina"],
+.snsp span[aip-type="rustina"],
+.snsp span[aip-type="anglictina"],
+.snsp span[aip-type="cestina"]{
+    color: red;
 }

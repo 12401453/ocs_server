@@ -3375,7 +3375,7 @@ const stealFromGorazd = (headword_query) => {
                   json_response.response.result.pageData.forEach(dict_entry => console.log(dict_entry.recordData.EnTrl));
                   displayDictBox(json_response.response.result.pageData[0].recordData.SourceD);
                 }
-                else console.log("No results. CUNT!");
+                else console.log("No results, repent");
                 }
           }
       }; 
@@ -3385,6 +3385,8 @@ const stealFromGorazd = (headword_query) => {
 };
 
 const displayDictBox= function (gorazd_html) {
+  const gorazd_box = document.getElementById("gorazd_box");
+  gorazd_box && gorazd_box.remove();
   const annot_box = document.createRange().createContextualFragment('<div id="gorazd_box"><div id="viewboxcontent">'+gorazd_html+'</div></div>');
 
   document.getElementById('spoofspan').after(annot_box);
