@@ -1202,3 +1202,18 @@ border-bottom: 2px solid rgb(23, 33, 54, 0);
   opacity: 0.8;
   cursor: pointer;
 }
+
+#gorazd_box {
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: flex-start;
+  height: 280px;
+  width: 500px;
+  min-height: 260px;
+  min-width: 424px;
+
+  position: fixed;
+  bottom: 1px;
+  left: 1px;
+  z-index: 2;
+}

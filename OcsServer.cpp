@@ -3448,6 +3448,7 @@ bool OcsServer::deleteMultiword(std::string _POST[4], int clientSocket) {
     }
 }
 
+//it's simpler to handle errors and timeouts if I keep everything as raw text until it gets back to the client; pretty sure having an xhttp.reponseType = 'json' just means it runs JSON.parse() implicitly rather than explicitly;
 bool OcsServer::curlLookup(std::string _POST[1], int clientSocket) {
     
     CurlFetcher query(_POST[0].c_str(), m_dict_cookies);

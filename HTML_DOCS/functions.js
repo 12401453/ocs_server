@@ -3348,3 +3348,44 @@ const toggleRegexSearch = (event) => {
   }
 }
 document.getElementById("regex_box").addEventListener('click', toggleRegexSearch);
+
+const stealFromGorazd = (headword_query) => {
+  const query_url = "http://castor.gorazd.org:8080/gorazd/advanced_search;jsessionid=013373AF9710B0E8728F91826ABBD8DD?queryFields=%7B%221%22%3A%7B%22fieldName%22%3A%22HeaderAll%22%2C%22rawFieldQuery%22%3A%22" + encodeURIComponent(headword_query) + "%22%2C%22logTerm%22%3A%22%22%7D%7D";
+  let send_data = "url="+query_url; 
+  const httpRequest = (method, url) => {
+      const xhttp = new XMLHttpRequest();
+      xhttp.open(method, url, true);
+      xhttp.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+      xhttp.responseType = 'text';
+      xhttp.onreadystatechange = () => { 
+          if (xhttp.readyState == 4) {
+              console.log("curl complete");
+              if(xhttp.responseText == "Request timeout") {
+                  console.log("Dictionary request took more than ten seconds so it was aborted");
+                  return;
+              }
+              else if(xhttp.responseText == "curl failure") {
+                  console.log("Dictionary request has failed");
+                  return;
+              }
+              else {
+                const json_response = JSON.parse(xhttp.responseText);
+                if(json_response.response.found > 0) {
+          
+                  json_response.response.result.pageData.forEach(dict_entry => console.log(dict_entry.recordData.EnTrl));
+                  displayDictBox(json_response.response.result.pageData[0].recordData.SourceD);
+                }
+                else console.log("No results. CUNT!");
+                }
+          }
+      }; 
+      xhttp.send(send_data);
+  };  
+  httpRequest("POST", "curl_lookup.php");
+};
+
+const displayDictBox= function (gorazd_html) {
+  const annot_box = document.createRange().createContextualFragment('<div id="gorazd_box"><div id="viewboxcontent">'+gorazd_html+'</div></div>');
+
+  document.getElementById('spoofspan').after(annot_box);
+};
