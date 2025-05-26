@@ -289,3 +289,54 @@ color: #cbd9f4;
 .snsp span[aip-type="cestina"]{
     color: red;
 }
+.rsi span[aip-type="odkaz"],
+.snsp span[aip-type="odkaz"],
+.sjs span[aip-type="odkaz"]{
+  color: black;
+}
+span[aip-type="odkaz"]:hover{
+  color: red;
+}
+
+#gorazd_topbar {
+  background-color: #f0c36d;
+}
+#gorazd_bottombar {
+  background-color: #f0c36d;
+}
+#gorazd_minimise {
+
+  background-color: inherit;
+  border-right: 1px solid inherit;
+  border-bottom: 1px solid inherit;
+}
+#gorazd_minimise:hover {
+  background-color: #f1ad2e;
+}
+#gorazd_minimise:hover #minimise{
+  background-color: #cbd9f4;
+}
+#gorazd_close {
+  background-color: inherit;
+  border-right: 1px solid inherit;
+  border-bottom: 1px solid inherit;
+}
+#gorazd_close:hover{
+  background-color: #f1ad2e;
+}
+.dict_type {
+  color: grey;
+  background-color: #f8e5be;
+}
+.dict_type.available:hover {
+  color: black;
+  cursor: pointer;
+}
+.dict_type.active{
+  color: black;
+  background-color: #f1ad2e;
+}
+.dict_type.active:hover{
+  color: black;
+  background-color: #f1ad2e;
+}

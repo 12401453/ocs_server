@@ -448,7 +448,7 @@ figcaption .dict_3{
 #viewboxcontent {
     /*margin-top: 50px;
     height: calc(100% - 100px);*/
-    overflow: auto;
+    overflow-y: auto;
     scrollbar-width: thin;
     padding: 4px;
 }
@@ -1163,9 +1163,10 @@ p.podvyznam-znak{
     color: red;
 }
 
-.sjs span[aip-type="el_preklad"]{
+/*.sjs span[aip-type="el_preklad"]{
   text-decoration: underline;
-}
+  these are underlined because they link to the OCS-Greek Lexicon dictionary, but I cba to include that in my webscraped version so I am getting rid of the underlining
+}*/
 
 .snsp span[aip-type="latina"],
 .snsp span[aip-type="rectina"],
@@ -1180,7 +1181,7 @@ p.podvyznam-znak{
 .rsi span[aip-type="odkaz"],
 .snsp span[aip-type="odkaz"],
 .sjs span[aip-type="odkaz"]{
-  color: blue;
+  cursor: pointer;
   text-decoration: underline;
 }
 

@@ -54,6 +54,9 @@ const app_state = {
   search_box_minimised: true,
   regex_search: false,
   search_type: 1,
+  dict_box_shown: false,
+  dict_box_minimised: true,
+  dict_html_entries: {1: "", 2: ""},
   titles_info: []
 }
 
@@ -1889,13 +1892,13 @@ const delAnnotate = function (total = true) {
 
 //this is stolen
 const makeDraggable = function () {
-  dragAnnotBox(document.getElementById("annot_box"));
+  dragAnnotBox(document.getElementById("gorazd_outline"));
 
   function dragAnnotBox(elmnt) {
     var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-    if (document.getElementById("annot_topbar")) {
+    if (document.getElementById("gorazd_topbar")) {
       /* if present, the header is where you move the DIV from:*/
-      document.getElementById("annot_topbar").onmousedown = dragMouseDown;
+      document.getElementById("gorazd_topbar").onmousedown = dragMouseDown;
     } else {
       /* otherwise, move the DIV from anywhere inside the DIV:*/
       elmnt.onmousedown = dragMouseDown;
@@ -1932,7 +1935,7 @@ const makeDraggable = function () {
     }
   }
 
-  document.getElementById('annot_topbar').style.cursor = 'move';
+  document.getElementById('gorazd_topbar').style.cursor = 'move';
 
 };
 
@@ -3350,6 +3353,7 @@ const toggleRegexSearch = (event) => {
 document.getElementById("regex_box").addEventListener('click', toggleRegexSearch);
 
 const stealFromGorazd = (headword_query) => {
+  app_state.dict_html_entries = {1: "", 2: ""};
   const query_url = "http://castor.gorazd.org:8080/gorazd/advanced_search;jsessionid=013373AF9710B0E8728F91826ABBD8DD?queryFields=%7B%221%22%3A%7B%22fieldName%22%3A%22HeaderAll%22%2C%22rawFieldQuery%22%3A%22" + encodeURIComponent(headword_query) + "%22%2C%22logTerm%22%3A%22%22%7D%7D";
   let send_data = "url="+query_url; 
   const httpRequest = (method, url) => {
@@ -3372,11 +3376,21 @@ const stealFromGorazd = (headword_query) => {
                 const json_response = JSON.parse(xhttp.responseText);
                 if(json_response.response.found > 0) {
           
-                  json_response.response.result.pageData.forEach(dict_entry => console.log(dict_entry.recordData.EnTrl));
-                  displayDictBox(json_response.response.result.pageData[0].recordData.SourceD);
+                  json_response.response.result.pageData.forEach(dict_entry => {
+                    console.log(dict_entry.recordData.EnTrl);
+
+                    const dict_no = dict_entry.recordData.Dictionary;
+                    const dict_html = dict_entry.recordData.SourceD;
+
+                    app_state.dict_html_entries[dict_no] = dict_html;
+
+
+                  });
+                  
+                  displayDictBox();
                 }
                 else console.log("No results, repent");
-                }
+              }
           }
       }; 
       xhttp.send(send_data);
@@ -3384,10 +3398,45 @@ const stealFromGorazd = (headword_query) => {
   httpRequest("POST", "curl_lookup.php");
 };
 
-const displayDictBox= function (gorazd_html) {
-  const gorazd_box = document.getElementById("gorazd_box");
-  gorazd_box && gorazd_box.remove();
-  const annot_box = document.createRange().createContextualFragment('<div id="gorazd_box"><div id="viewboxcontent">'+gorazd_html+'</div></div>');
+const displayDictBox = () => {
+  const gorazd_outline = document.getElementById("gorazd_outline");
+  if(gorazd_outline.style.display == "") {
+    gorazd_outline.style.display = "flex";
+  }
+  document.querySelectorAll(".dict_type").forEach(dict_type_button => {
+    dict_type_button.classList.remove("active");
+    dict_type_button.classList.remove("available");
+  });
 
-  document.getElementById('spoofspan').after(annot_box);
+  const snsp_button = document.getElementById("SNSP");
+  const sjs_button = document.getElementById("SJS");
+
+  const snsp_entry_exists = app_state.dict_html_entries[2] != "";
+  const sjs_entry_exists = app_state.dict_html_entries[1] != "";
+
+  let gorazd_result_content = document.createRange().createContextualFragment("No results found, perhaps this word is lemmatised differently by GORAZD");
+
+  if(snsp_entry_exists) {
+    gorazd_result_content = document.createRange().createContextualFragment(app_state.dict_html_entries[2]);
+    snsp_button.classList.add("active");
+    snsp_button.classList.add("available");
+    if(sjs_entry_exists) {
+      sjs_button.classList.add("available");
+    }
+  }
+  else if(sjs_entry_exists) {
+    gorazd_result_content = document.createRange().createContextualFragment(app_state.dict_html_entries[1]);
+    sjs_button.classList.add("active");
+    sjs_button.classList.add("available");
+  }
+  
+  
+  const gorazd_viewboxcontent = document.getElementById('viewboxcontent');
+  gorazd_viewboxcontent.innerHTML = "";
+  gorazd_viewboxcontent.append(gorazd_result_content);
 };
+
+const ajaxContextSearch = () => {
+  //this function is included as an onclick= attribute in the HTML returned in gorazd's JSON response, so I have to implement it to prevent errors when those words get clicked on. If I want to add link-functionality I can implement it myself with my own eventListeners, but I can't get rid of their bastard onclick= attributes
+  return;
+}
