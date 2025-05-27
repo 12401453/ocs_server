@@ -340,3 +340,30 @@ span[aip-type="odkaz"]:hover{
   color: black;
   background-color: #f1ad2e;
 }
+#gorazd_searchbox { 
+  background-color:white;
+  color: black;
+}
+#gorazd_searchbox:focus {
+  border: 1px solid black;
+}
+#gorazd_letter_button_box.letter_button_box {
+  border: 1px solid #f0c36d;
+  background-color: #f0c36d;
+}
+#gorazd_letter_button_box .letter_button {
+  border: 1px solid #353535;
+  background-color: white;
+  color: #353535;
+}
+#gorazd_letter_button_box .letter_button:hover {
+  border: 1px solid black;
+  background-color: #f1ad2e;
+  color: black;
+}
+#gorazd_search_button {
+  fill: black
+}
+#gorazd_search_button:hover {
+  fill: white;
+}

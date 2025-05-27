@@ -899,7 +899,7 @@ border-bottom: 2px solid rgb(23, 33, 54, 0);
   -webkit-animation: spin 1s linear infinite; /* Safari */
   animation: spin 1s linear infinite;
 }
-#search_load_spinner {
+.search_load_spinner {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -915,7 +915,7 @@ border-bottom: 2px solid rgb(23, 33, 54, 0);
 }
 
 /*--------------------Search Box-------------------*/
-#search_button {
+.search_button {
   width: 40px;
   padding: 4px 4px 4px 4px;
   flex-shrink: 0;
@@ -924,7 +924,7 @@ border-bottom: 2px solid rgb(23, 33, 54, 0);
   border-radius: 4px;
   -webkit-tap-highlight-color: transparent;
 }
-#search_button:hover {
+.search_button:hover {
   fill: #cbd9f4;
 }
 #dict_close {
@@ -991,38 +991,42 @@ border-bottom: 2px solid rgb(23, 33, 54, 0);
   background-color: #071022;
 }
 
-#letter_button_box {
+.letter_button_box {
   display: flex;
   flex-flow: row wrap;
   justify-content: space-around;
-  align-items: flex-start;
+  align-items: center;
   width: 140px;
   height: 100%;
   gap: 3px;
   overflow-y: auto;
   scrollbar-width: none;
   scrollbar-color: #040a16 #071022;
-  border: 1px solid black;
   border-radius: 4px;
   padding: 1px;
-  
+
+  border: 1px solid black;
+  background-color: #040a16;  
 }
 .letter_button {
-  border: 1px solid black;
-  border-radius: 4px;
-  background-color:#071022;
-  color: #cbd9f4a6;
-  font-size: var(--search-letter-size);
-  font-family: var(--search-letter-font);
+  border-radius: 4px;  
   height: 20px;
   width: 20px;
   text-align: center;
   cursor: pointer;
   user-select: none;
+
+  border: 1px solid black;
+  background-color:#071022;
+  color: #cbd9f4a6;
 }
 .letter_button:hover {
   border: 1px solid #cbd9f4;
   color: #cbd9f4;
+}
+#search_letter_button_box .letter_button {
+  font-size: var(--search-letter-size);
+  font-family: var(--search-letter-font);
 }
 
 .dict_row.header {
@@ -1232,7 +1236,7 @@ border-bottom: 2px solid rgb(23, 33, 54, 0);
 }
 #gorazd_minimise {
   height: 76%;
-  width: 11%;
+  width: 10%;
   border-top-right-radius: 4px;
   border-bottom-left-radius: 4px;
   display: flex;
@@ -1241,7 +1245,7 @@ border-bottom: 2px solid rgb(23, 33, 54, 0);
 }
 #gorazd_close {
   height: 76%;
-  width: 11%;
+  width: 8%;
   border-bottom-right-radius: 4px;
   border-top-left-radius: 4px;
   
@@ -1251,7 +1255,7 @@ border-bottom: 2px solid rgb(23, 33, 54, 0);
 }
 
 #gorazd_box {
-  display: flex;
+  display: none;
   flex-flow: column nowrap;
   justify-content: flex-start;
   height: fit-content;
@@ -1305,3 +1309,56 @@ border-bottom: 2px solid rgb(23, 33, 54, 0);
   padding: 3px;
 }
 
+#gorazd_hidden_box {
+  position: fixed;
+  bottom: 0px;
+  left: 4%;
+  z-index: 2;
+  cursor: pointer;
+  display: flex;
+  /* flex-direction: column nowrap; */
+  justify-content: center;
+  align-items: center;
+  background-color: #040a16;
+  color: #cbd9f4a6;
+  
+  border-left: 2px solid black;
+  border-right: 2px solid black;
+  border-top: 2px solid black;
+  border-top-right-radius: 4px;
+  border-top-left-radius: 4px;
+  padding: 4px;
+  height: 32px;
+  width: 65px;
+}
+#gorazd_hidden_box:hover {
+  color: #cbd9f4;
+}
+#gorazd_hidden_text {
+  font-family: IBM_Plex_Sans;
+  font-size: 15px;
+}
+#gorazd_letter_button_box {
+  font-family: Bukyvede;
+}
+#gorazd_searchbox {
+  width: 175px;
+  height: 73%;
+
+  padding: 4px;
+  outline: none;
+  overflow: hidden;
+  resize: none;
+  border-radius: 5px;
+  box-sizing: border-box;
+  font-family: Bukyvede;
+  font-size: 19px;
+  letter-spacing: 1px;
+}
+#gorazd_no_results {
+  font-family: IBM_PLEX_SANS;
+  font-size: 13px;
+  text-align: center;
+  padding: 9px;
+  color: red;
+}

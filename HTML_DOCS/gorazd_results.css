@@ -1119,12 +1119,14 @@ p.podvyznam-znak{
 .sjs .vyskyt span[aip-subtype="vyskyt"]:first-of-type,
 .sjs p.confer span[aip-subtype="confer"]:first-of-type,
 .sjs p.exh span[aip-type="exh"]:first-of-type{
-  margin-left: 50px !important;
+  /* margin-left: 50px !important; */
+  margin-left: 10px !important;
 }
 
 .snsp .odstavec span:first-of-type,
 .sjs .odstavec span:first-of-type{
-  margin-left: 50px !important;
+  /* margin-left: 50px !important; */
+  margin-left: 10px !important;
 }
 
 

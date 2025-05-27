@@ -2897,18 +2897,18 @@ const switchSearchType = (event) => {
     app_state.search_type = 2;
   }
 
-  document.getElementById("letter_button_box").innerHTML = "";
+  document.getElementById("search_letter_button_box").innerHTML = "";
   let search_letter_html = "";
   for(const letter of search_letters) {
     search_letter_html += "<div class=\"letter_button\">" + letter + "</div>";
   }
-  document.getElementById("letter_button_box").innerHTML = search_letter_html;
-  document.getElementById("letter_button_box").scrollTop = 0;
+  document.getElementById("search_letter_button_box").innerHTML = search_letter_html;
+  document.getElementById("search_letter_button_box").scrollTop = 0;
 };
 
 const insertLetter = (event) => {
   if(event.target.className == "letter_button") {
-    const searchbox = document.getElementById("dict_searchbox");
+    const searchbox = event.target.parentElement.parentElement.querySelector("textarea");
     const selection_start = searchbox.selectionStart;
     const selection_end = searchbox.selectionEnd;
     const new_letter = event.target.textContent;
@@ -2933,11 +2933,12 @@ document.getElementById("search_scope").addEventListener('click', switchSearchSc
 
 document.getElementById("search_type_options").addEventListener('click', switchSearchType);
 
-document.getElementById("letter_button_box").addEventListener('wheel', (event) => {
+document.getElementById("search_letter_button_box").addEventListener('wheel', (event) => {
   event.preventDefault();
   event.currentTarget.scrollTop += (event.deltaY > 0 ? 5 : -5);
 });
-document.getElementById("letter_button_box").addEventListener('click', insertLetter);
+
+document.querySelectorAll(".letter_button_box").forEach(letter_button_box => letter_button_box.addEventListener('click', insertLetter));
 
 const lookupForm = () => {
   const search_term = document.getElementById("dict_searchbox").value.trim();
@@ -2953,7 +2954,7 @@ document.getElementById("dict_searchbox").addEventListener('keydown', event => {
     lcsSearch(document.getElementById("dict_searchbox").value.trim(), app_state.regex_search);
   }
 });
-document.getElementById("search_button").addEventListener('click', event => {
+document.getElementById("corpus_search_button").addEventListener('click', event => {
   lcsSearch(document.getElementById("dict_searchbox").value.trim(), app_state.regex_search);
 });
 
@@ -2989,22 +2990,26 @@ const toggleSearchBox = () => {
 document.getElementById("dict_hidden_box").addEventListener('click', toggleSearchBox);
 document.getElementById("dict_close").addEventListener('click', toggleSearchBox);
 
-const search_load_spinner = document.createElement("div");
-search_load_spinner.id = "search_load_spinner";
+const corpus_search_load_spinner = document.createElement("div");
+const gorazd_search_load_spinner = document.createElement("div");
+corpus_search_load_spinner.className = "search_load_spinner";
+gorazd_search_load_spinner.className = "search_load_spinner";
+corpus_search_load_spinner.id = "corpus_search_load_spinner";
+gorazd_search_load_spinner.id = "gorazd_search_load_spinner";
 
 const showSearchLoadSpinner = (minimised) => {
   document.getElementById("dict_searchbox").disabled = true;
   if(minimised) {
-    document.getElementById("search_button").append(search_load_spinner);
+    document.getElementById("corpus_search_button").append(corpus_search_load_spinner);
   }
   else {
     document.getElementById("dict_body").style.opacity = "50%";
-    document.getElementById("dict_body").append(search_load_spinner);
+    document.getElementById("dict_body").append(corpus_search_load_spinner);
   }
 }
 const removeSearchLoadSpinner = () => {
   document.getElementById("dict_body").style.opacity = "";
-  document.getElementById("search_load_spinner").remove();
+  document.getElementById("corpus_search_load_spinner").remove();
   document.getElementById("dict_searchbox").disabled = false;
 }
 
@@ -3353,6 +3358,7 @@ const toggleRegexSearch = (event) => {
 document.getElementById("regex_box").addEventListener('click', toggleRegexSearch);
 
 const stealFromGorazd = (headword_query) => {
+  showGorazdSearchLoadSpinner(app_state.dict_box_minimised);
   app_state.dict_html_entries = {1: "", 2: ""};
   const query_url = "http://castor.gorazd.org:8080/gorazd/advanced_search;jsessionid=013373AF9710B0E8728F91826ABBD8DD?queryFields=%7B%221%22%3A%7B%22fieldName%22%3A%22HeaderAll%22%2C%22rawFieldQuery%22%3A%22" + encodeURIComponent(headword_query) + "%22%2C%22logTerm%22%3A%22%22%7D%7D";
   let send_data = "url="+query_url; 
@@ -3364,33 +3370,31 @@ const stealFromGorazd = (headword_query) => {
       xhttp.onreadystatechange = () => { 
           if (xhttp.readyState == 4) {
               console.log("curl complete");
+              document.getElementById("gorazd_searchbox").value = headword_query;
               if(xhttp.responseText == "Request timeout") {
                   console.log("Dictionary request took more than ten seconds so it was aborted");
-                  return;
+                  
               }
               else if(xhttp.responseText == "curl failure") {
                   console.log("Dictionary request has failed");
-                  return;
+                  
               }
               else {
                 const json_response = JSON.parse(xhttp.responseText);
                 if(json_response.response.found > 0) {
           
                   json_response.response.result.pageData.forEach(dict_entry => {
-                    console.log(dict_entry.recordData.EnTrl);
+                    // console.log(dict_entry.recordData.EnTrl);
 
                     const dict_no = dict_entry.recordData.Dictionary;
                     const dict_html = dict_entry.recordData.SourceD;
 
-                    app_state.dict_html_entries[dict_no] = dict_html;
-
-
+                    app_state.dict_html_entries[dict_no] = app_state.dict_html_entries[dict_no].concat(dict_html);
                   });
-                  
-                  displayDictBox();
                 }
-                else console.log("No results, repent");
+                else console.log("No results, repent");               
               }
+              displayDictBox();
           }
       }; 
       xhttp.send(send_data);
@@ -3398,14 +3402,60 @@ const stealFromGorazd = (headword_query) => {
   httpRequest("POST", "curl_lookup.php");
 };
 
-const displayDictBox = () => {
-  const gorazd_outline = document.getElementById("gorazd_outline");
-  if(gorazd_outline.style.display == "") {
-    gorazd_outline.style.display = "flex";
+const stealFromGorazdTOROT = (event) => {
+  console.log("stealFromGorazdTOROT");
+  const lemma_id = event.target.dataset.lemma_id;
+  if(lemma_id == undefined) {
+    return;
   }
+  showGorazdSearchLoadSpinner(app_state.dict_box_minimised);
+  app_state.dict_html_entries = {1: "", 2: ""};
+
+  let send_data = "lemma_id=" + lemma_id;
+  const httpRequest = (method, url) => {
+    const xhttp = new XMLHttpRequest();
+    xhttp.open(method, url, true);
+    xhttp.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+    xhttp.responseType = 'json';
+    xhttp.onreadystatechange = () => { 
+        if (xhttp.readyState == 4) {
+          console.log("curl complete");
+          if(xhttp.response.curl_return_text == "Request timeout") {
+            console.log("Dictionary request took more than ten seconds so it was aborted");
+              
+          }
+          else if(xhttp.response.curl_return_text == "curl failure") {
+            console.log("Dictionary request has failed");          
+          }
+          else {
+            const json_response = xhttp.response.curl_return_text;
+            document.getElementById("gorazd_searchbox").value = xhttp.response.torot_lemma_form;
+            if(json_response.response.found > 0) {
+      
+              json_response.response.result.pageData.forEach(dict_entry => {
+                // console.log(dict_entry.recordData.EnTrl);
+
+                const dict_no = dict_entry.recordData.Dictionary;
+                const dict_html = dict_entry.recordData.SourceD;
+
+                app_state.dict_html_entries[dict_no] = app_state.dict_html_entries[dict_no].concat(dict_html);
+              });
+            }
+            else console.log("No results, repent");               
+          }
+          displayDictBox();
+        }
+    }; 
+    xhttp.send(send_data);
+  };
+  httpRequest("POST", "gorazd_torot.php");
+};
+
+const displayDictBox = () => {
   document.querySelectorAll(".dict_type").forEach(dict_type_button => {
     dict_type_button.classList.remove("active");
     dict_type_button.classList.remove("available");
+    dict_type_button.removeEventListener('click', selectGorazdDictionary);
   });
 
   const snsp_button = document.getElementById("SNSP");
@@ -3414,29 +3464,125 @@ const displayDictBox = () => {
   const snsp_entry_exists = app_state.dict_html_entries[2] != "";
   const sjs_entry_exists = app_state.dict_html_entries[1] != "";
 
-  let gorazd_result_content = document.createRange().createContextualFragment("No results found, perhaps this word is lemmatised differently by GORAZD");
+  if(sjs_entry_exists) {
+    sjs_button.classList.add("available");
+    sjs_button.addEventListener('click', selectGorazdDictionary);
+  }
+  if(snsp_entry_exists) {
+    snsp_button.classList.add("available");
+    snsp_button.addEventListener('click', selectGorazdDictionary);
+  }
+
+  let gorazd_result_content = "<div id=\"gorazd_no_results\">Nothing found. Repent!</div>";
 
   if(snsp_entry_exists) {
-    gorazd_result_content = document.createRange().createContextualFragment(app_state.dict_html_entries[2]);
+    gorazd_result_content = app_state.dict_html_entries[2];
     snsp_button.classList.add("active");
-    snsp_button.classList.add("available");
-    if(sjs_entry_exists) {
-      sjs_button.classList.add("available");
-    }
   }
   else if(sjs_entry_exists) {
-    gorazd_result_content = document.createRange().createContextualFragment(app_state.dict_html_entries[1]);
+    gorazd_result_content = app_state.dict_html_entries[1];
     sjs_button.classList.add("active");
-    sjs_button.classList.add("available");
   }
   
-  
+
+
+  updateGorazdBody(gorazd_result_content);
+  fullyOpenGorazd();
+  removeGorazdSearchLoadSpinner();
+};
+
+const updateGorazdBody = (html_str) => {
   const gorazd_viewboxcontent = document.getElementById('viewboxcontent');
   gorazd_viewboxcontent.innerHTML = "";
-  gorazd_viewboxcontent.append(gorazd_result_content);
+  gorazd_viewboxcontent.append(document.createRange().createContextualFragment(html_str));
+  gorazd_viewboxcontent.scrollTop = 0;
+
+  document.querySelectorAll("span[aip-type=\"odkaz\"]").forEach(dict_link => {
+    dict_link.addEventListener('click', () => stealFromGorazd(dict_link.querySelector("a").textContent));
+  });
+};
+
+const fullyOpenGorazd = () => {
+  if(app_state.dict_box_shown == false) {
+    document.getElementById("gorazd_hidden_box").style.display = "none";
+    gorazd_outline.style.display = "flex";
+    app_state.dict_box_shown = true;
+  }
+  if(app_state.dict_box_minimised == true) {
+    document.getElementById("gorazd_box").style.display = "flex";
+    app_state.dict_box_minimised = false;
+  }
+};
+
+const selectGorazdDictionary = (event) => {
+  if(event.target.classList.contains("available") && !event.target.classList.contains("active")) {
+    event.target.parentElement.querySelector(".active").classList.remove("active");
+    const new_html = event.target.id == "SJS" ? app_state.dict_html_entries[1] : app_state.dict_html_entries[2];
+    updateGorazdBody(new_html);
+    event.target.classList.add("active");
+    fullyOpenGorazd();
+  }
 };
 
 const ajaxContextSearch = () => {
   //this function is included as an onclick= attribute in the HTML returned in gorazd's JSON response, so I have to implement it to prevent errors when those words get clicked on. If I want to add link-functionality I can implement it myself with my own eventListeners, but I can't get rid of their bastard onclick= attributes
   return;
 }
+const minimiseGorazd = () => {
+  const gorazd_body = document.getElementById("gorazd_box");
+  if(gorazd_body.style.display == "flex") {
+    gorazd_body.style.display = "none";
+    app_state.dict_box_minimised = true;
+  }
+  else {
+    gorazd_body.style.display = "flex";
+    app_state.dict_box_minimised = false;
+  }
+};
+document.getElementById("gorazd_minimise").addEventListener('click', minimiseGorazd);
+
+const toggleGorazd = () => {
+  if(app_state.dict_box_shown == true) {
+    document.getElementById("gorazd_hidden_box").style.display = "flex";
+    document.getElementById("gorazd_outline").style.display = "none";
+    document.getElementById("gorazd_searchbox").blur();
+    app_state.dict_box_shown = false;
+  }
+  else {
+    document.getElementById("gorazd_hidden_box").style.display = "none";
+    document.getElementById("gorazd_outline").style.display = "flex";
+    document.getElementById("gorazd_searchbox").focus();
+    app_state.dict_box_shown = true;
+  }
+}
+document.getElementById("gorazd_hidden_box").addEventListener('click', toggleGorazd);
+document.getElementById("gorazd_close").addEventListener('click', toggleGorazd);
+
+document.getElementById("gorazd_searchbox").addEventListener('keydown', event => {
+  if(event.key == "Enter") {
+    event.preventDefault();
+    let gorazd_query = document.getElementById("gorazd_searchbox").value.trim().toLowerCase().replaceAll("ы", "ꙑ").replaceAll("шт", "щ");
+    stealFromGorazd(gorazd_query);
+  }
+});
+document.getElementById("gorazd_search_button").addEventListener('click', event => {
+  let gorazd_query = document.getElementById("gorazd_searchbox").value.trim().toLowerCase().replaceAll("ы", "ꙑ").replaceAll("шт", "щ");
+  stealFromGorazd(gorazd_query);
+});
+const showGorazdSearchLoadSpinner = (minimised) => {
+  document.getElementById("gorazd_searchbox").disabled = true;
+  if(minimised) {
+    document.getElementById("gorazd_search_button").append(gorazd_search_load_spinner);
+  }
+  else {
+    document.getElementById("gorazd_box").style.opacity = "50%";
+    document.getElementById("gorazd_box").append(gorazd_search_load_spinner);
+  }
+};
+const removeGorazdSearchLoadSpinner = () => {
+  document.getElementById("gorazd_box").style.opacity = "";
+  document.getElementById("gorazd_search_load_spinner").remove();
+  document.getElementById("gorazd_searchbox").disabled = false;
+};
+
+document.getElementById("p1").addEventListener('click', stealFromGorazdTOROT);

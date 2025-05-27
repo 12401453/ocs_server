@@ -55,7 +55,7 @@
     padding: 4px;
 }
 
-#searchbox_flexbox {
+.searchbox_flexbox {
     display: flex;
     flex-flow: row nowrap;
     justify-content: space-between;
