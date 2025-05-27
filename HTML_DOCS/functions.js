@@ -2973,7 +2973,7 @@ document.getElementById("dict_minimise").addEventListener('click', minimiseSearc
 
 const toggleSearchBox = () => {
   if(app_state.search_box_shown == true) {
-    document.getElementById("dict_hidden_box").style.display = "flex";
+    document.getElementById("dict_hidden_box").style.display = "";
     document.getElementById("dict_outline").style.display = "none";
     document.getElementById("dict_searchbox").blur();
     resetLcsPageSearch();
@@ -2981,7 +2981,7 @@ const toggleSearchBox = () => {
   }
   else {
     document.getElementById("dict_hidden_box").style.display = "none";
-    document.getElementById("dict_outline").style.display = "flex";
+    document.getElementById("dict_outline").style.display = "";
     document.getElementById("dict_searchbox").focus();
     app_state.search_box_shown = true;
   }
@@ -3404,9 +3404,13 @@ const stealFromGorazd = (headword_query) => {
 
 const stealFromGorazdTOROT = (event) => {
   console.log("stealFromGorazdTOROT");
+  if(window.innerWidth < 769) return;
   const lemma_id = event.target.dataset.lemma_id;
   if(lemma_id == undefined) {
     return;
+  }
+  if(app_state.dict_box_shown == false) {
+    toggleGorazd();
   }
   showGorazdSearchLoadSpinner(app_state.dict_box_minimised);
   app_state.dict_html_entries = {1: "", 2: ""};
@@ -3498,14 +3502,18 @@ const updateGorazdBody = (html_str) => {
   gorazd_viewboxcontent.scrollTop = 0;
 
   document.querySelectorAll("span[aip-type=\"odkaz\"]").forEach(dict_link => {
-    dict_link.addEventListener('click', () => stealFromGorazd(dict_link.querySelector("a").textContent));
+    dict_link.addEventListener('click', () => {
+      let query = dict_link.querySelector("a").textContent;
+      if(query.slice(-1) == "-") query = query.slice(0, -1);
+      stealFromGorazd(query);
+    });
   });
 };
 
 const fullyOpenGorazd = () => {
   if(app_state.dict_box_shown == false) {
     document.getElementById("gorazd_hidden_box").style.display = "none";
-    gorazd_outline.style.display = "flex";
+    gorazd_outline.style.display = "";
     app_state.dict_box_shown = true;
   }
   if(app_state.dict_box_minimised == true) {
@@ -3543,14 +3551,14 @@ document.getElementById("gorazd_minimise").addEventListener('click', minimiseGor
 
 const toggleGorazd = () => {
   if(app_state.dict_box_shown == true) {
-    document.getElementById("gorazd_hidden_box").style.display = "flex";
+    document.getElementById("gorazd_hidden_box").style.display = "";
     document.getElementById("gorazd_outline").style.display = "none";
     document.getElementById("gorazd_searchbox").blur();
     app_state.dict_box_shown = false;
   }
   else {
     document.getElementById("gorazd_hidden_box").style.display = "none";
-    document.getElementById("gorazd_outline").style.display = "flex";
+    document.getElementById("gorazd_outline").style.display = "";
     document.getElementById("gorazd_searchbox").focus();
     app_state.dict_box_shown = true;
   }

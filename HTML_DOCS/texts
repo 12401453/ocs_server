@@ -5,12 +5,12 @@
   
 
 <link href="style.css" rel="stylesheet" media="all and (min-width: 769px)" type="text/css">
-<link href="style_small_screen.css" rel="stylesheet" media="all and (max-width: 769px)" type="text/css">
+<link href="style_small_screen.css" rel="stylesheet" media="all and (max-width: 768.9px)" type="text/css">
 <link rel="stylesheet" type="text/css" href="lemma_set_unexplicit.css" id="lemma_set_style">
 <link href="gorazd_results.css" rel="stylesheet">
 <!--<link rel="stylesheet" type="text/css" href="flexbox.css" id="flexbox_styles">-->
-<link href="dict.css" rel="stylesheet" type="text/css">
-<link href="dict_small_screens.css" rel="stylesheet" media="all and (max-width: 768px)" type="text/css">
+<link href="dict.css" rel="stylesheet" media="all and (min-width: 769px)" type="text/css">
+<link href="dict_small_screens.css" rel="stylesheet" media="all and (max-width: 768.9px)" type="text/css">
 <link id="colour_theme" href="dark_theme.css" rel="stylesheet" type="text/css">
 
 <meta charset="utf-8" />
@@ -62,7 +62,7 @@
 </div>
 </div>
 <span id="spoofspan" style="display: inline;"></span>
-<div id="gorazd_outline"><div id="gorazd_topbar"><div id="gorazd_minimise"><div id="minimise"></div></div>
+<div id="gorazd_outline" style="display: none;"><div id="gorazd_topbar"><div id="gorazd_minimise"><div id="minimise"></div></div>
 <div id="dict_type_options">
   <div id="SNSP" class="dict_type" title="Dictionary of the Oldest Old Church Slavonic Manuscripts">SNSP</div>
   <div id="SJS" class="dict_type" title="Old Church Slavonic Dictionary">SJS</div>
@@ -90,7 +90,7 @@
 </div>
 <div id="gorazd_hidden_box"><div id="gorazd_hidden_text">Dict</div></div>
 <span id="spoofspan2"><span id="hidden_lemma_tag"></span></span>
-<div id="dict_outline">
+<div id="dict_outline" style="display: none;">
   <div id="dict_topbar">
     <div id="dict_minimise"><div id="minimise"></div></div>
     <div id="search_type_options">

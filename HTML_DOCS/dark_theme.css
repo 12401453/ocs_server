@@ -323,6 +323,14 @@ span[aip-type="odkaz"]:hover{
   color: #cbd9f4;
   background-color: #071022;
 }
+
+#dict_hidden_box, #gorazd_hidden_box {
+  background-color: #040a16;
+  color: #cbd9f4a6;
+}
+#dict_hidden_box:hover, #gorazd_hidden_box:hover {
+  color: #cbd9f4;
+}
 #gorazd_searchbox { 
   background-color:#071022;
   color: #cbd9f4;

@@ -1,6 +1,6 @@
 
 #dict_outline {
-    display: none;
+    display: flex;
     flex-flow: column nowrap;
     height: fit-content;
     width: 400px;

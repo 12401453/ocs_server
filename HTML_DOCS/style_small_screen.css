@@ -861,3 +861,38 @@ a {
   -webkit-animation: spin 1s linear infinite; /* Safari */
   animation: spin 1s linear infinite;
 }
+#gorazd_hidden_box {
+  position: fixed;
+  bottom: 0px;
+  left: 4%;
+  z-index: 2;
+  cursor: pointer;
+  display: none;
+  /* flex-direction: column nowrap; */
+  justify-content: center;
+  align-items: center;
+  background-color: #040a16;
+  color: #cbd9f4a6;
+  
+  border-left: 2px solid black;
+  border-right: 2px solid black;
+  border-top: 2px solid black;
+  border-top-right-radius: 4px;
+  border-top-left-radius: 4px;
+  padding: 4px;
+  height: 32px;
+  width: 65px;
+}
+#gorazd_outline {
+  display: none;
+  flex-flow: column nowrap;
+  height: fit-content;
+  width: 400px;
+  max-height: 80%;
+  position: fixed;
+  bottom: 2px;
+  z-index: 2;
+  left: 2px;
+  border-radius: 6px;
+  background-color: #071022;
+}

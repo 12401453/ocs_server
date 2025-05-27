@@ -1147,8 +1147,6 @@ border-bottom: 2px solid rgb(23, 33, 54, 0);
   /* flex-direction: column nowrap; */
   justify-content: center;
   align-items: center;
-  background-color: #040a16;
-  color: #cbd9f4a6;
   
   border-left: 2px solid black;
   border-right: 2px solid black;
@@ -1207,7 +1205,7 @@ border-bottom: 2px solid rgb(23, 33, 54, 0);
 }
 
 #gorazd_outline {
-  display: none;
+  display: flex;
   flex-flow: column nowrap;
   height: fit-content;
   width: 400px;
@@ -1319,8 +1317,6 @@ border-bottom: 2px solid rgb(23, 33, 54, 0);
   /* flex-direction: column nowrap; */
   justify-content: center;
   align-items: center;
-  background-color: #040a16;
-  color: #cbd9f4a6;
   
   border-left: 2px solid black;
   border-right: 2px solid black;
@@ -1330,9 +1326,6 @@ border-bottom: 2px solid rgb(23, 33, 54, 0);
   padding: 4px;
   height: 32px;
   width: 65px;
-}
-#gorazd_hidden_box:hover {
-  color: #cbd9f4;
 }
 #gorazd_hidden_text {
   font-family: IBM_Plex_Sans;

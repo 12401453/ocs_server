@@ -344,6 +344,21 @@ span[aip-type="odkaz"]:hover{
   background-color:white;
   color: black;
 }
+
+#dict_hidden_box, #gorazd_hidden_box {
+  background-color: #f0c36d;
+  border-left: 1px solid #353535;
+  border-top: 1px solid #353535;
+  border-right: 1px solid #353535;
+  color: #353535;
+}
+#dict_hidden_box:hover, #gorazd_hidden_box:hover {
+  background-color: #f1ad2e;
+  color: black;
+  border-left: 1px solid black;
+  border-top: 1px solid black;
+  border-right: 1px solid black;
+}
 #gorazd_searchbox:focus {
   border: 1px solid black;
 }
