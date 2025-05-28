@@ -758,7 +758,7 @@ void OcsServer::handlePOSTedData(const char* post_data, int clientSocket) {
     else if(!strcmp(m_url, "/curl_lookup.php")) {
         bool php_func_success = curlLookup(post_values, clientSocket);
     }
-    else if(!strcmp(m_url, "/gorazd_torot.php")) {
+    else if(!strcmp(m_url, "/gorazd_lookup.php")) {
         bool php_func_success = gorazdLookup(post_values, clientSocket);
     }
     else if(!strcmp(m_url, "/disregard_word.php")) {
@@ -828,7 +828,7 @@ int OcsServer::getPostFields(const char* url) {
     else if(!strcmp(url, "/pull_multiword.php")) return 2;
     else if(!strcmp(url, "/pull_mw_by_form.php")) return 4;
     else if(!strcmp(url, "/curl_lookup.php")) return 1;
-    else if(!strcmp(url, "/gorazd_torot.php")) return 1;
+    else if(!strcmp(url, "/gorazd_lookup.php")) return 2;
     else if(!strcmp(url, "/disregard_word.php")) return 2;
     else if(!strcmp(url, "/clear_table.php")) return 0;
     else if(!strcmp(url, "/dump_lemmas.php")) return 1;
@@ -4795,14 +4795,29 @@ bool OcsServer::lcsTrigramSearch(std::string _POST[3], int clientSocket) {
     }
 }
 
-bool OcsServer::gorazdLookup(std::string _POST[1], int clientSocket) {
-    //this is a trick to get wildcarded (LIKE '%query%') SELECT statements to use a database-index, which ordinarily they can't do, because otherwise such queries over the full corpus would scale linearly with corpus-size
-    sqlite3* DB;
+bool OcsServer::gorazdLookup(std::string _POST[2], int clientSocket) {
 
+    int torot_lemma_id = safeStrToInt(_POST[0]);
+    std::string plain_query = "";
+    std::string uri_encoded_query = "";
+    if(torot_lemma_id == 0) {
+        uri_encoded_query = _POST[1];
+        plain_query = URIDecode(_POST[1]);
+
+        std::string json_str = curlGorazd(plain_query, uri_encoded_query);
+        int content_length = json_str.size();
+        std::ostringstream post_response;
+        post_response << "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: " << content_length << "\r\n\r\n" << json_str;
+
+        int length = post_response.str().size() + 1;
+        sendToClient(clientSocket, post_response.str().c_str(), length); 
+        return true;
+    }
+    //if we've already been passed the query-string from the client we won't even open the DB because we'll already have returned by now
+
+    sqlite3* DB;
     if(!sqlite3_open("chu.db", &DB)) {
         
-        int torot_lemma_id = safeStrToInt(_POST[0]);
-
         sqlite3_stmt* statement;
         const char* sql_text = "SELECT lemma_ocs FROM lemmas WHERE lemma_id = ?";
 
@@ -4810,7 +4825,7 @@ bool OcsServer::gorazdLookup(std::string _POST[1], int clientSocket) {
         sqlite3_bind_int(statement, 1, torot_lemma_id);
         sqlite3_step(statement);
 
-        std::string torot_lemma_form = "";
+        
         std::ostringstream uri_encoded_lemma_form_oss;
         const unsigned char* unsigned_char_lemma_form = sqlite3_column_text(statement, 0);
         const unsigned char* p = unsigned_char_lemma_form;
@@ -4821,16 +4836,12 @@ bool OcsServer::gorazdLookup(std::string _POST[1], int clientSocket) {
                 uri_encoded_lemma_form_oss << '%' << std::uppercase << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(*p);
                 ++p;
             }    
-            torot_lemma_form = (const char*)unsigned_char_lemma_form;
+            plain_query = (const char*)unsigned_char_lemma_form;
         }
-        std::cout << "torot_lemma_form: " << torot_lemma_form << " | uri_encoded_lemma_form: " << uri_encoded_lemma_form_oss.str() << "\n";
-        sqlite3_finalize(statement);
+        std::cout << "torot_lemma_form: " << plain_query << " | uri_encoded_lemma_form: " << uri_encoded_lemma_form_oss.str() << "\n";
+        sqlite3_finalize(statement);       
 
-        std::string gorazd_query = "http://castor.gorazd.org:8080/gorazd/advanced_search;jsessionid=013373AF9710B0E8728F91826ABBD8DD?queryFields=%7B%221%22%3A%7B%22fieldName%22%3A%22HeaderAll%22%2C%22rawFieldQuery%22%3A%22" + uri_encoded_lemma_form_oss.str() + "%22%2C%22logTerm%22%3A%22%22%7D%7D";
-        CurlFetcher query(gorazd_query.c_str(), m_dict_cookies);
-        query.fetch();         
-
-        std::string json_str = "{\"torot_lemma_form\":\"" + torot_lemma_form + "\",\"curl_return_text\":" + query.m_get_html  +"}";
+        std::string json_str = curlGorazd(plain_query, uri_encoded_lemma_form_oss.str());
         int content_length = json_str.size();
 
         std::ostringstream post_response;
@@ -4847,3 +4858,27 @@ bool OcsServer::gorazdLookup(std::string _POST[1], int clientSocket) {
         return false;
     }
 }
+
+std::string OcsServer::curlGorazd(std::string plain_query, std::string uri_encoded_query) {
+    std::string gorazd_query_url = "http://castor.gorazd.org:8080/gorazd/advanced_search;jsessionid=013373AF9710B0E8728F91826ABBD8DD?queryFields=%7B%221%22%3A%7B%22fieldName%22%3A%22HeaderAll%22%2C%22rawFieldQuery%22%3A%22" + uri_encoded_query + "%22%2C%22logTerm%22%3A%22%22%7D%7D";
+
+    CurlFetcher query(gorazd_query_url.c_str());
+
+    query.fetch();
+
+    if(query.m_get_html.find("\"found\":0,") != std::string::npos) {
+        //there can be instances where SJS has no numeral appended, but SNSP does (родьство), which means only the SJS entry gets found with no indiciation of there being 2 SNSP entries, so possibly some more sophisticated probing and aggregating of results would be better
+        std::cout << "first try nothing found, appending 1 to the query and re-running...\n";
+        uri_encoded_query.append("1");
+        gorazd_query_url = "http://castor.gorazd.org:8080/gorazd/advanced_search;jsessionid=013373AF9710B0E8728F91826ABBD8DD?queryFields=%7B%221%22%3A%7B%22fieldName%22%3A%22HeaderAll%22%2C%22rawFieldQuery%22%3A%22" + uri_encoded_query + "%22%2C%22logTerm%22%3A%22%22%7D%7D";
+
+        query.fetch(gorazd_query_url);
+        
+        if(query.m_get_html.find("\"found\":0,") == std::string::npos) {
+            plain_query.append("1");
+        }
+    }
+    if(query.error_state) query.m_get_html = "\"" + query.m_get_html + "\""; //normally GORAZD returns alread-escaped JSON, but my error-messages are raw strings, and the client expects a JSON response so I have to return a JSON object, which means the raw-string error-messages need to be quoted
+
+    return "{\"query_form\":\"" + plain_query + "\",\"curl_return_text\":" + query.m_get_html  +"}";
+};

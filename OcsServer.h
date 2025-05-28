@@ -85,7 +85,8 @@ class OcsServer : public TcpListener {
         bool retrieveMultiwordMeanings(std::string _POST[2], int clientSocket);
         bool pullInMultiwordByForm(std::string _POST[4], int clientSocket);
 
-        bool gorazdLookup(std::string _POST[1], int clientSocket);
+        bool gorazdLookup(std::string _POST[2], int clientSocket);
+        std::string curlGorazd(std::string plain_query, std::string uri_encoded_query);
 
         bool curlLookup(std::string _POST[1], int clientSocket);
 

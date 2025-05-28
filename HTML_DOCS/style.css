@@ -1333,9 +1333,10 @@ border-bottom: 2px solid rgb(23, 33, 54, 0);
 }
 #gorazd_letter_button_box {
   font-family: Bukyvede;
+  width: 153px;
 }
 #gorazd_searchbox {
-  width: 175px;
+  width: 155px;
   height: 73%;
 
   padding: 4px;
@@ -1354,4 +1355,11 @@ border-bottom: 2px solid rgb(23, 33, 54, 0);
   text-align: center;
   padding: 9px;
   color: red;
+}
+#gorazd_error {
+  font-family: IBM_PLEX_SANS;
+  font-size: 13px;
+  text-align: center;
+  padding: 9px;
+  color: rgb(255, 115, 0);
 }

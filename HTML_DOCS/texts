@@ -81,6 +81,8 @@
         <div class="letter_button">ѥ</div>
         <div class="letter_button">ѳ</div>
         <div class="letter_button">ѵ</div>
+        <div class="letter_button" title="palatalisation mark">҄</div>
+        <div class="letter_button" title="titlo (used for numerals)">҃</div>
       </div>
       <textarea id="gorazd_searchbox" spellcheck="false"></textarea>
     </div>
@@ -111,7 +113,7 @@
     </div>
     <div id="dict_bottombar">
       <div class="searchbox_flexbox">
-        <div id="search_letter_button_box" class="letter_button_box">
+        <div id="search_letter_button_box" class="letter_button_box" title="scroll down for more">
           <div class="letter_button">š</div>
           <div class="letter_button">ž</div>
           <div class="letter_button">č</div>

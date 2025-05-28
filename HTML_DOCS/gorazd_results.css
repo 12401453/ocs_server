@@ -1274,3 +1274,11 @@ span[aip-index="dolni"] {
     src: url(fonts/arial_narrow.ttf) format("truetype");
 }
 */
+
+/* this is my attempt to force these two font-files to load on main-page load before they are used to render anything, because otherwise you get pop-in when you run the dictionary for the first time on a new browser (after that they should be cached like all font-files are) */
+#spoofspan {
+    font-family: CyrillicaBulgarian10U;
+}
+#spoofspan2 {
+    font-family: FreeSerif;
+}

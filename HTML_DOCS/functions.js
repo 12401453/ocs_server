@@ -3357,65 +3357,25 @@ const toggleRegexSearch = (event) => {
 }
 document.getElementById("regex_box").addEventListener('click', toggleRegexSearch);
 
-const stealFromGorazd = (headword_query) => {
-  showGorazdSearchLoadSpinner(app_state.dict_box_minimised);
-  app_state.dict_html_entries = {1: "", 2: ""};
-  const query_url = "http://castor.gorazd.org:8080/gorazd/advanced_search;jsessionid=013373AF9710B0E8728F91826ABBD8DD?queryFields=%7B%221%22%3A%7B%22fieldName%22%3A%22HeaderAll%22%2C%22rawFieldQuery%22%3A%22" + encodeURIComponent(headword_query) + "%22%2C%22logTerm%22%3A%22%22%7D%7D";
-  let send_data = "url="+query_url; 
-  const httpRequest = (method, url) => {
-      const xhttp = new XMLHttpRequest();
-      xhttp.open(method, url, true);
-      xhttp.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-      xhttp.responseType = 'text';
-      xhttp.onreadystatechange = () => { 
-          if (xhttp.readyState == 4) {
-              console.log("curl complete");
-              document.getElementById("gorazd_searchbox").value = headword_query;
-              if(xhttp.responseText == "Request timeout") {
-                  console.log("Dictionary request took more than ten seconds so it was aborted");
-                  
-              }
-              else if(xhttp.responseText == "curl failure") {
-                  console.log("Dictionary request has failed");
-                  
-              }
-              else {
-                const json_response = JSON.parse(xhttp.responseText);
-                if(json_response.response.found > 0) {
-          
-                  json_response.response.result.pageData.forEach(dict_entry => {
-                    // console.log(dict_entry.recordData.EnTrl);
-
-                    const dict_no = dict_entry.recordData.Dictionary;
-                    const dict_html = dict_entry.recordData.SourceD;
-
-                    app_state.dict_html_entries[dict_no] = app_state.dict_html_entries[dict_no].concat(dict_html);
-                  });
-                }
-                else console.log("No results, repent");               
-              }
-              displayDictBox();
-          }
-      }; 
-      xhttp.send(send_data);
-  };  
-  httpRequest("POST", "curl_lookup.php");
-};
-
 const stealFromGorazdTOROT = (event) => {
-  console.log("stealFromGorazdTOROT");
+  //console.log("stealFromGorazdTOROT");
   if(window.innerWidth < 769) return;
   const lemma_id = event.target.dataset.lemma_id;
   if(lemma_id == undefined) {
     return;
   }
+  lookupGorazd(lemma_id, "");
+};
+
+const lookupGorazd = (lemma_id, query) => {
   if(app_state.dict_box_shown == false) {
+    if(app_state.dict_box_minimised == false) minimiseGorazd();
     toggleGorazd();
   }
   showGorazdSearchLoadSpinner(app_state.dict_box_minimised);
   app_state.dict_html_entries = {1: "", 2: ""};
 
-  let send_data = "lemma_id=" + lemma_id;
+  let send_data = "lemma_id=" + lemma_id + "&query=" + encodeURIComponent(query);
   const httpRequest = (method, url) => {
     const xhttp = new XMLHttpRequest();
     xhttp.open(method, url, true);
@@ -3423,17 +3383,21 @@ const stealFromGorazdTOROT = (event) => {
     xhttp.responseType = 'json';
     xhttp.onreadystatechange = () => { 
         if (xhttp.readyState == 4) {
+          let error_msg = "";
+
           console.log("curl complete");
           if(xhttp.response.curl_return_text == "Request timeout") {
             console.log("Dictionary request took more than ten seconds so it was aborted");
+            error_msg = "Dictionary request took more than ten seconds so it was aborted";
               
           }
           else if(xhttp.response.curl_return_text == "curl failure") {
-            console.log("Dictionary request has failed");          
+            console.log("Dictionary request has failed");
+            error_msg = "Dictionary request has failed";        
           }
           else {
             const json_response = xhttp.response.curl_return_text;
-            document.getElementById("gorazd_searchbox").value = xhttp.response.torot_lemma_form;
+            document.getElementById("gorazd_searchbox").value = xhttp.response.query_form;
             if(json_response.response.found > 0) {
       
               json_response.response.result.pageData.forEach(dict_entry => {
@@ -3447,15 +3411,15 @@ const stealFromGorazdTOROT = (event) => {
             }
             else console.log("No results, repent");               
           }
-          displayDictBox();
+          displayDictBox(error_msg);
         }
     }; 
     xhttp.send(send_data);
   };
-  httpRequest("POST", "gorazd_torot.php");
+  httpRequest("POST", "gorazd_lookup.php");
 };
 
-const displayDictBox = () => {
+const displayDictBox = (error_msg) => {
   document.querySelectorAll(".dict_type").forEach(dict_type_button => {
     dict_type_button.classList.remove("active");
     dict_type_button.classList.remove("available");
@@ -3468,27 +3432,30 @@ const displayDictBox = () => {
   const snsp_entry_exists = app_state.dict_html_entries[2] != "";
   const sjs_entry_exists = app_state.dict_html_entries[1] != "";
 
-  if(sjs_entry_exists) {
-    sjs_button.classList.add("available");
-    sjs_button.addEventListener('click', selectGorazdDictionary);
-  }
-  if(snsp_entry_exists) {
-    snsp_button.classList.add("available");
-    snsp_button.addEventListener('click', selectGorazdDictionary);
-  }
-
   let gorazd_result_content = "<div id=\"gorazd_no_results\">Nothing found. Repent!</div>";
+  if(error_msg == "") {
 
-  if(snsp_entry_exists) {
-    gorazd_result_content = app_state.dict_html_entries[2];
-    snsp_button.classList.add("active");
-  }
-  else if(sjs_entry_exists) {
-    gorazd_result_content = app_state.dict_html_entries[1];
-    sjs_button.classList.add("active");
-  }
-  
+    if(sjs_entry_exists) {
+      sjs_button.classList.add("available");
+      sjs_button.addEventListener('click', selectGorazdDictionary);
+    }
+    if(snsp_entry_exists) {
+      snsp_button.classList.add("available");
+      snsp_button.addEventListener('click', selectGorazdDictionary);
+    }
 
+    
+
+    if(snsp_entry_exists) {
+      gorazd_result_content = app_state.dict_html_entries[2];
+      snsp_button.classList.add("active");
+    }
+    else if(sjs_entry_exists) {
+      gorazd_result_content = app_state.dict_html_entries[1];
+      sjs_button.classList.add("active");
+    }
+  }
+  else gorazd_result_content = "<div id=\"gorazd_error\">" + error_msg + "</div>";
 
   updateGorazdBody(gorazd_result_content);
   fullyOpenGorazd();
@@ -3505,7 +3472,7 @@ const updateGorazdBody = (html_str) => {
     dict_link.addEventListener('click', () => {
       let query = dict_link.querySelector("a").textContent;
       if(query.slice(-1) == "-") query = query.slice(0, -1);
-      stealFromGorazd(query);
+      lookupGorazd(0, query);
     });
   });
 };
@@ -3570,12 +3537,13 @@ document.getElementById("gorazd_searchbox").addEventListener('keydown', event =>
   if(event.key == "Enter") {
     event.preventDefault();
     let gorazd_query = document.getElementById("gorazd_searchbox").value.trim().toLowerCase().replaceAll("ы", "ꙑ").replaceAll("шт", "щ");
-    stealFromGorazd(gorazd_query);
+    //stealFromGorazd(gorazd_query);
+    if(gorazd_query != "") lookupGorazd(0, gorazd_query);
   }
 });
 document.getElementById("gorazd_search_button").addEventListener('click', event => {
   let gorazd_query = document.getElementById("gorazd_searchbox").value.trim().toLowerCase().replaceAll("ы", "ꙑ").replaceAll("шт", "щ");
-  stealFromGorazd(gorazd_query);
+  if(gorazd_query != "") lookupGorazd(0, gorazd_query);
 });
 const showGorazdSearchLoadSpinner = (minimised) => {
   document.getElementById("gorazd_searchbox").disabled = true;
