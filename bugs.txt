@@ -1,0 +1,1 @@
+1.) The trigram search gives a false positive with "mъjǢ", it finds Assem. "umъjemъjixъ". Either my trigram-search is flawed or there is a problem with how many characters the long-a-archiphoneme is. Also happens with "ъjem" as a query finding things like "narikajemějemь"

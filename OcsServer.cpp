@@ -4655,7 +4655,7 @@ bool OcsServer::lcsTrigramSearch(std::string _POST[3], int clientSocket) {
             std::string query_trigram;
             int32_t trigram_start_offset = 0;
 
-            int num_of_trigrams = num_chars - 2;
+            int32_t num_of_trigrams = num_chars - 2;
             std::unordered_map<int, int> tokno_trigram_matches_map;
             while(trigram_start_offset + 2 < num_chars) {
                 sqlite3_bind_int(trigram_stmt, 1, tokno_start);
@@ -4663,8 +4663,11 @@ bool OcsServer::lcsTrigramSearch(std::string _POST[3], int clientSocket) {
                 unicode_query.tempSubString(trigram_start_offset, 3).toUTF8String(query_trigram);
                 sqlite3_bind_text(trigram_stmt, 3, query_trigram.c_str(), -1, SQLITE_STATIC);
 
+                int result_tokno = 0;
                 while(sqlite3_step(trigram_stmt) == SQLITE_ROW) {
-                    int result_tokno = sqlite3_column_int(trigram_stmt, 0);
+                    int new_result_tokno = sqlite3_column_int(trigram_stmt, 0);
+                    if(result_tokno == new_result_tokno) continue; //this prevents double-matches for words which contain the same trigram more than once
+                    result_tokno = new_result_tokno;
                     if(tokno_trigram_matches_map.contains(result_tokno)) {
                         tokno_trigram_matches_map[result_tokno]++;
                     }

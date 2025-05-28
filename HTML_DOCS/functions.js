@@ -3547,6 +3547,7 @@ document.getElementById("gorazd_search_button").addEventListener('click', event 
 });
 const showGorazdSearchLoadSpinner = (minimised) => {
   document.getElementById("gorazd_searchbox").disabled = true;
+  document.getElementById("p1").removeEventListener('click', stealFromGorazdTOROT);
   if(minimised) {
     document.getElementById("gorazd_search_button").append(gorazd_search_load_spinner);
   }
@@ -3559,6 +3560,7 @@ const removeGorazdSearchLoadSpinner = () => {
   document.getElementById("gorazd_box").style.opacity = "";
   document.getElementById("gorazd_search_load_spinner").remove();
   document.getElementById("gorazd_searchbox").disabled = false;
+  document.getElementById("p1").addEventListener('click', stealFromGorazdTOROT);
 };
 
 document.getElementById("p1").addEventListener('click', stealFromGorazdTOROT);
