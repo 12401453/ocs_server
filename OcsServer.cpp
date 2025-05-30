@@ -4841,10 +4841,17 @@ bool OcsServer::gorazdLookup(std::string _POST[2], int clientSocket) {
             }    
             plain_query = (const char*)unsigned_char_lemma_form;
         }
+
+        std::string uri_encoded_lemma_form = uri_encoded_lemma_form_oss.str();
+        //check for and remove TOROT #1, #2 etc. from end of disambiguated lemmas
+        if(uri_encoded_lemma_form.find("%23") != std::string::npos) {
+            uri_encoded_lemma_form = uri_encoded_lemma_form.substr(0, uri_encoded_lemma_form.size() - 6);
+            plain_query = plain_query.substr(0, plain_query.size() - 2);
+        }
         std::cout << "torot_lemma_form: " << plain_query << " | uri_encoded_lemma_form: " << uri_encoded_lemma_form_oss.str() << "\n";
         sqlite3_finalize(statement);       
 
-        std::string json_str = curlGorazd(plain_query, uri_encoded_lemma_form_oss.str());
+        std::string json_str = curlGorazd(plain_query, uri_encoded_lemma_form);
         int content_length = json_str.size();
 
         std::ostringstream post_response;
@@ -4891,9 +4898,11 @@ bool OcsServer::gorazdLookup(std::string _POST[2], int clientSocket) {
 std::string OcsServer::curlGorazd(std::string plain_query, std::string uri_encoded_query) {
     std::string gorazd_query_url_basic = "http://castor.gorazd.org:8080/gorazd/advanced_search;jsessionid=013373AF9710B0E8728F91826ABBD8DD?queryFields=%7B%221%22%3A%7B%22fieldName%22%3A%22HeaderAll%22%2C%22rawFieldQuery%22%3A%22" + uri_encoded_query + "%22%2C%22logTerm%22%3A%22%22%7D%7D";
     
-    std::string gorazd_query_url_numbered =  "http://castor.gorazd.org:8080/gorazd/advanced_search;jsessionid=013373AF9710B0E8728F91826ABBD8DD?queryFields=%7B%221%22%3A%7B%22fieldName%22%3A%22HeaderAll%22%2C%22rawFieldQuery%22%3A%22" + uri_encoded_query.append("1") + "%22%2C%22logTerm%22%3A%22%22%7D%7D";
+    std::string gorazd_query_url_numbered =  "http://castor.gorazd.org:8080/gorazd/advanced_search;jsessionid=013373AF9710B0E8728F91826ABBD8DD?queryFields=%7B%221%22%3A%7B%22fieldName%22%3A%22HeaderAll%22%2C%22rawFieldQuery%22%3A%22" + uri_encoded_query + "1" + "%22%2C%22logTerm%22%3A%22%22%7D%7D";
     
-    std::string gorazd_query_url_reflexive = "http://castor.gorazd.org:8080/gorazd/advanced_search;jsessionid=013373AF9710B0E8728F91826ABBD8DD?queryFields=%7B%221%22%3A%7B%22fieldName%22%3A%22HeaderAll%22%2C%22rawFieldQuery%22%3A%22" + uri_encoded_query.append("%C2%A0%D1%81%D1%A7") + "%22%2C%22logTerm%22%3A%22%22%7D%7D";
+    std::string gorazd_query_url_reflexive = "http://castor.gorazd.org:8080/gorazd/advanced_search;jsessionid=013373AF9710B0E8728F91826ABBD8DD?queryFields=%7B%221%22%3A%7B%22fieldName%22%3A%22HeaderAll%22%2C%22rawFieldQuery%22%3A%22" + uri_encoded_query + "%C2%A0%D1%81%D1%A7" + "%22%2C%22logTerm%22%3A%22%22%7D%7D";
+
+    std::cout << gorazd_query_url_reflexive << "\n";
     
     CurlFetcher basic_query(gorazd_query_url_basic.c_str());
     CurlFetcher numbered_query(gorazd_query_url_numbered.c_str());
