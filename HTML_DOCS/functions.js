@@ -3374,6 +3374,10 @@ const lookupGorazd = (lemma_id, query) => {
   }
   showGorazdSearchLoadSpinner(app_state.dict_box_minimised);
   app_state.dict_html_entries = {1: "", 2: ""};
+  
+  //the bastards at Gorazd use the non-break-space character (U+00A0, or UTF8-hex 0xC2 0xA0), rather than normal space (UTF8-hex 0x20) for queries containing a space, e.g. reflexives
+  query = query.replaceAll(" ", "\u00A0");
+  //query = query.replaceAll("%20", "%C2%A0");
 
   let send_data = "lemma_id=" + lemma_id + "&query=" + encodeURIComponent(query);
   const httpRequest = (method, url) => {

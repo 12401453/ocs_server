@@ -87,6 +87,7 @@ class OcsServer : public TcpListener {
 
         bool gorazdLookup(std::string _POST[2], int clientSocket);
         std::string curlGorazd(std::string plain_query, std::string uri_encoded_query);
+        std::string curlGorazdThreads(std::string plain_query, std::string uri_encoded_query);
 
         bool curlLookup(std::string _POST[1], int clientSocket);
 
