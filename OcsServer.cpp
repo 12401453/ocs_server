@@ -4941,7 +4941,7 @@ std::string OcsServer::curlGorazd(std::string plain_query, std::string uri_encod
     reflexive_thread.join();
 
     if(basic_query.error_state && numbered_query.error_state && reflexive_query.error_state) {
-        return "{\"query_form\":\"" + plain_query + "\",\"curl_return_text\":" + "\"" + basic_query.m_get_html + "\""  +"}";//normally GORAZD returns alread-escaped JSON, but my error-messages are raw strings, and the client expects a JSON response so I have to return a JSON object, which means the raw-string error-messages need to be quoted
+        return "{\"query_form\":\"" + plain_query + "\",\"curl_return_text\":" + "\"" + basic_query.m_get_html + "\""  +"}";//normally GORAZD returns alread-escaped JSON, but my error-messages are raw strings, and the client expects a JSON response so I have to return a well-formed JSON object, which means the raw-string error-messages need to be quoted
     }
 
     else if(basic_query_worked) {

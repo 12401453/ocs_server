@@ -3106,11 +3106,11 @@ const lcsSearch = (query, regex=false) => {
 };
 
 const getShortTextLocation = (tokno) => {
-  return app_state.titles_info.find(title => title[1] < tokno && title[2] > tokno)[0];
+  return app_state.titles_info.find(title => title[1] <= tokno && title[2] >= tokno)[0];
 }
 const getTextResultFont = (tokno) => {
   //this should be replaced with a simple "script" field in the texts table in the DB which would return glag or cyr, not bullshit switching on title-strings
-  const title = app_state.titles_info.find(title => title[1] < tokno && title[2] > tokno)[0];
+  const title = app_state.titles_info.find(title => title[1] <= tokno && title[2] >= tokno)[0];
 
   if(title == "Codex Suprasliensis" || title == "Vita Constantini" || title == "Vita Methodii" || title == "Treatise on the letters") {
     return "cyr";
