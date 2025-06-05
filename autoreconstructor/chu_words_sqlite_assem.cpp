@@ -277,7 +277,7 @@ std::unordered_map <int, std::string> text_id_map = {
 int main () {
     //std::cout.setstate(std::ios_base::failbit);
     sqlite3* DB;
-    if(!sqlite3_open("chu_corpus_untagged_including_autorecon_autotagged_and_assemanianus.db", &DB)) {
+    if(!sqlite3_open("chu_corpus_assem.db", &DB)) {
 
         sqlite3_stmt* statement;
 

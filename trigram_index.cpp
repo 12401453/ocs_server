@@ -10,10 +10,14 @@ struct LcsRow {
   int32_t num_chars;
 };
 
-int main() {
+int main(int argc, char *argv[]) {
+  if(argc < 2) {
+    std::cout << "Must specify database-file to add trigram index to\n";
+    return -1;
+  }
   sqlite3* DB;
 
-  if(!sqlite3_open("chu.db", &DB)) {
+  if(!sqlite3_open(argv[1], &DB)) {
 
     sqlite3_exec(DB, "DROP TABLE IF EXISTS lcs_trigrams;CREATE TABLE lcs_trigrams (tokno INTEGER, trigram TEXT)", nullptr, nullptr, nullptr);
 
