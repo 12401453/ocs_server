@@ -1492,13 +1492,15 @@ bool OcsServer::retrieveText(std::string _POST[1], int clientSocket) {
         while(sqlite3_step(statement) == SQLITE_ROW) {
             int sentence_no = sqlite3_column_int(statement, 0);
             int sentence_start_tokno = sqlite3_column_int(statement, 1);
-            sentence_count++;
+            // sentence_count++;
 
-            if(sentence_count % sentences_per_page == 0) {
+            if(sentence_count > 0 && sentence_count % sentences_per_page == 0) {
                 page_toknos_arr << "," << sentence_start_tokno - 1 << "],[" << sentence_start_tokno;
                 if(pageno_count == 1) first_page_toknos[1] = sentence_start_tokno;
                 pageno_count++;
             }
+
+            sentence_count++;
         }
         if(pageno_count == 1) first_page_toknos[1] = first_tokno_end + 1;
         page_toknos_arr << "," << first_tokno_end << "]]";
@@ -1609,14 +1611,15 @@ bool OcsServer::retrieveTextSubtitle(std::string _POST[2], int clientSocket) {
         while(sqlite3_step(statement) == SQLITE_ROW) {
             int sentence_no = sqlite3_column_int(statement, 0);
             int sentence_start_tokno = sqlite3_column_int(statement, 1);
-            sentence_count++;
+            // sentence_count++;
             float quotient = trunc(sentence_count / (float)sentences_per_page);
             int remainder = (int)((sentence_count - (float)sentences_per_page*quotient));
-            if(remainder == 0) {
+            if(sentence_count > 0 && remainder == 0) {
                 page_toknos_arr << "," << sentence_start_tokno - 1 << "],[" << sentence_start_tokno;
                 if(pageno_count == 1) first_page_toknos[1] = sentence_start_tokno;
                 pageno_count++;
             }
+            sentence_count++;
         }
         if(pageno_count == 1) first_page_toknos[1] = tokno_end + 1;
         page_toknos_arr << "," << tokno_end << "]]";
@@ -1827,15 +1830,14 @@ void OcsServer::void_retrieveText(std::ostringstream &html) {
         while(sqlite3_step(statement) == SQLITE_ROW) {
             int sentence_no = sqlite3_column_int(statement, 0);
             int sentence_start_tokno = sqlite3_column_int(statement, 1);
-            sentence_count++;
+            // sentence_count++;
 
-            // std::cout << "sentence_count:" << sentence_count << "; sentences_per_page: " << sentences_per_page << "\n";
-
-            if(sentence_count % sentences_per_page == 0) {
+            if(sentence_count > 0 && sentence_count % sentences_per_page == 0) {
                 page_toknos_arr << "," << sentence_start_tokno - 1 << "],[" << sentence_start_tokno;
                 page_toknos_vec.push_back(sentence_start_tokno);
                 pageno_count++;
             }
+            sentence_count++;
         }
         page_toknos_vec.push_back(tokno_end + 1);
         page_toknos_arr << "," << tokno_end << "]]";
@@ -4185,8 +4187,6 @@ bool OcsServer::retrieveTextFromSearch(std::string _POST[1], int clientSocket) {
     page_toknos_arr << "[";
     int pageno_count = 1;
     int sentence_count = 0;
-
-    int result_pageno = 1;
     bool pageno_found = false;
 
     sqlite3* DB;
@@ -4246,19 +4246,23 @@ bool OcsServer::retrieveTextFromSearch(std::string _POST[1], int clientSocket) {
         while (sqlite3_step(statement) == SQLITE_ROW) {
             int sentence_no = sqlite3_column_int(statement, 0);
             int sentence_start_tokno = sqlite3_column_int(statement, 1);
-            sentence_count++;
+            // sentence_count++;
 
-            if (sentence_count % sentences_per_page == 0) {
+            if (sentence_count > 0 && sentence_count % sentences_per_page == 0) {
                 page_toknos_arr << "," << sentence_start_tokno - 1 << "],[" << sentence_start_tokno;
                 page_toknos_vec.push_back(sentence_start_tokno);
-                if (pageno_found == false && result_tokno <= sentence_start_tokno) {
-                    result_pageno = pageno_count;
-                    pageno_found = true;
-                }
                 pageno_count++;
+                
             }
+            sentence_count++;
         }
-        if(pageno_found == false) result_pageno = pageno_count; //the final page will contain less than 30 sentences so that modulo condition will never be fulfilled
+        int result_pageno = 0;
+        for(const int page_tokno_start : page_toknos_vec) { 
+            if(result_tokno < page_tokno_start) break;
+            result_pageno++;
+        }
+
+        std::cout << "result_page_no: " << result_pageno << "\n";
 
         page_toknos_vec.push_back(tokno_end + 1);
         page_toknos_arr << "," << tokno_end << "]]";
