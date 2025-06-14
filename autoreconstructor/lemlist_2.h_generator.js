@@ -1,5 +1,7 @@
 #!/usr/bin/node
 
+//NB this file also writes the lemma_json.json file which is used for the "Words" page as the data-structure holding lemma-forms and inflection-classes which are suggested when typing in the search-box and which get full paradigms produced by my LcsFlecter class
+
 const fs = require('node:fs');
 const readline = require('readline');
 
