@@ -62,7 +62,8 @@ Inflection LcsFlecter::addEnding(int desinence_ix) {
 
 void LcsFlecter::postProcess(std::array<std::vector<Inflection>, 3> &inflected_forms) {
     if(m_noun_verb == NOUN) {
-        if(m_outer_map_no == 301) {
+        if(m_conj_type == "masc_o_PV3") {
+            //the second index is not identical to the row-number in the autoreconstructor; we should be applying PV1 here only to masculine vocative singulars (which in the autoreconstructor are rowno == 7), but this is doing it for all genders because I am only taking the gender-specific subsection of the inflection-maps into the inflected_forms std::array
             firstVelarClean(inflected_forms[0][6].flected_form);
         }
         else if(m_conj_type == "oko") {
@@ -156,9 +157,6 @@ void LcsFlecter::postProcess(std::array<std::vector<Inflection>, 3> &inflected_f
                 inflected_forms[2].emplace_back(infl_pair.first + 44, infl_pair.second);
             }
 
-        }
-        else if(m_outer_map_no == 211) {
-            //add the endings at outer_map_no == 2112 to the possible variants alongside those at m_outer_map_no++;
         }
 
         //probably should check the ablaut-grades of kviti-verbs
@@ -257,6 +255,10 @@ std::array<std::vector<Inflection>, 3> LcsFlecter::getFullParadigm() {
     if(m_conj_type == "iskati") {
         alternative_map_no = m_outer_map_no - 10;
         //need to get rid of the duplicates in the alternative map or it looks retarded
+    }
+    else if(m_outer_map_no == 211) {
+        //add the endings at outer_map_no == 2112 to the possible variants (these are aorists added straight to the nǫ- ending rather than the stem, Mar. оусѣкнѫхъ etc.)
+        alternative_map_no = 2112;
     }
     auto alternatives_iter = m_active_endings.find(alternative_map_no);
 
@@ -501,6 +503,7 @@ void LcsFlecter::class3Clean(std::string& flecter_output) {
 }
 void LcsFlecter::class5AblautClean(std::string& flecter_output) {
     replaceAll(flecter_output, "strъg", "strug");
+    replaceAll(flecter_output, "pĺ̥z", "pelz");
     replaceAll(flecter_output, "stьl", "stel");
     replaceAll(flecter_output, "ĺьv", "ĺu");
     replaceAll(flecter_output, "zьd", "zid");
@@ -518,6 +521,7 @@ void LcsFlecter::class5AblautClean(std::string& flecter_output) {
 }
 std::string LcsFlecter::class5AblautCleanCopy(std::string flecter_output) {
     replaceAll(flecter_output, "strъg", "strug");
+    replaceAll(flecter_output, "pĺ̥z", "pelz");
     replaceAll(flecter_output, "stьl", "stel");
     replaceAll(flecter_output, "ĺьv", "lu");
     replaceAll(flecter_output, "zьd", "zid");

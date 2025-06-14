@@ -596,12 +596,15 @@ void class_5_ablaut_clean(std::string &verb)
 
   std::string str1, str2;
   int x, y;
-  for (int letno = 0; letno < 15; letno++)
+  for (int letno = -1; letno < 15; letno++)
   {
 
     switch (letno)
     {
-
+    case -1:
+      str1.assign("pĺ̥z");
+      str2.assign("pelz");
+      break;
     case 0:
       str1.assign("strъg");
       str2.assign("strug");

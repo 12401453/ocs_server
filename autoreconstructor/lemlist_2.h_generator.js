@@ -312,7 +312,8 @@ async function readLemmasSpreadsheet() {
 
       //write just the inflectable lemmas to lemmas_json.json for use with the paradigm-generator
       if(noun_verb != 0) {
-        lemma_json += "\n  [" + new_id +",\"" + lemma_stem + "\",\"" + noun_verb + "\",\"" + conj_type + "\",\"" + cs_lemma + "\"],";
+        //the class 21 -nǫti verbs are recorded in the lemmas_spreadsheet with their full stems, regardless of consonant-cluster-constraints, because this simplifies the production of the stem (by just taking 4 chars off the lemma-form, rather than recording stems separately as with class 1 verbs). However, /pn/ is banned in LCS and therefore those p-stem infinitives need to get rid of the /p/ before we display the infinite in the search-candidates popup.  
+        lemma_json += "\n  [" + new_id +",\"" + lemma_stem + "\",\"" + noun_verb + "\",\"" + conj_type + "\",\"" + cs_lemma.replaceAll("pn", "n") + "\"],";
       }
     }
     
