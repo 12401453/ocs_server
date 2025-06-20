@@ -114,6 +114,8 @@ const chu_mappings = {
   'žǯ' : 'жд',
   'žђ' : 'жд',
   'zr' : 'здр',
+  //this one is just for *mĺ̥dnьji
+  'dn' : 'n',
   'ǵ' : 'ꙉ',
   'ḱ' : 'к҄',
   'x́' : 'х',
@@ -359,6 +361,8 @@ const orv_mappings = {
   'žǯ' : 'жд',
   'žђ' : 'жд',
   'zr' : 'здр',
+  //this one is just for *mĺ̥dnьji
+  'dn' : 'n',
   'ǵ' : 'ꙉ',
   'ḱ' : 'к҄',
   'x́' : 'х',
