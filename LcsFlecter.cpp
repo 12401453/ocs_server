@@ -266,6 +266,12 @@ std::array<std::vector<Inflection>, 3> LcsFlecter::getFullParadigm() {
         //add the endings at outer_map_no == 2112 to the possible variants (these are aorists added straight to the nǫ- ending rather than the stem, Mar. оусѣкнѫхъ etc.)
         alternative_map_no = 2112;
     }
+
+    //need to add jo-stem endings for i-stems that end on /nlr/, but also need to jotate the stem by explicitly adding /j/ (which should get yeeted by the Dejotation step)
+    if((m_stem.ends_with("r") || m_stem.ends_with("n") || m_stem.ends_with("l")) && (m_conj_type == "masc_i" || m_conj_type == "fem_i")) {
+        deviances_iter = m_active_endings.find(1401); //1401 holds jo-stem endings except with prepended /j/
+    }
+
     auto alternatives_iter = m_active_endings.find(alternative_map_no);
 
     if(deviances_iter != end_iter) {
