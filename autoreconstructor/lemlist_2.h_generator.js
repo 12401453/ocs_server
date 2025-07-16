@@ -5,6 +5,34 @@
 const fs = require('node:fs');
 const readline = require('readline');
 
+class CsvReader {
+
+  constructor(separator=",") {
+    this.m_separator = separator;
+  }
+  
+  setHeaders(first_line) {
+    const headers_arr = first_line.split(this.m_separator);
+    for(const header_idx in headers_arr) {
+      this.m_header_index_map.set(headers_arr[header_idx], header_idx);
+    }
+  }
+ 
+  setLine(line) {
+    this.m_raw_line = line;
+    this.m_fields_array = this.m_raw_line.split(this.m_separator);
+  }
+
+  getField(header) {
+    return this.m_fields_array[this.m_header_index_map.get(header)];
+  }
+
+  m_header_index_map = new Map();
+  m_raw_line = "";
+  m_fields_array = new Array();
+  m_separator = "";
+};
+
 function conj_type_Trunc(conj_type) {
 
   if (conj_type == "byti")
@@ -259,27 +287,36 @@ async function readChuLemmasFile() {
 
 async function readLemmasSpreadsheet() {
   const lemma_spreadsheet_file = readline.createInterface({input: read_stream1});
+  const csv_reader = new CsvReader("|");
+  let line_idx = 0;
   for await(const line of lemma_spreadsheet_file) {
-    const row = line.split("|");
 
-    const pos_lemma_combo = row[2] + row[0];
-    const old_id = Number(row[1]);
+    if(line_idx == 0) {
+      csv_reader.setHeaders(line);
+      line_idx++;
+      continue;
+    }
+
+    //const row = line.split("|");
+    csv_reader.setLine(line);
+    const pos_lemma_combo = csv_reader.getField("pos") + csv_reader.getField("torot_lemma");
+    const old_id = Number(csv_reader.getField("lemma_id"));
     let new_id = 0;
     if(new_ids_map.has(pos_lemma_combo)) {
         new_id = new_ids_map.get(pos_lemma_combo);
     }
     else new_id = old_id;
 
-    const cs_lemma = row[3];
-    const morph_replace = row[4];
-    const pre_jot = row[11];
-    const conj_type = row[20];
-    const root_1 = row[18];
-    const root_2 = row[19];
-    const noun_verb = Number(row[21]);
-    const loan_place = Number(row[7]); //empty string should give 0
-    const long_adj = Number(row[8]);
-    const poss_doublet = row[6];
+    const cs_lemma = csv_reader.getField("lcs_lemma");
+    const morph_replace = csv_reader.getField("morph_replace");
+    const pre_jot = csv_reader.getField("pre_jot");
+    const conj_type = csv_reader.getField("conj_type");
+    const root_1 = csv_reader.getField("stem1");
+    const root_2 = csv_reader.getField("stem2");
+    const noun_verb = Number(csv_reader.getField("noun_verb"));
+    const loan_place = Number(csv_reader.getField("loan_place")); //empty string should give 0
+    const long_adj = Number(csv_reader.getField("long_adj"));
+    const poss_doublet = csv_reader.getField("doublet");
     
     if(noun_verb != 99) {
       let lemma_stem = "";
@@ -319,6 +356,7 @@ async function readLemmasSpreadsheet() {
       }
     }
     
+    line_idx++;
   };
   cpp_lemma_list += "};";
   lemma_json = lemma_json.slice(0,-1);

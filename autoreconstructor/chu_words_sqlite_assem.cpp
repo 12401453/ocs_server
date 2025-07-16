@@ -1,3 +1,4 @@
+//compile: clang++ -std=c++20 chu_words_sqlite_assem.cpp -lsqlite3 -licuuc -licudata -licui18n -o chu_words_sqlite_assem
 #include <iostream>
 #include <sqlite3.h>
 #include <string>
@@ -281,6 +282,46 @@ struct LcsRow {
   int32_t num_chars;
 };
 
+class CsvReader {
+  public:
+    CsvReader(char separator=',') {
+      m_separator = separator;
+      m_fields_vec.reserve(32);
+    }
+
+    void setHeaders(std::string first_line) {
+      //const headers_arr = first_line.split(this.m_separator);
+
+      std::stringstream first_line_ss(first_line);
+      std::string header;
+      int header_idx = 0;
+      while(std::getline(first_line_ss, header, m_separator)) {
+        m_header_index_map.emplace(header, header_idx);
+        ++header_idx;
+      }
+    }
+   
+    void setLine(std::string line) {
+      std::stringstream line_ss(line);
+      std::string field;
+      m_raw_line = line;
+      m_fields_vec.clear();
+      while(std::getline(line_ss, field, m_separator)){
+        m_fields_vec.emplace_back(field);
+      }
+    }
+  
+    std::string getField(std::string header) {
+      return m_fields_vec[m_header_index_map.at(header)];
+    }
+
+  private:
+    char m_separator;
+    std::string m_raw_line;
+    std::vector<std::string> m_fields_vec;
+    std::unordered_map<std::string, int> m_header_index_map;
+};
+
 int main () {
     //std::cout.setstate(std::ios_base::failbit);
     sqlite3* DB;
@@ -355,6 +396,7 @@ int main () {
             int lemma_id, sentence_no, main_title_id, subtitle_id;
             bool auto_tagged;
 
+            //I should add titles to the source .csv files and use my CsvReader instead of this crap
             int row_no = 1;
             while(std::getline(ss_line, field, '|')) {
                 switch(row_no) {
@@ -518,16 +560,50 @@ int main () {
         int noun_class_count = 1;
 
         //this is the bit where we actually read from the master-spreadsheet file and retrieve the lemma forms, the lemma_stem necessary to build autoreconstructed forms from, and get each lemma's new lemma_id by looking up the lemma_form+POS combo from the master-spreadsheet in the lemma_id map we just constructed from the chu_lemmas.csv file. This means that we are only adding lemmas to the lemmas table which are present in the lemmas master-spreadsheet; lemmas in the corpus but not in my spreadsheet get missed out and are added in a subsequent step, and printed to the console, e.g. the adjective видимъ from Supr. (8162). If a lemma in the master-spreadsheet does not exist in the chu_lemmas.csv file, then we keep the old lemma_id from the spreadsheet. If it does exist in the new lemma_ids map, then we erase this entry in the map straight after reading the new lemma_id from it, so that the only things left in the lemma_ids_map after we go through the lemmas in the master-spreadsheet are the new ones frmo the corpus that have been added since we created the master-spreadsheet. 
+        
+        CsvReader csv_reader('|');
+        //this should advance the internal iterator of the file-stream but not sure
+        std::getline(lemma_spreadsheet, line);
+        csv_reader.setHeaders(line);
+
         while(std::getline(lemma_spreadsheet, line)) {
+            //std::cout << line << '\n';
             std::stringstream ss_line(line);
             int parameter_no = 1;
             int row_no = 1;
 
-            int lemma_id, pos, inflexion_class_id, verb_noun;
+          /*  int lemma_id, pos, inflexion_class_id, verb_noun;
             std::string lemma_lcs, lemma_ocs, pre_jot, stem_lcs, pos_lemma_combo, inflexion_class, root_1, root_2;
+            icu::UnicodeString unicode_lemma_lcs; */
+
+            csv_reader.setLine(line); 
+            //std::cout << "lemma_id: " << csv_reader.getField("lemma_id") << '\n';    
+            int lemma_id = std::stoi(csv_reader.getField("lemma_id"));//assign first to the id used in my spreadsheet incase the lemma doesnt exist in the 2023 version of the torot files (which it definitely won't for my added ones, but also some may have been deleted since 2020)
+            int pos = 0;
+            std::string torot_pos = csv_reader.getField("pos");
+            if(pos_map.contains(torot_pos)) {
+              pos = pos_map.at(torot_pos);
+            }
+            int inflexion_class_id = 0;
+            int verb_noun = std::stoi(csv_reader.getField("noun_verb"));
+            std::string lemma_ocs = csv_reader.getField("torot_lemma");
+            std::string lemma_lcs = csv_reader.getField("lcs_lemma");
+            std::string pre_jot = csv_reader.getField("pre_jot");
+            std::string root_1 = csv_reader.getField("stem1");
+            std::string root_2 = csv_reader.getField("stem2");
+            std::string inflexion_class = csv_reader.getField("conj_type");
+            std::string pos_lemma_combo = torot_pos + lemma_ocs;
+
+            std::string stem_lcs;
             icu::UnicodeString unicode_lemma_lcs;
 
-            while(std::getline(ss_line, field, '|')) {
+            if(lemma_id_map.contains(pos_lemma_combo)) {
+              lemma_id = lemma_id_map.at(pos_lemma_combo);
+              lemma_id_map.erase(pos_lemma_combo);
+            }
+
+
+           /* while(std::getline(ss_line, field, '|')) {
                 switch(row_no) {
                     case 1:
                         lemma_ocs = field;
@@ -566,11 +642,11 @@ int main () {
                         break;
                 }
                 row_no++;
-            }
-            if(lemma_id_map.contains(pos_lemma_combo)) {
-              lemma_id = lemma_id_map.at(pos_lemma_combo);
-              lemma_id_map.erase(pos_lemma_combo);
-            }
+            } */
+            // if(lemma_id_map.contains(pos_lemma_combo)) {
+            //   lemma_id = lemma_id_map.at(pos_lemma_combo);
+            //   lemma_id_map.erase(pos_lemma_combo);
+            // }
             sqlite3_bind_int(statement, 1, lemma_id);
             sqlite3_bind_int(statement, 2, pos);
             sqlite3_bind_text(statement, 3, lemma_lcs.c_str(), -1, SQLITE_TRANSIENT);
