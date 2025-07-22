@@ -80,24 +80,6 @@ bool operator<(const Lemma &l1, const Lemma &l2)
   return (l1.lemma_id < l2.lemma_id);
 }
 
-struct ReconstructedLemma {
-  int lemma_id;
-  std::string lemma_form;
-  std::string morph_replace;
-  //std::string second_velar{};
-  std::string poss_doublet;
-  short int loan_place;
-  short int long_adj;
-  //bool non_assim{};
-  //std::string eng_trans{};
-  std::string pre_jot;
-  //std::string etym_disc{};
-  //bool bad_etym{};
-  //std::string loan_source{};
-  std::string conj_type;
-  short int noun_verb;
-};
-
 std::string str_Truncate(std::string str1, int lop_off)
 {
 
@@ -107,7 +89,8 @@ std::string str_Truncate(std::string str1, int lop_off)
   return str_cut;
 }
 
-#include "lemlist_2.h"
+//#include "lemlist_2.h"
+std::set<Lemma> lemma_list;
 #include "conj_type_enum.h"
 #include "verb_cleaning.h"
 #include "noun_cleaning.h"

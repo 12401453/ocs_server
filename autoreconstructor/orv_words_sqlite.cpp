@@ -1,4 +1,4 @@
-//compile: clang++ -std=c++20 chu_words_sqlite_assem.cpp -lsqlite3 -licuuc -licudata -licui18n -o chu_words_sqlite_assem
+//compile: clang++ -std=c++20 orv_words_sqlite.cpp -lsqlite3 -licuuc -licudata -licui18n -o orv_words_sqlite
 #include <iostream>
 #include <sqlite3.h>
 #include <string>
@@ -324,8 +324,8 @@ class CsvReader {
       m_fields_vec.reserve(32);
     }
 
-    void setHeaders(std::string first_line) {
-      //const headers_arr = first_line.split(this.m_separator);
+    void setHeaders(const std::string& first_line) {
+      m_header_index_map.clear();
 
       std::stringstream first_line_ss(first_line);
       std::string header;
@@ -336,17 +336,18 @@ class CsvReader {
       }
     }
    
-    void setLine(std::string line) {
+    void setLine(const std::string& line) {
+      m_fields_vec.clear();
+
+      m_raw_line = line;
       std::stringstream line_ss(line);
       std::string field;
-      m_raw_line = line;
-      m_fields_vec.clear();
       while(std::getline(line_ss, field, m_separator)){
         m_fields_vec.emplace_back(field);
       }
     }
   
-    std::string getField(std::string header) {
+    std::string getField(const std::string& header) {
       return m_fields_vec[m_header_index_map.at(header)];
     }
 
@@ -357,9 +358,34 @@ class CsvReader {
     std::unordered_map<std::string, int> m_header_index_map;
 };
 
-void buildLemmaMap(std::string lemma_filename, std::string words_filename, std::set<Lemma>& lemma_list, std::unordered_map<std::string, int>& all_lemmas_map) {
+struct LemmaDBInfo {
+  //"INSERT INTO lemmas (lemma_id, pos, lemma_lcs, lemma_ocs, stem_lcs, inflexion_class_id) VALUES (?,?,?,?,?,?)";
+  //torot_pos and lemma_form are included in the key of the map which this struct is the value of
+  int lemma_id;
+  std::string lemma_lcs;
+  std::string stem_lcs;
+  std::string inflexion_class;
+};
+struct CorpusDBInfo {    
+  bool auto_tagged;
+  int sentence_no;
+  int main_title_id;
+  int subtitle_id;
+  int lemma_id;
+  std::string presentation_before;
+  std::string presentation_after;
+  std::string word_normalised;
+  std::string morph_tag;
+  std::string word_torot;
+  std::string autoreconstructed_lcs;
+  std::string autoreconstructed_morph_replace;
+};
+
+void buildLemmaMap(std::string lemma_filename, std::string words_filename, std::set<Lemma>& lemma_list, std::unordered_map<std::string, LemmaDBInfo>& all_lemmas_map, std::unordered_map<std::string, int>& inflexion_class_map, std::vector<CorpusDBInfo>& corpus_vec) {
+  
   lemma_list.clear();
   all_lemmas_map.reserve(16384);
+  corpus_vec.reserve(262144);
 
   std::ifstream words_file(words_filename);
   std::ifstream lemmas_file(lemma_filename);
@@ -368,17 +394,22 @@ void buildLemmaMap(std::string lemma_filename, std::string words_filename, std::
 
   std::string line;
 
+  std::cout << "Reading lemma file...\n";
   std::getline(lemmas_file, line);
   csv_reader.setHeaders(line);
-  int lemma_id = 1;
+  int lemma_id_count = 1;
+  int inflexion_class_id = 1;
   while(std::getline(lemmas_file, line)) {
     csv_reader.setLine(line);
+    std::string lcs_lemma = csv_reader.getField("lcs_lemma");
+    if(lcs_lemma.empty()) continue;
 
+    std::string orv_lemma = csv_reader.getField("orv_lemma");
     std::string torot_pos = csv_reader.getField("pos");
     int noun_verb = std::stoi(csv_reader.getField("noun_verb"));
-    int loan_place = std::stoi(csv_reader.getField("loan_place"));
-    std::string orv_lemma = csv_reader.getField("orv_lemma");
-    std::string lcs_lemma = csv_reader.getField("lcs_lemma");
+    std::string loan_place_str = csv_reader.getField("loan_place");
+    int loan_place = 0;
+    if(!loan_place_str.empty()) loan_place = std::stoi(loan_place_str);
     std::string morph_replace = csv_reader.getField("morph_replace");
     std::string poss_doublet = csv_reader.getField("doublet");
     std::string pre_jot = csv_reader.getField("pre_jot");
@@ -411,20 +442,57 @@ void buildLemmaMap(std::string lemma_filename, std::string words_filename, std::
     
     std::string pos_lemma_combo = torot_pos + orv_lemma;
 
-    lemma_list.emplace(lemma_id, stem_lcs, morph_replace, poss_doublet, loan_place, 0, pre_jot, inflexion_class, noun_verb);
-    all_lemmas_map.emplace(pos_lemma_combo, lemma_id);
-    lemma_id++;
+    lemma_list.emplace(lemma_id_count, stem_lcs, morph_replace, poss_doublet, loan_place, 0, pre_jot, inflexion_class, noun_verb);
+    
+    all_lemmas_map.emplace(pos_lemma_combo, LemmaDBInfo{lemma_id_count, lcs_lemma, stem_lcs, inflexion_class});
+    if(!inflexion_class.empty() && !inflexion_class_map.contains(inflexion_class)) {
+      inflexion_class_map.emplace(inflexion_class, inflexion_class_id);
+      inflexion_class_id++;
+    }
+    lemma_id_count++;
   }
+  lemmas_file.close();
 
+  std::cout << "Reading words file...\n";
   std::getline(words_file, line);
   csv_reader.setHeaders(line);
   while(std::getline(words_file, line)) {
+    
     csv_reader.setLine(line);
 
+    std::string word_torot = csv_reader.getField("torot_word");
+    std::string word_normalised = csv_reader.getField("deep_cleaned");
+    std::string morph_tag = csv_reader.getField("morph_tag");
+    int sentence_no = std::stoi(csv_reader.getField("sentence_no"));
+    std::string presentation_before = csv_reader.getField("pres_before");
+    std::string presentation_after = csv_reader.getField("pres_after");
+    int main_title_id = std::stoi(csv_reader.getField("text_id"));
+    int subtitle_id = std::stoi(csv_reader.getField("subtitle_id"));
+    bool auto_tagged = (bool)std::stoi(csv_reader.getField("autotagged"));
+
+    std::string orv_lemma = csv_reader.getField("lemma");
     std::string torot_pos = csv_reader.getField("pos");
-    std::string orv_lemma = csv_reader.getField("orv_lemma");
+    std::string pos_lemma_combo = torot_pos + orv_lemma;
+
+    if(!orv_lemma.empty() && !all_lemmas_map.contains(pos_lemma_combo)){
+      all_lemmas_map.emplace(pos_lemma_combo, LemmaDBInfo{lemma_id_count, "", "", ""});
+      lemma_id_count++;
+    }
+
+    int lemma_id = 0;
+    std::string autoreconstructed_lcs = "";
+    std::string autoreconstructed_morph_replace = "";
+    if(all_lemmas_map.contains(pos_lemma_combo)) {
+      lemma_id = all_lemmas_map.at(pos_lemma_combo).lemma_id;
+      std::array<std::string, 2> autoreconstructed_array = ReconstructMorphReplace(word_normalised, morph_tag, lemma_id);
+      autoreconstructed_lcs = autoreconstructed_array[0];
+      autoreconstructed_morph_replace = autoreconstructed_array[1];
+    }
+
+    corpus_vec.emplace_back(CorpusDBInfo{auto_tagged, sentence_no, main_title_id, subtitle_id, lemma_id, presentation_before, presentation_after, word_normalised, morph_tag, word_torot, autoreconstructed_lcs, autoreconstructed_morph_replace});
 
   }
+  words_file.close();
   
 }
 
@@ -437,9 +505,20 @@ int main () {
         sqlite3_stmt* statement;
 
         std::ifstream words_file("orv_words_full_with_titles_untagged.csv");
-        std::ifstream chu_lemmas_file("orv_lemmas_master.csv");
+        std::ifstream lemmas_file("orv_lemmas_master.csv");
         std::ifstream subtitles_file("orv_subtitles.csv");
 
+       
+        std::unordered_map<std::string, LemmaDBInfo> all_lemmas_map;
+        std::unordered_map<std::string, int> inflexion_class_map;
+        std::vector<CorpusDBInfo> corpus_vec;
+        buildLemmaMap("orv_lemmas_master.csv", "orv_words_full_with_titles_untagged.csv", lemma_list, all_lemmas_map, inflexion_class_map, corpus_vec);
+
+        std::cout << "reconstructed lemma count: " << lemma_list.size() << "\n";
+        std::cout << "all orv lemma count: " << all_lemmas_map.size() << "\n";
+        std::cout << "corpus_vec size: " << corpus_vec.size() << "\n";
+
+       
         std::string subtitles_line;
         std::vector<std::vector<std::string>> subtitles_vector;
         std::string text_id_str = "";
@@ -458,6 +537,10 @@ int main () {
         }
         subtitles_vector.push_back(text_subtitles);
 
+        std::cout << "subtitles_vector size: " << subtitles_vector.size() << "\n";
+
+        std::cout << "Writing into database...\n";
+
         const char* sql_BEGIN = "BEGIN IMMEDIATE";
         const char* sql_COMMIT = "COMMIT";
 
@@ -469,15 +552,14 @@ int main () {
         sqlite3_exec(DB, "DROP TABLE IF EXISTS texts;CREATE TABLE texts (text_id INTEGER PRIMARY KEY, text_title TEXT, tokno_start INTEGER, tokno_end INTEGER)", nullptr, nullptr, nullptr);
         sqlite3_exec(DB, "DROP TABLE IF EXISTS subtitles;CREATE TABLE subtitles (subtitle_id INTEGER PRIMARY KEY, subtitle_text TEXT, text_id INTEGER, tokno_start INTEGER, tokno_end INTEGER)", nullptr, nullptr, nullptr);
         sqlite3_exec(DB, "DROP TABLE IF EXISTS lcs_trigrams;CREATE TABLE lcs_trigrams (tokno INTEGER, trigram TEXT)", nullptr, nullptr, nullptr);
-        
-        std::unordered_map<std::string, int> inflexion_class_map;
-        std::unordered_map<std::string, int> lemma_id_map;
+
 
         const char *sql_text = "INSERT INTO corpus (chu_word_torot, chu_word_normalised, morph_tag, lemma_id, sentence_no, presentation_before, presentation_after, autoreconstructed_lcs, autoreconstructed_morph_replace, auto_tagged) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         const char* sql_text_table = "INSERT INTO texts (text_title, tokno_start, tokno_end) VALUES (?, ?, ?)";
         const char* sql_subtitle_table = "INSERT INTO subtitles (subtitle_text, text_id, tokno_start, tokno_end) VALUES (?, ?, ?, ?)";
 
+        std::cout << "Writing main corpus to database...\n";
         sqlite3_stmt* statement_texts;
         sqlite3_stmt* statement_subtitles;
 
@@ -492,113 +574,35 @@ int main () {
         int main_tokno_end;
         int subtitle_tokno_start = 1;
         int subtitle_tokno_end;                
-        std::string line;
-        std::string field;
-        int pos_key = 0;
 
-        CsvReader csv_reader('|');
-        std::getline(words_file, line);
-        csv_reader.setHeaders(line);
-        while(std::getline(words_file, line)) {
-            csv_reader.setLine(line);
+        for(const auto& corpus_row : corpus_vec) {
 
-            std::string chu_word_torot, chu_word_normalised, morph_tag, presentation_before, presentation_after, autoreconstructed_lcs, autoreconstructed_morph_replace, torot_pos;
-            int lemma_id, sentence_no, main_title_id, subtitle_id;
-            bool auto_tagged;
-
-            chu_word_torot = csv_reader.getField("torot_word");
-            chu_word_normalised = csv_reader.getField("deep_cleaned");
-            torot_pos = csv_reader.getField("pos");
-            morph_tag = csv_reader.getField("morph_tag");
-            lemma_id = std::stoi(csv_reader.getField("lemma_id"));
-            sentence_no = std::stoi(csv_reader.getField("sentence_no"));
-            presentation_before = csv_reader.getField("pres_before");
-            presentation_after = csv_reader.getField("pres_after");
-            main_title_id = std::stoi(csv_reader.getField("text_id"));
-            subtitle_id = std::stoi(csv_reader.getField("subtitle_id"));
-            auto_tagged = (bool)std::stoi(csv_reader.getField("autotagged"));
-
-
-            //I should add titles to the source .csv files and use my CsvReader instead of this crap
-            /* std::stringstream ss_line(line);
-           int row_no = 1;
-            while(std::getline(ss_line, field, '|')) {
-                switch(row_no) {
-                    case 1:
-                        chu_word_torot = field;	
-                        break;
-                    case 4:
-                        chu_word_normalised = field;
-                        break;
-                    case 3:
-                        morph_tag = field;
-                        break;
-                    case 5:
-                        //std::cout << "stoi 01\n";
-                        lemma_id = std::stoi(field);
-                        break;
-                    case 6:
-                        //std::cout << "stoi 02\n";
-                        sentence_no = std::stoi(field);
-                        break;
-                    case 7:
-                        presentation_before = field;
-                        break;
-                    case 8:
-                        presentation_after = field;
-                        break;
-                    case 9:
-                        //std::cout << "stoi 03\n";
-                        main_title_id = std::stoi(field);
-                        break;
-                    case 10:
-                        //std::cout << "stoi 04\n";
-                        subtitle_id = std::stoi(field);
-                        break;
-                    case 2:
-                      torot_pos = field;
-                      break;
-                    case 11:
-                      auto_tagged = (bool)std::stoi(field);
-                      break;
-
-                    default:
-                        ;
-		            }
-                row_no++;
-            } */
-            std::array<std::string, 2> autoreconstructed_array = ReconstructMorphReplace(chu_word_normalised, morph_tag, lemma_id);
-            autoreconstructed_lcs = autoreconstructed_array[0];
-
-            std::cout << "1autoreconstructed_lcs: " << autoreconstructed_lcs << "\n";
-            if(autoreconstructed_lcs.empty()) {
+            if(corpus_row.autoreconstructed_lcs.empty()) {
               sqlite3_bind_null(statement, 8);
               sqlite3_bind_null(statement, 9);
             }
             else {
-              sqlite3_bind_text(statement, 8, autoreconstructed_lcs.c_str(), -1, SQLITE_TRANSIENT);
-              autoreconstructed_morph_replace = autoreconstructed_array[1];
-              if(autoreconstructed_morph_replace.empty()) sqlite3_bind_null(statement, 9);
-              else sqlite3_bind_text(statement, 9, autoreconstructed_morph_replace.c_str(), -1, SQLITE_TRANSIENT);
+              sqlite3_bind_text(statement, 8, corpus_row.autoreconstructed_lcs.c_str(), -1, SQLITE_TRANSIENT);
+              if(corpus_row.autoreconstructed_morph_replace.empty()) sqlite3_bind_null(statement, 9);
+              else sqlite3_bind_text(statement, 9, corpus_row.autoreconstructed_morph_replace.c_str(), -1, SQLITE_TRANSIENT);
             }
 
-            sqlite3_bind_int(statement, 4, lemma_id);
-            sqlite3_bind_int(statement, 5, sentence_no);
-            sqlite3_bind_text(statement, 1, chu_word_torot.c_str(), -1, SQLITE_TRANSIENT);
-            sqlite3_bind_text(statement, 2, chu_word_normalised.c_str(), -1, SQLITE_TRANSIENT);
-            if(!morph_tag.empty()) sqlite3_bind_text(statement, 3, morph_tag.c_str(), -1, SQLITE_TRANSIENT);
+            sqlite3_bind_int(statement, 4, corpus_row.lemma_id);
+            sqlite3_bind_int(statement, 5, corpus_row.sentence_no);
+            sqlite3_bind_text(statement, 1, corpus_row.word_torot.c_str(), -1, SQLITE_TRANSIENT);
+            sqlite3_bind_text(statement, 2, corpus_row.word_normalised.c_str(), -1, SQLITE_TRANSIENT);
+            if(!corpus_row.morph_tag.empty()) sqlite3_bind_text(statement, 3, corpus_row.morph_tag.c_str(), -1, SQLITE_TRANSIENT);
             else sqlite3_bind_null(statement, 3);
-            sqlite3_bind_text(statement, 6, presentation_before.c_str(), -1, SQLITE_TRANSIENT);
-            sqlite3_bind_text(statement, 7, presentation_after.c_str(), -1, SQLITE_TRANSIENT);
-            if(auto_tagged) sqlite3_bind_int(statement, 10, 1);
+            sqlite3_bind_text(statement, 6, corpus_row.presentation_before.c_str(), -1, SQLITE_TRANSIENT);
+            sqlite3_bind_text(statement, 7, corpus_row.presentation_after.c_str(), -1, SQLITE_TRANSIENT);
+            if(corpus_row.auto_tagged) sqlite3_bind_int(statement, 10, 1);
             else sqlite3_bind_null(statement, 10);
 
             sqlite3_step(statement);
             sqlite3_reset(statement);
             sqlite3_clear_bindings(statement);
-            if(current_subtitle_id != subtitle_id || current_main_title_id < main_title_id) {
+            if(current_subtitle_id != corpus_row.subtitle_id || current_main_title_id < corpus_row.main_title_id) {
               subtitle_tokno_end = tokno_count - 1;
-              std::cout << "2autoreconstructed_lcs: " << autoreconstructed_lcs << "\n";
               sqlite3_bind_text(statement_subtitles, 1, subtitles_vector[current_main_title_id - 1][current_subtitle_id - 1].c_str(), -1, SQLITE_TRANSIENT);
               sqlite3_bind_int(statement_subtitles, 2, current_main_title_id); 
               sqlite3_bind_int(statement_subtitles, 3, subtitle_tokno_start);
@@ -608,10 +612,10 @@ int main () {
               sqlite3_reset(statement_subtitles);
               sqlite3_clear_bindings(statement_subtitles);
 
-              current_subtitle_id = subtitle_id;
+              current_subtitle_id = corpus_row.subtitle_id;
               subtitle_tokno_start = tokno_count;
             }
-            if(current_main_title_id < main_title_id) {
+            if(current_main_title_id < corpus_row.main_title_id) {
               main_tokno_end = tokno_count - 1;
               
               sqlite3_bind_text(statement_texts, 1, text_id_map.at(current_main_title_id).c_str(), -1, SQLITE_TRANSIENT);
@@ -622,7 +626,7 @@ int main () {
               sqlite3_reset(statement_texts);
               sqlite3_clear_bindings(statement_texts);
 
-              current_main_title_id = main_title_id;
+              current_main_title_id = corpus_row.main_title_id;
               main_tokno_start = tokno_count;
             }
             tokno_count++;
@@ -647,8 +651,48 @@ int main () {
         sqlite3_finalize(statement_subtitles);
         sqlite3_finalize(statement_texts);
 
+        std::cout << "Writing lemmas table into database...\n";
+        //lemmas table
+        sqlite3_stmt* lemma_stmt;
+        sql_text = "INSERT INTO lemmas (lemma_id, pos, lemma_lcs, lemma_ocs, stem_lcs, inflexion_class_id) VALUES (?,?,?,?,?,?)";
+        sqlite3_prepare_v2(DB, sql_text, -1, &lemma_stmt, nullptr);
+
+        for(const auto& lemma_row : all_lemmas_map) {
+
+          sqlite3_bind_int(lemma_stmt, 1, lemma_row.second.lemma_id);
+          sqlite3_bind_int(lemma_stmt, 2, pos_map.at(lemma_row.first.substr(0, 2))); //torot part-of-speech code as defined by the map at the top of the file
+          sqlite3_bind_text(lemma_stmt, 3, lemma_row.second.lemma_lcs.c_str(), -1, SQLITE_TRANSIENT);
+          sqlite3_bind_text(lemma_stmt, 4, lemma_row.first.substr(2).c_str(), -1, SQLITE_TRANSIENT); //torot lemma-form extracted from pos_lemma_combo string
+
+          sqlite3_bind_text(lemma_stmt, 5, lemma_row.second.stem_lcs.c_str(), -1, SQLITE_TRANSIENT);
+
+          if(!inflexion_class_map.contains(lemma_row.second.inflexion_class)) {
+            sqlite3_bind_null(lemma_stmt, 6);
+          }
+          else {
+            sqlite3_bind_int(lemma_stmt, 6, inflexion_class_map.at(lemma_row.second.inflexion_class));
+          }
+          sqlite3_step(lemma_stmt);
+          sqlite3_reset(lemma_stmt);
+          sqlite3_clear_bindings(lemma_stmt);
+        }
+        sqlite3_finalize(lemma_stmt);
+
+        sqlite3_stmt* inflexion_class_stmt;
+        sql_text = "INSERT INTO inflexion_classes (inflexion_class_id, inflexion_class_name) VALUES (?, ?)";
+        sqlite3_prepare_v2(DB, sql_text, -1, &inflexion_class_stmt, nullptr);
+        for(const auto& pair : inflexion_class_map) {
+            sqlite3_bind_int(inflexion_class_stmt, 1, pair.second);
+            sqlite3_bind_text(inflexion_class_stmt, 2, pair.first.c_str(), -1, SQLITE_TRANSIENT);
+            sqlite3_step(inflexion_class_stmt);
+            sqlite3_reset(inflexion_class_stmt);
+            sqlite3_clear_bindings(inflexion_class_stmt);
+        }
+        sqlite3_finalize(inflexion_class_stmt);
+
         
 
+        std::cout << "Writing trigrams table into database...\n";
         //add the lcs_trigrams and an index on the trigrams table to make searches faster (does the same as the separate trigram_index.cpp program)
         sqlite3_stmt* stmt_select;
         const char* sql_select = "SELECT tokno, autoreconstructed_lcs FROM corpus";

@@ -290,7 +290,7 @@ class CsvReader {
     }
 
     void setHeaders(std::string first_line) {
-      //const headers_arr = first_line.split(this.m_separator);
+      m_header_index_map.clear();
 
       std::stringstream first_line_ss(first_line);
       std::string header;
