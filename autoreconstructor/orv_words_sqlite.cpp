@@ -381,7 +381,7 @@ struct CorpusDBInfo {
   std::string autoreconstructed_morph_replace;
 };
 
-void buildLemmaMap(std::string lemma_filename, std::string words_filename, std::set<Lemma>& lemma_list, std::unordered_map<std::string, LemmaDBInfo>& all_lemmas_map, std::unordered_map<std::string, int>& inflexion_class_map, std::vector<CorpusDBInfo>& corpus_vec) {
+void buildDataStructures(std::string lemma_filename, std::string words_filename, std::unordered_map<int, Lemma>& lemma_list, std::unordered_map<std::string, LemmaDBInfo>& all_lemmas_map, std::unordered_map<std::string, int>& inflexion_class_map, std::vector<CorpusDBInfo>& corpus_vec) {
   
   lemma_list.clear();
   all_lemmas_map.reserve(16384);
@@ -389,6 +389,15 @@ void buildLemmaMap(std::string lemma_filename, std::string words_filename, std::
 
   std::ifstream words_file(words_filename);
   std::ifstream lemmas_file(lemma_filename);
+
+  if(!words_file.good()) {
+    std::cout << "corpus file not found, exiting\n";
+    exit(0);
+  }
+  if(!lemmas_file.good()){
+    std::cout << "lemmas file not found, exiting\n";
+    exit(0);
+  }
 
   CsvReader csv_reader('|');
 
@@ -398,17 +407,18 @@ void buildLemmaMap(std::string lemma_filename, std::string words_filename, std::
   std::getline(lemmas_file, line);
   csv_reader.setHeaders(line);
   int lemma_id_count = 1;
+  inflexion_class_map.emplace("non_infl", 0);
   int inflexion_class_id = 1;
   while(std::getline(lemmas_file, line)) {
     csv_reader.setLine(line);
     std::string lcs_lemma = csv_reader.getField("lcs_lemma");
-    if(lcs_lemma.empty()) continue;
+    if(lcs_lemma.empty()) continue; //this line here prevents lemmas which are present in my orv_lemmas_master.csv file, but not present in any of the texts, from getting stored in the database, in distinction to what happened under the previous regime. I suspect that these lemmas are junk that has been cleared out of the database between 2020 and 2023, so I'm not sure if keeping them is worth it or not.
 
     std::string orv_lemma = csv_reader.getField("orv_lemma");
     std::string torot_pos = csv_reader.getField("pos");
-    int noun_verb = std::stoi(csv_reader.getField("noun_verb"));
+    short int noun_verb = std::stoi(csv_reader.getField("noun_verb"));
     std::string loan_place_str = csv_reader.getField("loan_place");
-    int loan_place = 0;
+    short int loan_place = 0;
     if(!loan_place_str.empty()) loan_place = std::stoi(loan_place_str);
     std::string morph_replace = csv_reader.getField("morph_replace");
     std::string poss_doublet = csv_reader.getField("doublet");
@@ -416,6 +426,7 @@ void buildLemmaMap(std::string lemma_filename, std::string words_filename, std::
     std::string root_1 = csv_reader.getField("stem1");
     std::string root_2 = csv_reader.getField("stem2");
     std::string inflexion_class = csv_reader.getField("conj_type");
+    if(noun_verb == 0) inflexion_class = "non_infl";
 
     std::string stem_lcs = "";
     icu::UnicodeString unicode_lemma_lcs;
@@ -442,10 +453,10 @@ void buildLemmaMap(std::string lemma_filename, std::string words_filename, std::
     
     std::string pos_lemma_combo = torot_pos + orv_lemma;
 
-    lemma_list.emplace(lemma_id_count, stem_lcs, morph_replace, poss_doublet, loan_place, 0, pre_jot, inflexion_class, noun_verb);
+    lemma_list.emplace(lemma_id_count, Lemma{lemma_id_count, stem_lcs, morph_replace, poss_doublet, loan_place, 0, pre_jot, inflexion_class, noun_verb});
     
     all_lemmas_map.emplace(pos_lemma_combo, LemmaDBInfo{lemma_id_count, lcs_lemma, stem_lcs, inflexion_class});
-    if(!inflexion_class.empty() && !inflexion_class_map.contains(inflexion_class)) {
+    if(!inflexion_class.empty() && inflexion_class != "non_infl" && !inflexion_class_map.contains(inflexion_class)) {
       inflexion_class_map.emplace(inflexion_class, inflexion_class_id);
       inflexion_class_id++;
     }
@@ -504,15 +515,15 @@ int main () {
 
         sqlite3_stmt* statement;
 
-        std::ifstream words_file("orv_words_full_with_titles_untagged.csv");
-        std::ifstream lemmas_file("orv_lemmas_master.csv");
+        // std::ifstream words_file("orv_words_full_with_titles_untagged.csv");
+        // std::ifstream lemmas_file("orv_lemmas_master.csv");
         std::ifstream subtitles_file("orv_subtitles.csv");
 
        
         std::unordered_map<std::string, LemmaDBInfo> all_lemmas_map;
         std::unordered_map<std::string, int> inflexion_class_map;
         std::vector<CorpusDBInfo> corpus_vec;
-        buildLemmaMap("orv_lemmas_master.csv", "orv_words_full_with_titles_untagged.csv", lemma_list, all_lemmas_map, inflexion_class_map, corpus_vec);
+        buildDataStructures("orv_lemmas_master.csv", "orv_words_full_with_titles_untagged.csv", lemma_list, all_lemmas_map, inflexion_class_map, corpus_vec);
 
         std::cout << "reconstructed lemma count: " << lemma_list.size() << "\n";
         std::cout << "all orv lemma count: " << all_lemmas_map.size() << "\n";
@@ -546,7 +557,7 @@ int main () {
 
         sqlite3_exec(DB, sql_BEGIN, nullptr, nullptr, nullptr);
 
-        sqlite3_exec(DB, "DROP TABLE IF EXISTS corpus;CREATE TABLE corpus (tokno INTEGER PRIMARY KEY, chu_word_torot TEXT, chu_word_normalised TEXT, morph_tag TEXT, lemma_id INTEGER, sentence_no INTEGER, presentation_before TEXT, presentation_after TEXT, autoreconstructed_lcs TEXT, inflexion_class_id INTEGER, autoreconstructed_morph_replace TEXT, auto_tagged INTEGER);CREATE INDEX lemma_id_index on corpus(lemma_id) WHERE lemma_id IS NOT NULL;CREATE INDEX sentence_no_index on corpus(sentence_no);CREATE INDEX inflexion_class_corpus_index on corpus(inflexion_class_id) WHERE inflexion_class_id IS NOT NULL", nullptr, nullptr, nullptr);
+        sqlite3_exec(DB, "DROP TABLE IF EXISTS corpus;CREATE TABLE corpus (tokno INTEGER PRIMARY KEY, chu_word_torot TEXT, chu_word_normalised TEXT, morph_tag TEXT, lemma_id INTEGER, sentence_no INTEGER, presentation_before TEXT, presentation_after TEXT, autoreconstructed_lcs TEXT, inflexion_class_id INTEGER, autoreconstructed_morph_replace TEXT, auto_tagged INTEGER, inflexion_class TEXT);CREATE INDEX lemma_id_index on corpus(lemma_id) WHERE lemma_id IS NOT NULL;CREATE INDEX sentence_no_index on corpus(sentence_no);CREATE INDEX inflexion_class_corpus_index on corpus(inflexion_class_id) WHERE inflexion_class_id IS NOT NULL", nullptr, nullptr, nullptr);
         sqlite3_exec(DB, "DROP TABLE IF EXISTS lemmas;CREATE TABLE lemmas (lemma_id INTEGER PRIMARY KEY, pos INTEGER, lemma_lcs TEXT, lemma_ocs TEXT, stem_lcs TEXT, inflexion_class_id INTEGER);CREATE INDEX inflexion_class_index ON lemmas(inflexion_class_id) WHERE inflexion_class_id IS NOT NULL", nullptr, nullptr, nullptr);
         sqlite3_exec(DB, "DROP TABLE IF EXISTS inflexion_classes;CREATE TABLE inflexion_classes (inflexion_class_id INTEGER PRIMARY KEY, inflexion_class_name TEXT)", nullptr, nullptr, nullptr);
         sqlite3_exec(DB, "DROP TABLE IF EXISTS texts;CREATE TABLE texts (text_id INTEGER PRIMARY KEY, text_title TEXT, tokno_start INTEGER, tokno_end INTEGER)", nullptr, nullptr, nullptr);
@@ -576,6 +587,8 @@ int main () {
         int subtitle_tokno_end;                
 
         for(const auto& corpus_row : corpus_vec) {
+
+            
 
             if(corpus_row.autoreconstructed_lcs.empty()) {
               sqlite3_bind_null(statement, 8);
@@ -651,11 +664,16 @@ int main () {
         sqlite3_finalize(statement_subtitles);
         sqlite3_finalize(statement_texts);
 
-        std::cout << "Writing lemmas table into database...\n";
+
         //lemmas table
+        std::cout << "Writing lemmas table into database...\n";
         sqlite3_stmt* lemma_stmt;
         sql_text = "INSERT INTO lemmas (lemma_id, pos, lemma_lcs, lemma_ocs, stem_lcs, inflexion_class_id) VALUES (?,?,?,?,?,?)";
         sqlite3_prepare_v2(DB, sql_text, -1, &lemma_stmt, nullptr);
+
+        //INFLEXION_CLASS SHIT TODO
+        sqlite3_stmt* stmt_update_corpus;
+        sqlite3_prepare_v2(DB, "UPDATE corpus SET inflexion_class_id = ?, inflexion_class = ? WHERE lemma_id = ?", -1, &stmt_update_corpus, nullptr);
 
         for(const auto& lemma_row : all_lemmas_map) {
 
@@ -671,11 +689,20 @@ int main () {
           }
           else {
             sqlite3_bind_int(lemma_stmt, 6, inflexion_class_map.at(lemma_row.second.inflexion_class));
+            
+            sqlite3_bind_int(stmt_update_corpus, 1, inflexion_class_map.at(lemma_row.second.inflexion_class));
+            sqlite3_bind_text(stmt_update_corpus, 2, lemma_row.second.inflexion_class.c_str(), -1, SQLITE_TRANSIENT);
+            sqlite3_bind_int(stmt_update_corpus, 3, lemma_row.second.lemma_id);
+
+            sqlite3_step(stmt_update_corpus);
+            sqlite3_reset(stmt_update_corpus);
+            sqlite3_clear_bindings(stmt_update_corpus);
           }
           sqlite3_step(lemma_stmt);
           sqlite3_reset(lemma_stmt);
           sqlite3_clear_bindings(lemma_stmt);
         }
+        sqlite3_finalize(stmt_update_corpus);
         sqlite3_finalize(lemma_stmt);
 
         sqlite3_stmt* inflexion_class_stmt;
@@ -725,20 +752,21 @@ int main () {
         for(const auto& row : lcs_rows_vec) {
       
           std::string trigram;
-          if(row.num_chars < 4) {
-            sqlite3_bind_int(stmt_insert, 1, row.tokno);
-            row.lcs_unicode.toUTF8String(trigram);
-            sqlite3_bind_text(stmt_insert, 2, trigram.c_str(), -1, SQLITE_STATIC);
+          // if(row.num_chars < 4) {
+          //   sqlite3_bind_int(stmt_insert, 1, row.tokno);
+          //   row.lcs_unicode.toUTF8String(trigram);
+          //   sqlite3_bind_text(stmt_insert, 2, trigram.c_str(), -1, SQLITE_STATIC);
 
-            sqlite3_step(stmt_insert);
-            sqlite3_reset(stmt_insert);
-            sqlite3_clear_bindings(stmt_insert);
+          //   sqlite3_step(stmt_insert);
+          //   sqlite3_reset(stmt_insert);
+          //   sqlite3_clear_bindings(stmt_insert);
 
-            continue;
-          }
+          //   continue;
+          // }
 
           int32_t trigram_start_offset = 0;
-          while(trigram_start_offset + 2 < row.num_chars) {
+          while(trigram_start_offset /*+ 2*/ < row.num_chars) {
+            //int32_t substr_length = row.num_chars - trigram_start_offset > 2 ? 3 : 
             row.lcs_unicode.tempSubString(trigram_start_offset, 3).toUTF8String(trigram);
             sqlite3_bind_int(stmt_insert, 1, row.tokno);
             sqlite3_bind_text(stmt_insert, 2, trigram.c_str(), -1, SQLITE_STATIC);

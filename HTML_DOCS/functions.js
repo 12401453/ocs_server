@@ -2767,10 +2767,10 @@ const lcsTooltip = function () {
   lcs_words.forEach(lcs_word => {
     
     const lcs_recon = lcs_word.dataset.lcs_recon;
-    const inflexion_class_id = Number(lcs_word.dataset.inflexion);
+    const inflexion_class = lcs_word.dataset.inflexion;
     const lemma_id = Number(lcs_word.dataset.lemma_id);
     let tt_box_string = '<span class="lemma_tt" onclick="event.stopPropagation()"><span id="tt_top"><div id="lemma_tag_tt">';
-    tt_box_string += convertToOCS(lcs_recon, inflexion_class_id, lemma_id) + '</div><span id="pos_tag_box_tt">';
+    tt_box_string += convertToOCS(lcs_recon, inflexion_class, lemma_id) + '</div><span id="pos_tag_box_tt">';
     tt_box_string += '<span id="pos_tag_unassigned_tt" class="pos_tag_tt" title="unassigned"></span>' + '</span></span><span id="tt_mid"><div id="tt_meaning">';
     tt_box_string +=  lcs_recon.replaceAll("Q", "ъ") + '</div></span><span id="tt_bottom"></span></span>';
     

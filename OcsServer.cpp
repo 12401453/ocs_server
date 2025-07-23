@@ -1400,7 +1400,7 @@ bool OcsServer::lcsSearch(std::string _POST[3], int clientSocket) {
 }
 
 void OcsServer::writeTextBody(std::ostringstream &html, sqlite3* DB, int tokno_start, int tokno_end) {
-    const char* sql_text = "SELECT chu_word_torot, presentation_before, presentation_after, sentence_no, lemma_id, morph_tag, autoreconstructed_lcs, inflexion_class_id, tokno, auto_tagged FROM corpus WHERE tokno >= ? AND tokno <= ?";
+    const char* sql_text = "SELECT chu_word_torot, presentation_before, presentation_after, sentence_no, lemma_id, morph_tag, autoreconstructed_lcs, inflexion_class, tokno, auto_tagged FROM corpus WHERE tokno >= ? AND tokno <= ?";
     sqlite3_stmt* statement;
     sqlite3_prepare_v2(DB, sql_text, -1, &statement, NULL);
     sqlite3_bind_int(statement, 1, tokno_start);
@@ -1413,7 +1413,7 @@ void OcsServer::writeTextBody(std::ostringstream &html, sqlite3* DB, int tokno_s
     int lemma_id = 0;
     int sentence_number_previous = 0;
     int sentence_no_current = 0;
-    int inflexion_class_id = 0;
+    std::string inflexion_class;
     int tokno = 0;
     int auto_tagged = 0;
     while(sqlite3_step(statement) == SQLITE_ROW) {
@@ -1422,7 +1422,10 @@ void OcsServer::writeTextBody(std::ostringstream &html, sqlite3* DB, int tokno_s
         presentation_after = (const char*)sqlite3_column_text(statement, 2);
         sentence_no_current = sqlite3_column_int(statement, 3);
         lemma_id = sqlite3_column_int(statement, 4);
-        inflexion_class_id = sqlite3_column_int(statement, 7);
+        const unsigned char* raw_sqlite_text = sqlite3_column_text(statement, 7);
+        if(raw_sqlite_text != nullptr) {
+            inflexion_class = (const char*)raw_sqlite_text;
+        }
         tokno = sqlite3_column_int(statement, 8);
         auto_tagged = sqlite3_column_int(statement, 9);
         if(sqlite3_column_type(statement, 5) == SQLITE_NULL) morph_tag = "";
@@ -1439,7 +1442,7 @@ void OcsServer::writeTextBody(std::ostringstream &html, sqlite3* DB, int tokno_s
             html << " data-lemma_id=\"" << lemma_id << "\"" " data-morph_tag=\"" << morph_tag << "\"";
         }
         if(!autoreconstructed_lcs.empty()) {
-            html << " data-lcs_recon=\"" << autoreconstructed_lcs << "\" data-inflexion=\"" << inflexion_class_id << "\"";
+            html << " data-lcs_recon=\"" << autoreconstructed_lcs << "\" data-inflexion=\"" << inflexion_class << "\"";
         }
         html << ">" << applySuperscripts(chu_word_torot) << "</span>" << applySuperscripts(presentation_after) << "</span>";
         sentence_number_previous = sentence_no_current;

@@ -1,6 +1,6 @@
 #include <vector>
 #include <array>
-#include <set>
+#include <unordered_set>
 #include <sstream>
 #include <iostream>
 #include <string>
@@ -33,8 +33,8 @@ struct Lemma
   std::string conj_type{};
   short int noun_verb{};
 
-  friend bool operator==(const Lemma &l1, const Lemma &l2);
-  friend bool operator<(const Lemma &l1, const Lemma &l2);
+  // friend bool operator==(const Lemma &l1, const Lemma &l2);
+  // friend bool operator<(const Lemma &l1, const Lemma &l2);
 
   Lemma(
       long int lemma_id_, 
@@ -71,14 +71,14 @@ struct Lemma
   {
   }
 };
-bool operator==(const Lemma &l1, const Lemma &l2)
-{
-  return (l1.lemma_id == l2.lemma_id);
-}
-bool operator<(const Lemma &l1, const Lemma &l2)
-{
-  return (l1.lemma_id < l2.lemma_id);
-}
+// bool operator==(const Lemma &l1, const Lemma &l2)
+// {
+//   return (l1.lemma_id == l2.lemma_id);
+// }
+// bool operator<(const Lemma &l1, const Lemma &l2)
+// {
+//   return (l1.lemma_id < l2.lemma_id);
+// }
 
 std::string str_Truncate(std::string str1, int lop_off)
 {
@@ -90,7 +90,7 @@ std::string str_Truncate(std::string str1, int lop_off)
 }
 
 //#include "lemlist_2.h"
-std::set<Lemma> lemma_list;
+std::unordered_map<int, Lemma> lemma_list;
 #include "conj_type_enum.h"
 #include "verb_cleaning.h"
 #include "noun_cleaning.h"
@@ -371,12 +371,12 @@ std::string boolToStr(bool non_assim)
 std::string Reconstruct(std::string cyr_id, std::string morph_tag, int lemma_id)
 {  
   std::string lcs_reconstruction = "";
-  std::set<Lemma>::iterator it;
+  std::unordered_map<int, Lemma>::iterator it;
 
   it = lemma_list.find(lemma_id);
   if (it != lemma_list.end())
   {
-    Lemma lemma = *it; // retrieve the object stored in the memory address of the iterator
+    Lemma lemma = it->second; // retrieve the object stored in the memory address of the iterator
 
     changeLemma_field(lemma, morph_tag, deep_clean_Cyr(cyr_id)); // pass object by reference to a function so I can change one of its members directly
 
@@ -390,12 +390,12 @@ std::array<std::string, 2> ReconstructMorphReplace(std::string cyr_id, std::stri
 {  
   std::string lcs_reconstruction = "";
   std::string lcs_morph_replace = "";
-  std::set<Lemma>::iterator it;
+  std::unordered_map<int, Lemma>::iterator it;
 
   it = lemma_list.find(lemma_id);
   if (it != lemma_list.end())
   {
-    Lemma lemma = *it; // retrieve the object stored in the memory address of the iterator
+    Lemma lemma = it->second; // retrieve the object stored in the memory address of the iterator
 
     changeLemma_field(lemma, morph_tag, deep_clean_Cyr(cyr_id)); // pass object by reference to a function so I can change one of its members directly
 
@@ -435,12 +435,12 @@ std::string ReconstructLine(std::string text_line)
   }
 
   std::string lcs_reconstruction = cyr_id + "|";
-  std::set<Lemma>::iterator it;
+  std::unordered_map<int, Lemma>::iterator it;
 
   it = lemma_list.find(lemma_id);
   if (it != lemma_list.end())
   {
-    Lemma lemma = *it; // retrieve the object stored in the memory address of the iterator
+    Lemma lemma = it->second; // retrieve the object stored in the memory address of the iterator
 
     changeLemma_field(lemma, morph_tag, cyr_id); // pass object by reference to a function so I can change one of its members directly
 

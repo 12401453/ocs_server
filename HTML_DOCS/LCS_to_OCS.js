@@ -170,7 +170,20 @@ const inflection_class_map = new Map( [
   //and so wider and so forth
 ]);
 
-const convertToOCS = (lcs_word, inflexion_class_id, lemma_id) => {
+const chu_pv3_lemma_ids = [
+  362,
+  2608,
+  68,
+  2858,
+  1576,
+  2661,
+  3091,
+  2960,
+  7200,
+  7242
+];
+
+const convertToOCS = (lcs_word, inflexion_class, lemma_id) => {
 
   //extremely disgusting jo-stem variants of gospodь possible only under a system with Russian-style secondary palatalisation of dentals
   if(lemma_id == 342) {
@@ -199,7 +212,7 @@ const convertToOCS = (lcs_word, inflexion_class_id, lemma_id) => {
     lcs_word = lcs_word.slice(0, PV2_pos) + PV2_map.get(PV2_cons) + lcs_word.slice(PV2_pos + 1);
     PV2_pos = lcs_word.search(PV2_regex);
   }
-  if(inflexion_class_id == 1013 || inflexion_class_id == 1017 || inflexion_class_id == 1029 || inflexion_class_id == 1036 || inflexion_class_id == 1057 || lemma_id == 362 || lemma_id == 2608 /*vьxakъ and vьxako*/ || lemma_id == 68 || lemma_id == 2858 || lemma_id == 1576 || lemma_id == 2661 || lemma_id == 3091 || lemma_id == 2960 || lemma_id == 7200 || lemma_id == 7242) {
+  if(inflexion_class.includes("PV3") || inflexion_class == "vьxь" || chu_pv3_lemma_ids.includes(lemma_id)) {
     //this type of word-level specification would be partly reduced if the lemmas-system was broken down by stem and prefix more
     lcs_word = applyPV3(lcs_word);
   }
@@ -408,7 +421,7 @@ const orv_mappings = {
   'ŕ' : 'р҄',
 }
 
-const convertToORV = (lcs_word, inflexion_class_id, lemma_id) => {
+const convertToORV = (lcs_word, inflexion_class, lemma_id) => {
 
   lcs_word = lcs_word.replaceAll("ę̌", "ě").replaceAll("y̨", "a").replaceAll("Q", "ь");
   lcs_word = lcs_word.replaceAll("ĺ̥", "l̥");
@@ -416,7 +429,7 @@ const convertToORV = (lcs_word, inflexion_class_id, lemma_id) => {
   lcs_word = lcs_word.replace(/^ak/, "jǢk").replace(/^av/, "jǢv");
   lcs_word = yeetTlDl(lcs_word);
 
-  if(inflexion_class_id == 1013 || inflexion_class_id == 1029 || inflexion_class_id == 1036 || inflexion_class_id == 1057 || inflexion_class_id == 1017 || lemma_id == 362 || lemma_id == 2608 /*vьxakъ and vьxako*/) lcs_word = applyPV3(lcs_word);
+  if(inflexion_class == 1013 || inflexion_class == 1029 || inflexion_class == 1036 || inflexion_class == 1057 || inflexion_class == 1017 || lemma_id == 362 || lemma_id == 2608 /*vьxakъ and vьxako*/) lcs_word = applyPV3(lcs_word);
   lcs_word = denasalise(lcs_word);
   lcs_word = russifyDoublets(lcs_word);
 
