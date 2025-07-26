@@ -212,7 +212,7 @@ const convertToOCS = (lcs_word, inflexion_class, lemma_id) => {
     lcs_word = lcs_word.slice(0, PV2_pos) + PV2_map.get(PV2_cons) + lcs_word.slice(PV2_pos + 1);
     PV2_pos = lcs_word.search(PV2_regex);
   }
-  if(inflexion_class.includes("PV3") || inflexion_class == "vьxь" || chu_pv3_lemma_ids.includes(lemma_id)) {
+  if(inflexion_class.includes("PV3") || inflexion_class == "vьxь" || chu_pv3_lemma_ids.includes(lemma_id) || lcs_word.startsWith("vьxak")) {
     //this type of word-level specification would be partly reduced if the lemmas-system was broken down by stem and prefix more
     lcs_word = applyPV3(lcs_word);
   }
