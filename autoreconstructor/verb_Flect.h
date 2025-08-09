@@ -168,7 +168,7 @@ void verb_Flect(Lemma &lemma_ref, short int int_morph_tag[10], std::string cyr_i
         } // these two if statements exist entirely due to решти
         if (row_no == 18)
         {
-          if (Sniff(cyr_id, "ѣш", 5))
+          if (Sniff(cyr_id, "ѣш", 5) || Sniff(cyr_id, "ѧш", 5) /*second one is for nalęk-ti*/)
             outer_map_no += 2;
         }
         if (outer_map_no % 10 == 1)

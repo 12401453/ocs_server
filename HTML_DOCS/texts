@@ -79,10 +79,11 @@
         <div class="letter_button">ѭ</div>
         <div class="letter_button">ꙗ</div>
         <div class="letter_button">ѥ</div>
-        <div class="letter_button">ѳ</div>
+        <div class="letter_button">ѕ</div>
         <div class="letter_button">ѵ</div>
         <div class="letter_button" title="palatalisation mark">҄</div>
         <div class="letter_button" title="titlo (used for numerals)">҃</div>
+        <div class="letter_button">ѳ</div>
       </div>
       <textarea id="gorazd_searchbox" spellcheck="false"></textarea>
     </div>

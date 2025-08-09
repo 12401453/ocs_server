@@ -28,11 +28,7 @@
 </div>
 
 <div id="main_words_box" style="display: none">
-    <span id="lang_button">
-    <label for="langselect">Language:</label>
-    <select id="langselect" name="langselect" form="formid">
-    <?lng
-    </select></span>
+
     <div id="pos_selectors">
       <span data-pos_code="1" class="pos_sel noun pos_selected">noun</span>
       <span data-pos_code="2" class="pos_sel verb pos_selected">verb</span>

@@ -13,13 +13,20 @@ int main(int argc, char *argv[]) {
     }
 
     bool show_output = true;
+    const char* db_path = "chu.db";
     if(argc > 2) {
-        const char* output_flag = argv[2];
+        const char* lang_code = argv[2];
+        if(!strcmp(lang_code, "orv")) db_path = "orv.db";
+        else if(!strcmp(lang_code, "silent")) show_output = false;
+    }
+    if(argc > 3) {
+        const char* output_flag = argv[3];
         if(!strcmp(output_flag, "silent")) show_output = false;
+        else if(!strcmp(output_flag, "orv")) db_path = "orv.db";
     }
     
     int portno = atoi(argv[1]);
-    OcsServer ocsserv("0.0.0.0", portno, show_output);
+    OcsServer ocsserv("0.0.0.0", portno, show_output, db_path);
     if(ocsserv.init() != 0) {
         std::cout << "Init failed" << std::endl;
         return 0;

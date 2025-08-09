@@ -1,4 +1,4 @@
-//compile: clang++ -std=c++20 orv_words_sqlite.cpp -lsqlite3 -licuuc -licudata -licui18n -o orv_words_sqlite
+//compile: g++ -O3 -std=c++20 orv_words_sqlite.cpp -lsqlite3 -licuuc -licudata -licui18n -o orv_words_sqlite
 #include <iostream>
 #include <sqlite3.h>
 #include <string>

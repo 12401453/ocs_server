@@ -9,7 +9,7 @@
 
 class OcsServer : public TcpListener {
     public:
-        OcsServer(const char *ipAddress, int port, bool show_output) : TcpListener(ipAddress, port), m_DB_path{"Kazakh.db"}, m_show_output{show_output}, m_dict_cookies{""} {
+        OcsServer(const char *ipAddress, int port, bool show_output, const char* db_path) : TcpListener(ipAddress, port), m_DB_path{db_path}, m_show_output{show_output}, m_dict_cookies{""} {
             if(!m_show_output) std::cout.setstate(std::ios_base::failbit);
             //this setting of the sozdik.kz cookies should be moved to only run when the language is set to Kazakh, when I implement language-separation
             std::ifstream kaz_cookies_file;
@@ -21,6 +21,8 @@ class OcsServer : public TcpListener {
             else {
                 std::cout << "No kaz_cookies.txt file found\n";
             }
+
+            //printf("%s\n", m_DB_path);
         }
 
     protected:
@@ -41,7 +43,6 @@ class OcsServer : public TcpListener {
 
         void buildGETContent(short int page_type, char* url_c_str, std::string &content, bool cookies_present);
         void insertTextSelect(std::ostringstream &html);
-        void insertLangSelect(std::ostringstream &html);
         void sendBinaryFile(char* url_c_str, int clientSocket, const std::string &content_type);
         
         int checkHeaderEnd(const char* msg);
@@ -52,47 +53,21 @@ class OcsServer : public TcpListener {
         bool readCookie(std::string cookie[3], const char* msg);
         void setCookies(std::ostringstream &http_response_ss);
 
-        bool addText(std::string _POST[3], int clientSocket);
-        bool addTextOldEnglish(std::string _POST[3], int clientSocket);
         bool lemmaTooltips(std::string _POST[1], int clientSocket);
         bool lcsSearch(std::string _POST[3], int clientSocket);
         bool lcsRegexSearch(std::string _POST[3], int clientSocket);
         bool lcsTrigramSearch(std::string _POST[3], int clientSocket);
         
-        
-        bool lemmaTooltipsMW(std::string _POST[3], int clientSocket);
         bool retrieveText(std::string text_id[1], int clientSocket);
         bool retrieveTextSubtitle(std::string text_id[2], int clientSocket);
         bool retrieveTextPageNo(std::string text_id[2], int clientSocket);
         void void_retrieveText(std::ostringstream &html);
-        bool retrieveTextSplitup(std::string _POST[3], int clientSocket);
-        bool retrieveEngword(std::string _POST[3], int clientSocket);
-        bool recordLemma(std::string _POST[8], int clientSocket);
-        bool deleteLemma(std::string _POST[3], int clientSocket);
-        bool recordMultiwordOld(std::string _POST[8], int clientSocket);
-        bool recordMultiword(std::string _POST[8], int clientSocket);
-        bool deleteMultiword(std::string _POST[4], int clientSocket);
-        bool updateMultiwordTranslations(std::string _POST[3], int clientSocket);
-        bool deleteText(std::string _POST[1], int clientSocket);
-        bool getLangId(std::string text_id[1], int clientSocket);
-        bool retrieveMultiword(std::string _POST[3], int clientSocket);
-        bool clearTable(int clientSocket);
-        bool disregardWord(std::string _POST[2], int clientSocket);
-        bool updateDisplayWord(std::string _POST[5], int clientSocket);
-
-        bool pullInLemma(std::string _POST[4], int clientSocket);
-        bool retrieveMeanings(std::string _POST[2], int clientSocket);
-        bool pullInMultiword(std::string _POST[2], int clientSocket);
-        bool retrieveMultiwordMeanings(std::string _POST[2], int clientSocket);
-        bool pullInMultiwordByForm(std::string _POST[4], int clientSocket);
 
         bool gorazdLookup(std::string _POST[2], int clientSocket);
         std::string curlGorazd(std::string plain_query, std::string uri_encoded_query);
         std::string curlGorazdThreads(std::string plain_query, std::string uri_encoded_query);
 
         bool curlLookup(std::string _POST[1], int clientSocket);
-
-        bool dumpLemmaTable(std::string _POST[1], int clientSocket);
 
         std::string URIDecode(std::string &text);
         std::string htmlspecialchars(const std::string &innerHTML);
