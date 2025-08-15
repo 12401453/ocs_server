@@ -306,7 +306,7 @@ void class_I_nasal_clean(std::string &verb)
   int x, y;
   for (int letno = 0; letno < 12; letno++)
   {
-
+    //need to add versions with ъm- to account for *dǫti (already added to LcsFlecter.cpp)
     switch (letno)
     {
     case 0:

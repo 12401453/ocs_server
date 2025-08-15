@@ -72,6 +72,8 @@ int conj_type_enum(std::string conj_type) {
         return 241;
   if(conj_type == "masc_o_u")
         return 251;
+  if(conj_type == "masc_o_in")
+        return 121;
   if(conj_type == "nt_N")
         return 261;
   if(conj_type == "nt_NT")

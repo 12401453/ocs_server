@@ -9,13 +9,16 @@ void noun_Flect(Lemma &lemma_ref, short int int_morph_tag[10], std::string cyr_i
   //   if(outer_map_no == 0) {return; }
 
   short int num{int_morph_tag[1]}, pers{int_morph_tag[0]}, gr_case{int_morph_tag[6]}, gender{int_morph_tag[5]}, strength{int_morph_tag[8]}, degree{int_morph_tag[7]};
+  
+  // force fem. on a-stems which can be masc. or fem. or the bastard gets o-stem endings
+  //ѫжика
   if (lemma_ref.lemma_id == 2438)
   {
     gender = 2;
-  } // force fem. on a-stems which can be masc. or fem. or the bastard gets o-stem endings
+  }
   row_no = 21 * gender + 7 * num + gr_case - 28;
 
-  // check for *jedьn-
+  // check for *jedьn- ѥдинъMa and ѥдинъPx, should remove because ѥдьнъ lemmas exist
   if (lemma_ref.lemma_id == 243 || lemma_ref.lemma_id == 987)
   {
     if (Sniff(cyr_id, "дін", 20) == false)
@@ -33,6 +36,11 @@ void noun_Flect(Lemma &lemma_ref, short int int_morph_tag[10], std::string cyr_i
   if (conj_type == "long_adj_noun")
   {
     strength = 1;
+  }
+
+  //take off the -in- suffix from nouns like татаринъ and исполинъ in the plural (idk about the dual tbh)
+  if(conj_type == "masc_o_in" && num == 3) {
+    stem = str_Truncate(stem, 2);
   }
 
   // mark long-adjectives as 2 if they're fucked and 1 if not
@@ -787,7 +795,7 @@ void noun_Flect(Lemma &lemma_ref, short int int_morph_tag[10], std::string cyr_i
     first_velar_clean(flected_word);
   }
   
-  // find *-pis- stem in *-pьsanьje N_PV3_nouns
+  // find *-pis- stem in пьсаниѥ and напьсаниѥ
   if ((lemma_ref.lemma_id == 1739 || lemma_ref.lemma_id == 2607) && Sniff(cyr_id, "піс", 20))
   {
     lemma_ref.morph_replace = flected_word;
