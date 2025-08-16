@@ -1,0 +1,3 @@
+things like Lsg *slovesi instead of *slovese (currently only finds slově)
+both S-aorists and *-ox- aorists of ьti-verbs (this should be doable in the current framework if checks were written for it)
+zero-grade in more than the imperative of class 11 verbs (aor. -жьже etc.)

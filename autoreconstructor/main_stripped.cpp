@@ -6,6 +6,8 @@
 #include <string>
 #include <fstream>
 #include <unordered_map>
+#include <string_view>
+#include <cstdint>
 
 typedef std::unordered_map<int, std::string> inner_map;
 
@@ -14,10 +16,31 @@ typedef std::unordered_map<int, std::string> inner_map;
 #include "nom_map.cpp"
 #include "outer_nom_map.cpp"
 
+
+
+
+consteval std::uint64_t compileTimeHashString(std::string_view sv) {
+    uint64_t hash = 1469598103934665603ULL;
+    for(char c : sv) {
+        hash = hash ^ static_cast<unsigned char>(c);
+        hash = hash * 1099511628211ULL;
+    }
+    return hash;
+}
+
+std::uint64_t runTimeHashString(std::string_view sv) {
+    uint64_t hash = 1469598103934665603ULL;
+    for(char c : sv) {
+        hash = hash ^ static_cast<unsigned char>(c);
+        hash = hash * 1099511628211ULL;
+    }
+    return hash;
+}
+
 struct Lemma
 {
 
-  long int lemma_id{};
+  uint64_t lemma_id{};
   std::string lemma_form{};
   std::string morph_replace{};
   //std::string second_velar{};
@@ -37,7 +60,7 @@ struct Lemma
   // friend bool operator<(const Lemma &l1, const Lemma &l2);
 
   Lemma(
-      long int lemma_id_, 
+      uint64_t lemma_id_, 
       std::string lemma_form_ = "", 
       std::string morph_replace_ = "", 
       //std::string second_velar_ = "", 

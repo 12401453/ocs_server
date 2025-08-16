@@ -12,24 +12,14 @@ void noun_Flect(Lemma &lemma_ref, short int int_morph_tag[10], std::string cyr_i
   
   // force fem. on a-stems which can be masc. or fem. or the bastard gets o-stem endings
   //ѫжика
-  if (lemma_ref.lemma_id == 2438)
+  if (lemma_ref.lemma_id == /*2438*/ compileTimeHashString("Nbѫжика"))
   {
     gender = 2;
   }
   row_no = 21 * gender + 7 * num + gr_case - 28;
 
-  // check for *jedьn- ѥдинъMa and ѥдинъPx, should remove because ѥдьнъ lemmas exist
-  if (lemma_ref.lemma_id == 243 || lemma_ref.lemma_id == 987)
-  {
-    if (Sniff(cyr_id, "дін", 20) == false)
-    {
-      stem = lemma_ref.poss_doublet;
-      lemma_ref.poss_doublet = lemma_ref.lemma_form + "ъ";
-    }
-  }
-
   // definitise ordinal numbers and "которъі" and "universe/population" which TOROT wrongly marks as strong or both
-  if (conj_type == "adj_hard_ord" || conj_type == "adj_soft_ord" || lemma_ref.lemma_id == 1747 || lemma_ref.lemma_id == 2609)
+  if (conj_type == "adj_hard_ord" || conj_type == "adj_soft_ord" || lemma_ref.lemma_id == compileTimeHashString("Piкоторꙑи") || lemma_ref.lemma_id == compileTimeHashString("Pxникоторꙑиже"))
   {
     strength = 1;
   }
@@ -64,13 +54,13 @@ void noun_Flect(Lemma &lemma_ref, short int int_morph_tag[10], std::string cyr_i
   }
 
   // оходити vs отъходити (strictly speaking the first is etymologically correct, but levelling to the preposition *otъ- is doubtless Common Slavonic also)
-  if (lemma_ref.lemma_id == 1879 && Sniff(cyr_id, "от", 20))
+  if (lemma_ref.lemma_id == compileTimeHashString("V-оходити") && Sniff(cyr_id, "от", 20))
   {
     stem = "otъxod";
   }
 
   // switch to adjectival declension in толикъ, селикъ, коликъ, еликъ
-  if (lemma_ref.lemma_id == 2092 || lemma_ref.lemma_id == 139 || lemma_ref.lemma_id == 3125 || lemma_ref.lemma_id == 959 || lemma_ref.lemma_id == 5098)
+  if (lemma_ref.lemma_id == compileTimeHashString("Pdтоликъ") || lemma_ref.lemma_id == compileTimeHashString("Piколикъ") || lemma_ref.lemma_id == compileTimeHashString("Pxколикъ") || lemma_ref.lemma_id == compileTimeHashString("Pdселикъ") || lemma_ref.lemma_id == compileTimeHashString("Prѥликъ"))
   {
     if (row_no == 3 || row_no == 4 || row_no == 5 || row_no == 10 || row_no == 12 || row_no == 24 || row_no == 25 || row_no == 26 || row_no == 31 || row_no == 33 || row_no == 45 || row_no == 46 || row_no == 47 || row_no == 52 || row_no == 54)
     {
@@ -88,22 +78,22 @@ void noun_Flect(Lemma &lemma_ref, short int int_morph_tag[10], std::string cyr_i
   // !!!!CHECK FOR the тѧжъкъ lemma when doing comparatives to give correct тѧжии form, and вꙑшь҆ша
   if (conj_type == "adj_hard" && degree == 2)
   {
-    if (lemma_ref.lemma_id == 1525)
+    if (lemma_ref.lemma_id == compileTimeHashString("A-вꙑсокъ"))
     {
       stem = "vyš";
       outer_map_no = 1311;
     }
-    else if (lemma_ref.lemma_id == 1760)
+    else if (lemma_ref.lemma_id == compileTimeHashString("A-тѧжькъ"))
     {
       stem = "tęž";
       outer_map_no = 1311;
     }
-    else if (lemma_ref.lemma_id == 462)
+    else if (lemma_ref.lemma_id == compileTimeHashString("A-лихъ"))
     {
       stem = "liš";
       outer_map_no = 1311;
     }
-    else if (lemma_ref.lemma_id == 2057)
+    else if (lemma_ref.lemma_id == compileTimeHashString("A-крѣпъ"))
     {
       stem = "krěpĺ";
       outer_map_no = 1311;
@@ -198,11 +188,11 @@ void noun_Flect(Lemma &lemma_ref, short int int_morph_tag[10], std::string cyr_i
   }
 
   // apparent nasal doublet in "thousand"
-  if ((lemma_ref.lemma_id == 1420 || lemma_ref.lemma_id == 417) && Sniff(cyr_id, "сѧ", 20))
+  if ((lemma_ref.lemma_id == compileTimeHashString("Maтꙑсѧщи") || lemma_ref.lemma_id == compileTimeHashString("Nbтꙑсѧщи")) && Sniff(cyr_id, "сѧ", 20))
   {
     stem = "tysętj";
   }
-  // fem ja-stems with /ji/ in nominative singular
+  // fem ja-stems with /ja/ in nominative singular
   if (outer_map_no == 151 && row_no == 22)
   {
     if (Sniff(cyr_id, "ѣ", 1) || Sniff(cyr_id, "ꙗ", 2) || Sniff(cyr_id, "а", 1))
@@ -796,7 +786,7 @@ void noun_Flect(Lemma &lemma_ref, short int int_morph_tag[10], std::string cyr_i
   }
   
   // find *-pis- stem in пьсаниѥ and напьсаниѥ
-  if ((lemma_ref.lemma_id == 1739 || lemma_ref.lemma_id == 2607) && Sniff(cyr_id, "піс", 20))
+  if ((lemma_ref.lemma_id == compileTimeHashString("Nbпьсаниѥ") || lemma_ref.lemma_id == compileTimeHashString("Nbнапьсаниѥ")) && Sniff(cyr_id, "піс", 20))
   {
     lemma_ref.morph_replace = flected_word;
     pisanie_clean(stem);

@@ -420,7 +420,7 @@ void buildDataStructures(std::string lemma_filename, std::string words_filename,
     
     std::string pos_lemma_combo = torot_pos + chu_lemma;
 
-    lemma_list.emplace(lemma_id_count, Lemma{lemma_id_count, stem_lcs, morph_replace, poss_doublet, loan_place, 0, pre_jot, inflexion_class, noun_verb});
+    lemma_list.emplace(lemma_id_count, Lemma{runTimeHashString(pos_lemma_combo), stem_lcs, morph_replace, poss_doublet, loan_place, 0, pre_jot, inflexion_class, noun_verb});
     
     all_lemmas_map.emplace(pos_lemma_combo, LemmaDBInfo{lemma_id_count, lcs_lemma, stem_lcs, inflexion_class});
     if(!inflexion_class.empty() && inflexion_class != "non_infl" && !inflexion_class_map.contains(inflexion_class)) {

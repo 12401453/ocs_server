@@ -379,11 +379,15 @@ void iti_clean(std::string &verb)
 
   std::string str1, str2;
   int x, y;
-  for (int letno = 0; letno < 8; letno++)
+  for (int letno = -1; letno < 8; letno++)
   {
 
     switch (letno)
     {
+    case -1:
+      str1.assign("ǫtj");
+      str2.assign("ǫћ");
+      break;
     case 0:
       str1.assign("njь");
       str2.assign("ni");
