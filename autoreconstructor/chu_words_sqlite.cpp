@@ -332,9 +332,12 @@ struct LemmaDBInfo {
   std::string lemma_lcs;
   std::string stem_lcs;
   std::string inflexion_class;
+  std::string pv2_3_lemma;
+  short int noun_verb;
 };
 struct CorpusDBInfo {    
   bool auto_tagged;
+  bool pv2_3_exists;
   int sentence_no;
   int main_title_id;
   int subtitle_id;
@@ -393,6 +396,7 @@ void buildDataStructures(std::string lemma_filename, std::string words_filename,
     std::string root_1 = csv_reader.getField("stem1");
     std::string root_2 = csv_reader.getField("stem2");
     std::string inflexion_class = csv_reader.getField("conj_type");
+    std::string pv2_3_lemma = csv_reader.getField("PV2/3");
     if(noun_verb == 0) inflexion_class = "non_infl";
 
     std::string stem_lcs = "";
@@ -422,7 +426,7 @@ void buildDataStructures(std::string lemma_filename, std::string words_filename,
 
     lemma_list.emplace(lemma_id_count, Lemma{runTimeHashString(pos_lemma_combo), stem_lcs, morph_replace, poss_doublet, loan_place, 0, pre_jot, inflexion_class, noun_verb});
     
-    all_lemmas_map.emplace(pos_lemma_combo, LemmaDBInfo{lemma_id_count, lcs_lemma, stem_lcs, inflexion_class});
+    all_lemmas_map.emplace(pos_lemma_combo, LemmaDBInfo{lemma_id_count, lcs_lemma, stem_lcs, inflexion_class, pv2_3_lemma, noun_verb});
     if(!inflexion_class.empty() && inflexion_class != "non_infl" && !inflexion_class_map.contains(inflexion_class)) {
       inflexion_class_map.emplace(inflexion_class, inflexion_class_id);
       inflexion_class_id++;
@@ -458,6 +462,7 @@ void buildDataStructures(std::string lemma_filename, std::string words_filename,
     }
 
     int lemma_id = 0;
+    bool pv2_3_exists = false;
     std::string autoreconstructed_lcs = "";
     std::string autoreconstructed_morph_replace = "";
     if(all_lemmas_map.contains(pos_lemma_combo)) {
@@ -465,9 +470,12 @@ void buildDataStructures(std::string lemma_filename, std::string words_filename,
       std::array<std::string, 2> autoreconstructed_array = ReconstructMorphReplace(word_normalised, morph_tag, lemma_id);
       autoreconstructed_lcs = autoreconstructed_array[0];
       autoreconstructed_morph_replace = autoreconstructed_array[1];
+      if(!all_lemmas_map.at(pos_lemma_combo).pv2_3_lemma.empty()) {
+        pv2_3_exists = true;
+      }
     }
 
-    corpus_vec.emplace_back(CorpusDBInfo{auto_tagged, sentence_no, main_title_id, subtitle_id, lemma_id, presentation_before, presentation_after, word_normalised, morph_tag, word_torot, autoreconstructed_lcs, autoreconstructed_morph_replace});
+    corpus_vec.emplace_back(CorpusDBInfo{auto_tagged, pv2_3_exists, sentence_no, main_title_id, subtitle_id, lemma_id, presentation_before, presentation_after, word_normalised, morph_tag, word_torot, autoreconstructed_lcs, autoreconstructed_morph_replace});
 
   }
   words_file.close();
@@ -524,15 +532,15 @@ int main () {
 
         sqlite3_exec(DB, sql_BEGIN, nullptr, nullptr, nullptr);
 
-        sqlite3_exec(DB, "DROP TABLE IF EXISTS corpus;CREATE TABLE corpus (tokno INTEGER PRIMARY KEY, chu_word_torot TEXT, chu_word_normalised TEXT, morph_tag TEXT, lemma_id INTEGER, sentence_no INTEGER, presentation_before TEXT, presentation_after TEXT, autoreconstructed_lcs TEXT, inflexion_class_id INTEGER, autoreconstructed_morph_replace TEXT, auto_tagged INTEGER, inflexion_class TEXT);CREATE INDEX lemma_id_index on corpus(lemma_id) WHERE lemma_id IS NOT NULL;CREATE INDEX sentence_no_index on corpus(sentence_no);CREATE INDEX inflexion_class_corpus_index on corpus(inflexion_class_id) WHERE inflexion_class_id IS NOT NULL", nullptr, nullptr, nullptr);
-        sqlite3_exec(DB, "DROP TABLE IF EXISTS lemmas;CREATE TABLE lemmas (lemma_id INTEGER PRIMARY KEY, pos INTEGER, lemma_lcs TEXT, lemma_ocs TEXT, stem_lcs TEXT, inflexion_class_id INTEGER);CREATE INDEX inflexion_class_index ON lemmas(inflexion_class_id) WHERE inflexion_class_id IS NOT NULL", nullptr, nullptr, nullptr);
+        sqlite3_exec(DB, "DROP TABLE IF EXISTS corpus;CREATE TABLE corpus (tokno INTEGER PRIMARY KEY, chu_word_torot TEXT, chu_word_normalised TEXT, morph_tag TEXT, lemma_id INTEGER, sentence_no INTEGER, presentation_before TEXT, presentation_after TEXT, autoreconstructed_lcs TEXT, inflexion_class_id INTEGER, autoreconstructed_morph_replace TEXT, auto_tagged INTEGER, inflexion_class TEXT, pv2_3_exists INTEGER);CREATE INDEX lemma_id_index on corpus(lemma_id) WHERE lemma_id IS NOT NULL;CREATE INDEX sentence_no_index on corpus(sentence_no);CREATE INDEX inflexion_class_corpus_index on corpus(inflexion_class_id) WHERE inflexion_class_id IS NOT NULL", nullptr, nullptr, nullptr);
+        sqlite3_exec(DB, "DROP TABLE IF EXISTS lemmas;CREATE TABLE lemmas (lemma_id INTEGER PRIMARY KEY, pos INTEGER, lemma_lcs TEXT, lemma_ocs TEXT, stem_lcs TEXT, inflexion_class_id INTEGER, pv2_3_lemma TEXT);CREATE INDEX inflexion_class_index ON lemmas(inflexion_class_id) WHERE inflexion_class_id IS NOT NULL", nullptr, nullptr, nullptr);
         sqlite3_exec(DB, "DROP TABLE IF EXISTS inflexion_classes;CREATE TABLE inflexion_classes (inflexion_class_id INTEGER PRIMARY KEY, inflexion_class_name TEXT)", nullptr, nullptr, nullptr);
         sqlite3_exec(DB, "DROP TABLE IF EXISTS texts;CREATE TABLE texts (text_id INTEGER PRIMARY KEY, text_title TEXT, tokno_start INTEGER, tokno_end INTEGER)", nullptr, nullptr, nullptr);
         sqlite3_exec(DB, "DROP TABLE IF EXISTS subtitles;CREATE TABLE subtitles (subtitle_id INTEGER PRIMARY KEY, subtitle_text TEXT, text_id INTEGER, tokno_start INTEGER, tokno_end INTEGER)", nullptr, nullptr, nullptr);
         sqlite3_exec(DB, "DROP TABLE IF EXISTS lcs_trigrams;CREATE TABLE lcs_trigrams (tokno INTEGER, trigram TEXT)", nullptr, nullptr, nullptr);
 
 
-        const char *sql_text = "INSERT INTO corpus (chu_word_torot, chu_word_normalised, morph_tag, lemma_id, sentence_no, presentation_before, presentation_after, autoreconstructed_lcs, autoreconstructed_morph_replace, auto_tagged) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        const char *sql_text = "INSERT INTO corpus (chu_word_torot, chu_word_normalised, morph_tag, lemma_id, sentence_no, presentation_before, presentation_after, autoreconstructed_lcs, autoreconstructed_morph_replace, auto_tagged, pv2_3_exists) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         const char* sql_text_table = "INSERT INTO texts (text_title, tokno_start, tokno_end) VALUES (?, ?, ?)";
         const char* sql_subtitle_table = "INSERT INTO subtitles (subtitle_text, text_id, tokno_start, tokno_end) VALUES (?, ?, ?, ?)";
@@ -577,6 +585,8 @@ int main () {
             sqlite3_bind_text(statement, 7, corpus_row.presentation_after.c_str(), -1, SQLITE_TRANSIENT);
             if(corpus_row.auto_tagged) sqlite3_bind_int(statement, 10, 1);
             else sqlite3_bind_null(statement, 10);
+            if(corpus_row.pv2_3_exists) sqlite3_bind_int(statement, 11, 1);
+            else sqlite3_bind_null(statement, 11);
 
             sqlite3_step(statement);
             sqlite3_reset(statement);
@@ -635,13 +645,15 @@ int main () {
         //lemmas table
         std::cout << "Writing lemmas table into database...\n";
         sqlite3_stmt* lemma_stmt;
-        sql_text = "INSERT INTO lemmas (lemma_id, pos, lemma_lcs, lemma_ocs, stem_lcs, inflexion_class_id) VALUES (?,?,?,?,?,?)";
+        sql_text = "INSERT INTO lemmas (lemma_id, pos, lemma_lcs, lemma_ocs, stem_lcs, inflexion_class_id, pv2_3_lemma) VALUES (?,?,?,?,?,?,?)";
         sqlite3_prepare_v2(DB, sql_text, -1, &lemma_stmt, nullptr);
 
         //INFLEXION_CLASS SHIT TODO
         sqlite3_stmt* stmt_update_corpus;
         sqlite3_prepare_v2(DB, "UPDATE corpus SET inflexion_class_id = ?, inflexion_class = ? WHERE lemma_id = ?", -1, &stmt_update_corpus, nullptr);
 
+        std::ofstream orv_lemmas_json_file("../HTML_DOCS/chu_lemmas_json.json");
+        orv_lemmas_json_file << "[";
         for(const auto& lemma_row : all_lemmas_map) {
 
           sqlite3_bind_int(lemma_stmt, 1, lemma_row.second.lemma_id);
@@ -664,11 +676,24 @@ int main () {
             sqlite3_step(stmt_update_corpus);
             sqlite3_reset(stmt_update_corpus);
             sqlite3_clear_bindings(stmt_update_corpus);
+
+            if(lemma_row.second.noun_verb != 0) {
+              orv_lemmas_json_file << "\n  [" << lemma_row.second.lemma_id << ", \"" << lemma_row.second.stem_lcs << "\",\"" << lemma_row.second.noun_verb << "\",\"" << lemma_row.second.inflexion_class << "\",\"" << lemma_row.second.lemma_lcs << "\",\"" << lemma_row.second.pv2_3_lemma << "\"],";
+            }
           }
+
+          if(!lemma_row.second.pv2_3_lemma.empty()) {
+            sqlite3_bind_text(lemma_stmt, 7, lemma_row.second.pv2_3_lemma.c_str(), -1, SQLITE_TRANSIENT);
+          }
+          else sqlite3_bind_null(lemma_stmt, 7);
+
           sqlite3_step(lemma_stmt);
           sqlite3_reset(lemma_stmt);
           sqlite3_clear_bindings(lemma_stmt);
         }
+        orv_lemmas_json_file.seekp(-1, std::ios_base::cur);
+        orv_lemmas_json_file << "\n]";
+        orv_lemmas_json_file.close();
         sqlite3_finalize(stmt_update_corpus);
         sqlite3_finalize(lemma_stmt);
 

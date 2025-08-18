@@ -183,7 +183,7 @@ const chu_pv3_lemma_ids = [
   7242
 ];
 
-const convertToOCS = (lcs_word, inflexion_class, lemma_id) => {
+const convertToOCS = (lcs_word, pv2_3_exists, lemma_id) => {
 
   //extremely disgusting jo-stem variants of gospodь possible only under a system with Russian-style secondary palatalisation of dentals
   if(lemma_id == 342) {
@@ -212,7 +212,8 @@ const convertToOCS = (lcs_word, inflexion_class, lemma_id) => {
     lcs_word = lcs_word.slice(0, PV2_pos) + PV2_map.get(PV2_cons) + lcs_word.slice(PV2_pos + 1);
     PV2_pos = lcs_word.search(PV2_regex);
   }
-  if(inflexion_class.includes("PV3") || inflexion_class == "vьxь" || chu_pv3_lemma_ids.includes(lemma_id) || lcs_word.startsWith("vьxak")) {
+  //if(inflexion_class.includes("PV3") || inflexion_class == "vьxь" || chu_pv3_lemma_ids.includes(lemma_id) || lcs_word.startsWith("vьxak")) {
+  if(pv2_3_exists){
     //this type of word-level specification would be partly reduced if the lemmas-system was broken down by stem and prefix more
     lcs_word = applyPV3(lcs_word);
   }

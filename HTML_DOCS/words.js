@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 let lemmas_json = Object.create(null);
 
-fetch("lemmas_json.json")
+fetch("chu_lemmas_json.json")
 .then(response => {
   return response.json()
 })
@@ -18,7 +18,7 @@ const randomLemma = () => {
 };
 
 let raw_lcs_paradigm = Object.create(null);
-const generateInflection = ([lemma_id, stem, noun_verb, conj_type]) => {
+const generateInflection = ([lemma_id, stem, noun_verb, conj_type, lcs_lemma, pv2_3_exists]) => {
   console.log(lemma_id, stem, noun_verb, conj_type);
   let send_data = "stem="+stem+"&conj_type="+conj_type+"&noun_verb="+noun_verb;
   const myheaders = new Headers();
@@ -45,7 +45,7 @@ const generateInflection = ([lemma_id, stem, noun_verb, conj_type]) => {
       }
     }
     
-    writeTable(lcs_paradigm, conj_type, noun_verb, lemma_id);
+    writeTable(lcs_paradigm, conj_type, pv2_3_exists, noun_verb, lemma_id);
     for(const obj of response) {
       //console.log(obj);
       for(const infl in obj) {
@@ -65,10 +65,10 @@ const switchConv = () => {
 
 let convertFunction = convertToOCS;
 
-const writeTable = (lcs_paradigm, conj_type, noun_verb, lemma_id) => {
+const writeTable = (lcs_paradigm, conj_type, pv2_3_exists, noun_verb, lemma_id) => {
 
   const writeCell = (idx) => {
-    cell_html += "<div class='grid-child' title='"+lcs_paradigm[0][idx]+"'>"+convertFunction(lcs_paradigm[0][idx], inflection_class_map.get(conj_type), lemma_id);
+    cell_html += "<div class='grid-child' title='"+lcs_paradigm[0][idx]+"'>"+convertFunction(lcs_paradigm[0][idx], pv2_3_exists, lemma_id);
     cell_html += "<div class='infl_variants'>";
     
     let variants_written = false;
@@ -77,7 +77,7 @@ const writeTable = (lcs_paradigm, conj_type, noun_verb, lemma_id) => {
       //console.log(lcs_variant);
       let variant_type = i == 2 ? "variant" : "deviance";
       if(lcs_variant != "" && lcs_variant != undefined) {
-        cell_html += "<span class='"+variant_type+"' title='" + lcs_variant + "'>" + convertFunction(lcs_variant, inflection_class_map.get(conj_type), lemma_id) + "</span> ";
+        cell_html += "<span class='"+variant_type+"' title='" + lcs_variant + "'>" + convertFunction(lcs_variant, pv2_3_exists, lemma_id) + "</span> ";
         variants_written = true;
       }
     }
@@ -166,8 +166,9 @@ const filterLemmas = (event) => {
   let results_html = "";
 
   for(let i = 0; i < filtered_lemmas.length && i < 10; i++) {
+    const pv2_3_exists = filtered_lemmas[i][5] == "" ? false : true;
     //console.log("search_candidate data: ", filtered_lemmas[i][4], inflection_class_map.get(filtered_lemmas[i][3]), filtered_lemmas[i][0]);
-    results_html += "<div class=\"search_candidate\" data-idx=\"" + filtered_lemmas[i][0] +"\">" + convertFunction(filtered_lemmas[i][4], inflection_class_map.get(filtered_lemmas[i][3]), filtered_lemmas[i][0]) + "</div>";
+    results_html += "<div class=\"search_candidate\" data-idx=\"" + filtered_lemmas[i][0] +"\">" + convertFunction(filtered_lemmas[i][4].replaceAll("pn", "n"), pv2_3_exists, filtered_lemmas[i][0]) + "</div>";
   }
   const results_elem = document.createRange().createContextualFragment(results_html);
   search_candidates.append(results_elem);
