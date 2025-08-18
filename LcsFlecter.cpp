@@ -366,13 +366,9 @@ void replaceAll(std::string &source, const std::string yeeted, const std::string
     if(yeeted_length == 0) return;
     size_t replacement_length = replacement.length();
 
-    std::string result;
-
-    int search_pos = 0;
-    int yeeted_pos = source.find(yeeted);
+    size_t yeeted_pos = source.find(yeeted);
     while(yeeted_pos != std::string::npos) {
-        //source = source.substr(0, yeeted_pos) + replacement + source.substr(yeeted_pos + yeeted_length);
-        source = source.replace(yeeted_pos, yeeted_length, replacement); 
+        source.replace(yeeted_pos, yeeted_length, replacement); 
         yeeted_pos = source.find(yeeted, yeeted_pos + replacement_length);
     }
 }

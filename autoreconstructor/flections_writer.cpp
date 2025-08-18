@@ -19,8 +19,6 @@ class FlectWriter {
     static const inner_map m_noun_endings;
     static const inner_map m_verb_endings;
 
-    #include "conj_type_enum.h"
-
 };
 
 #include "nom_map.cpp"
@@ -275,6 +273,7 @@ int main() {
             std::sort(endings_vec.begin(), endings_vec.end(), customLess);       
         }
         for(auto& inner_map : endings_vec) {
+            //stops the Nsg. ǫtj- ending of PRAPs being included because both forms of the PRAP are already included in the base-table
             if(inner_map.first == 37 && outer_map.first%10 == 2) {
                 continue;
             }

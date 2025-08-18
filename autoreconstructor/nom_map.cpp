@@ -1777,7 +1777,7 @@ inner_map N_all_i_stems_c0 = {
 };
 
 inner_map N_all_i_stems_c1 = {
-{3, "a"},
+{3, "Ǣ"},
 {4, "u"},
 {7, "ь"},
 {28, "ь"},

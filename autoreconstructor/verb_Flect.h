@@ -155,7 +155,7 @@ void verb_Flect(Lemma &lemma_ref, short int int_morph_tag[10], std::string cyr_i
       // class 21 *-nǫ- aorists
       if (outer_map_no == 211 && (row_no < 19 && row_no > 9))
       {
-        if (Sniff(cyr_id, "нѫ", 6) || Sniff(cyr_id, "нѭ", 6) || Sniff(cyr_id, "нѹ", 6))
+        if (Sniff(cyr_id, "нѫ", 6) || Sniff(cyr_id, "нѭ", 6) || Sniff(cyr_id, "ноу", 6))
           outer_map_no = outer_map_no * 10 + 2; //the table v_211_c0 is a copy of v_21_c0, but it is necessary because later on the "non-deviant" variants need to be added to the lemma.morph_replace field by decrementing the current outer_map_no, and thus something has to exist at outer_map_no = 2111. 
       }
 
@@ -517,7 +517,7 @@ void verb_Flect(Lemma &lemma_ref, short int int_morph_tag[10], std::string cyr_i
           row_no = 39;
           if (conj_type == "40")
           {
-            if (cyr_id.find("ів") != -1 || cyr_id.find("ꙇв") != -1 || cyr_id.find("ів") != -1)
+            if (cyr_id.find("ів") != -1)
             {
               outer_map_no++;
             }
@@ -562,7 +562,7 @@ void verb_Flect(Lemma &lemma_ref, short int int_morph_tag[10], std::string cyr_i
       }
 
       // class 2.1 *nǫvъš- PAPs
-      if (outer_map_no == 211 && (Sniff(cyr_id, "нѫв", 10) || Sniff(cyr_id, "нѹв", 10)))
+      if (outer_map_no == 211 && (Sniff(cyr_id, "нѫв", 10) || Sniff(cyr_id, "ноув", 10)))
       {
         outer_map_no++;
       }
@@ -736,21 +736,21 @@ void verb_Flect(Lemma &lemma_ref, short int int_morph_tag[10], std::string cyr_i
     {
       if (Sniff(cyr_id, "ъіш", 4))
         outer_map_no++;
-      else if (Sniff(cyr_id, "біш", 4) || Sniff(cyr_id, "біш", 4) || Sniff(cyr_id, "бꙇш", 4))
+      else if (Sniff(cyr_id, "біш", 4))
         outer_map_no += 2;
     }
     if (row_no == 14 || row_no == 15 || row_no == 17)
     {
       if (Sniff(cyr_id, "ъіс", 5))
         outer_map_no++;
-      else if (Sniff(cyr_id, "біс", 5) || Sniff(cyr_id, "біс", 5) || Sniff(cyr_id, "бꙇс", 5))
+      else if (Sniff(cyr_id, "біс", 5))
         outer_map_no += 2;
     }
     if (row_no == 10 || row_no == 13 || row_no == 16)
     {
       if (Sniff(cyr_id, "ъіх", 6))
         outer_map_no++;
-      else if (Sniff(cyr_id, "біх", 6) || Sniff(cyr_id, "біх", 6) || Sniff(cyr_id, "бꙇх", 6))
+      else if (Sniff(cyr_id, "біх", 6))
         outer_map_no += 2;
     }
     if (row_no == 11 || row_no == 12)

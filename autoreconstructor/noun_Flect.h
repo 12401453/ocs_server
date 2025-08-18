@@ -146,7 +146,7 @@ void noun_Flect(Lemma &lemma_ref, short int int_morph_tag[10], std::string cyr_i
   }
   if (conj_type == "den" && (row_no == 10 || row_no == 12))
   {
-    if (Sniff(cyr_id, "і", 2) || Sniff(cyr_id, "ью", 2) || Sniff(cyr_id, "ю", 1) || Sniff(cyr_id, "ьѹ", 2))
+    if (Sniff(cyr_id, "і", 2) || Sniff(cyr_id, "ью", 2) || Sniff(cyr_id, "ю", 1) || Sniff(cyr_id, "ьоу", 3))
       outer_map_no++;
   }
   if (conj_type == "den" && (row_no == 15 || row_no == 21))
@@ -171,20 +171,32 @@ void noun_Flect(Lemma &lemma_ref, short int int_morph_tag[10], std::string cyr_i
       outer_map_no++;
   }
   // masc i-stems
-  if (outer_map_no == 141 && (row_no == 3))
-  {
-    if (Sniff(cyr_id, "а", 1) || Sniff(cyr_id, "ѣ", 1))
+  // if (outer_map_no == 141 && (row_no == 3))
+  // {
+  //   if (Sniff(cyr_id, "а", 1) || Sniff(cyr_id, "ѣ", 1))
+  //     outer_map_no++;
+  // }
+  // if (outer_map_no == 141 && (row_no == 4))
+  // {
+  //   if (Sniff(cyr_id, "оу", 2) || Sniff(cyr_id, "ю", 1))
+  //     outer_map_no++;
+  // }
+  // if (outer_map_no == 141 && (row_no == 7) && conj_type != "tri")
+  // {
+  //   if (Sniff(cyr_id, "ь", 1))
+  //     outer_map_no++;
+  // }
+
+  if(outer_map_no == 141) {
+    if(row_no == 3 && (Sniff(cyr_id, "а", 1) || Sniff(cyr_id, "ѣ", 1))){
       outer_map_no++;
-  }
-  if (outer_map_no == 141 && (row_no == 4))
-  {
-    if (Sniff(cyr_id, "ѹ", 1) || Sniff(cyr_id, "ю", 1))
+    }
+    if(row_no == 4 && (Sniff(cyr_id, "оу", 2) || Sniff(cyr_id, "ю", 1))){
       outer_map_no++;
-  }
-  if (outer_map_no == 141 && (row_no == 7) && conj_type != "tri")
-  {
-    if (Sniff(cyr_id, "ь", 1))
+    }
+    if(row_no == 7 && conj_type != "tri" && Sniff(cyr_id, "ь", 1)) {
       outer_map_no++;
+    } 
   }
 
   // apparent nasal doublet in "thousand"
@@ -207,7 +219,7 @@ void noun_Flect(Lemma &lemma_ref, short int int_morph_tag[10], std::string cyr_i
   }
   if (outer_map_no == 161 && (row_no == 31 || row_no == 33))
   {
-    if (Sniff(cyr_id, "і", 2) || Sniff(cyr_id, "ью", 2) || Sniff(cyr_id, "ю", 1) || Sniff(cyr_id, "ьѹ", 2))
+    if (Sniff(cyr_id, "і", 2) || Sniff(cyr_id, "ью", 2) || Sniff(cyr_id, "ю", 1) || Sniff(cyr_id, "ьоу", 3))
       outer_map_no++;
   }
   if (outer_map_no == 161 && (row_no == 36 || row_no == 42))
@@ -234,7 +246,7 @@ void noun_Flect(Lemma &lemma_ref, short int int_morph_tag[10], std::string cyr_i
   }
   if (outer_map_no == 171 && (row_no == 31 || row_no == 33))
   {
-    if (Sniff(cyr_id, "і", 2) || Sniff(cyr_id, "ью", 2) || Sniff(cyr_id, "ю", 1) || Sniff(cyr_id, "ьѹ", 2))
+    if (Sniff(cyr_id, "і", 2) || Sniff(cyr_id, "ью", 2) || Sniff(cyr_id, "ю", 1) || Sniff(cyr_id, "ьоу", 3))
       outer_map_no++;
   }
   if (outer_map_no == 171 && (row_no == 36 || row_no == 42))
@@ -336,7 +348,7 @@ void noun_Flect(Lemma &lemma_ref, short int int_morph_tag[10], std::string cyr_i
   }
   if (outer_map_no == 221 && (row_no == 10 || row_no == 12))
   {
-    if (Sniff(cyr_id, "і", 2) || Sniff(cyr_id, "ью", 2) || Sniff(cyr_id, "ю", 1) || Sniff(cyr_id, "ьѹ", 2))
+    if (Sniff(cyr_id, "і", 2) || Sniff(cyr_id, "ью", 2) || Sniff(cyr_id, "ю", 1) || Sniff(cyr_id, "ьоу", 3))
       outer_map_no++;
   }
   if (outer_map_no == 221 && (row_no == 15 || row_no == 21))
@@ -358,7 +370,7 @@ void noun_Flect(Lemma &lemma_ref, short int int_morph_tag[10], std::string cyr_i
   //  masc -teĺь words
   if (outer_map_no == 231 && (row_no == 7))
   {
-    if (Sniff(cyr_id, "ю", 1) == false && Sniff(cyr_id, "ѹ", 1) == false)
+    if (Sniff(cyr_id, "ю", 1) == false && Sniff(cyr_id, "оу", 2) == false)
       outer_map_no++;
   }
   if (outer_map_no == 231 && (row_no == 15 || row_no == 21))
@@ -385,7 +397,7 @@ void noun_Flect(Lemma &lemma_ref, short int int_morph_tag[10], std::string cyr_i
   }
   if (outer_map_no == 311 && (row_no == 7))
   {
-    if (Sniff(cyr_id, "ю", 1) == false && Sniff(cyr_id, "ѹ", 1) == false)
+    if (Sniff(cyr_id, "ю", 1) == false && Sniff(cyr_id, "оу", 2) == false)
       outer_map_no++;
   }
   if (outer_map_no == 311 && (row_no == 15 || row_no == 21))
@@ -407,7 +419,7 @@ void noun_Flect(Lemma &lemma_ref, short int int_morph_tag[10], std::string cyr_i
   }
   if (outer_map_no == 241 && (row_no == 5 || row_no == 7))
   {
-    if (Sniff(cyr_id, "ѹ", 1) == false && Sniff(cyr_id, "у", 1) == false)
+    if (Sniff(cyr_id, "оу", 2) == false && Sniff(cyr_id, "у", 1) == false)
       outer_map_no++;
   }
   if (outer_map_no == 241 && (row_no == 11 || row_no == 13))
@@ -439,7 +451,7 @@ void noun_Flect(Lemma &lemma_ref, short int int_morph_tag[10], std::string cyr_i
   }
   if (outer_map_no == 251 && (row_no == 5 || row_no == 7))
   {
-    if (Sniff(cyr_id, "ѹ", 1) || Sniff(cyr_id, "у", 1))
+    if (Sniff(cyr_id, "оу", 2) || Sniff(cyr_id, "у", 1))
       outer_map_no += 2;
   }
   if (outer_map_no == 251 && (row_no == 11 || row_no == 13))

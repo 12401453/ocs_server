@@ -1,4 +1,4 @@
-void first_velar_clean(std::string &noun)
+/*void first_velar_clean(std::string &noun)
 {
 
   std::string str1, str2;
@@ -66,9 +66,22 @@ void first_velar_clean(std::string &noun)
     } while (x != -1);
   }
   return;
+}*/
+void first_velar_clean(std::string& flecter_output) {
+  replaceAll(flecter_output, "ske", "šče");
+  replaceAll(flecter_output, "xve", "šve");
+  replaceAll(flecter_output, "ge", "že");
+  replaceAll(flecter_output, "ke", "če");
+  replaceAll(flecter_output, "xe", "še");
+  replaceAll(flecter_output, "gi", "ži");
+  replaceAll(flecter_output, "ki", "či");
+  replaceAll(flecter_output, "xi", "ši");
+  replaceAll(flecter_output, "gь", "žь");
+  replaceAll(flecter_output, "kь", "čь");
+  replaceAll(flecter_output, "xь", "šь");
 }
 
-void PV1_long_e(std::string &noun)
+/*void PV1_long_e(std::string &noun)
 {
 
   std::string str1, str2;
@@ -105,4 +118,9 @@ void PV1_long_e(std::string &noun)
     } while (x != -1);
   }
   return;
+}*/
+void PV1_long_e(std::string& flecter_output) {
+  replaceAll(flecter_output, "gě", "žǢ");
+  replaceAll(flecter_output, "kě", "čǢ");
+  replaceAll(flecter_output, "xě", "šǢ");
 }

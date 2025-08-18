@@ -187,7 +187,7 @@ const convertToOCS = (lcs_word, inflexion_class, lemma_id) => {
 
   //extremely disgusting jo-stem variants of gospodь possible only under a system with Russian-style secondary palatalisation of dentals
   if(lemma_id == 342) {
-    if(lcs_word == "gospoda") return "господꙗ";
+    if(lcs_word == "gospodǢ") return "господꙗ";
     else if(lcs_word == "gospodu") return "господю";
   }
 

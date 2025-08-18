@@ -17,8 +17,6 @@ typedef std::unordered_map<int, std::string> inner_map;
 #include "outer_nom_map.cpp"
 
 
-
-
 consteval std::uint64_t compileTimeHashString(std::string_view sv) {
     uint64_t hash = 1469598103934665603ULL;
     for(char c : sv) {
@@ -35,6 +33,19 @@ std::uint64_t runTimeHashString(std::string_view sv) {
         hash = hash * 1099511628211ULL;
     }
     return hash;
+}
+
+void replaceAll(std::string &source, const std::string& yeeted, const std::string& replacement) {
+    
+  size_t yeeted_length = yeeted.length();
+  if(yeeted_length == 0) return;
+  size_t replacement_length = replacement.length();
+
+  size_t yeeted_pos = source.find(yeeted);
+  while(yeeted_pos != std::string::npos) {
+      source.replace(yeeted_pos, yeeted_length, replacement); 
+      yeeted_pos = source.find(yeeted, yeeted_pos + replacement_length);
+  }
 }
 
 struct Lemma
@@ -122,7 +133,7 @@ std::unordered_map<int, Lemma> lemma_list;
 #include "noun_Flect.h"
 #include "changeLemma_field.h"
 
-std::string Dejotate(std::string cs_word)
+/*std::string Dejotate(std::string cs_word)
 {
 
   std::string str1, str2;
@@ -303,6 +314,53 @@ std::string Dejotate(std::string cs_word)
     } while (x != -1);
   }
   return cs_word;
+}*/
+void Dejotate(std::string& jotated_form) {
+  replaceAll(jotated_form, "stvj", "šћvĺ");
+  replaceAll(jotated_form, "strj", "šћŕ");
+  replaceAll(jotated_form, "stj", "šћ");
+  replaceAll(jotated_form, "zdj", "žђ");
+  replaceAll(jotated_form, "slj", "šĺ");
+  replaceAll(jotated_form, "zlj", "žĺ");
+  replaceAll(jotated_form, "znj", "žń");
+  replaceAll(jotated_form, "snj", "šń");
+  replaceAll(jotated_form, "trj", "ћŕ");
+  replaceAll(jotated_form, "drj", "ђŕ");
+  replaceAll(jotated_form, "tvj", "ћvĺ");
+  replaceAll(jotated_form, "bj", "bĺ");
+  replaceAll(jotated_form, "pj", "pĺ");
+  replaceAll(jotated_form, "mj", "mĺ");
+  replaceAll(jotated_form, "vj", "vĺ");
+  replaceAll(jotated_form, "kt", "ћ");
+  replaceAll(jotated_form, "gt", "ћ");
+  replaceAll(jotated_form, "tj", "ћ");
+  replaceAll(jotated_form, "dj", "ђ");
+  replaceAll(jotated_form, "nj", "ń");
+  replaceAll(jotated_form, "lj", "ĺ");
+  replaceAll(jotated_form, "rj", "ŕ");
+  replaceAll(jotated_form, "sj", "š");
+  replaceAll(jotated_form, "zj", "ž");
+  replaceAll(jotated_form, "čj", "č");
+  replaceAll(jotated_form, "šj", "š");
+  replaceAll(jotated_form, "žj", "ž");
+  replaceAll(jotated_form, "ǯj", "ǯ");
+  replaceAll(jotated_form, "zž", "žǯ");
+  replaceAll(jotated_form, "jj", "j");
+  replaceAll(jotated_form, "gj", "ž");
+  replaceAll(jotated_form, "kj", "č");
+  replaceAll(jotated_form, "xj", "š");
+  replaceAll(jotated_form, "ђj", "ђ");
+  replaceAll(jotated_form, "ńj", "ń");
+  replaceAll(jotated_form, "ћj", "ћ");
+  replaceAll(jotated_form, "ĺj", "ĺ");
+  replaceAll(jotated_form, "ŕj", "ŕ");
+  replaceAll(jotated_form, "ћъ", "ћь");
+  replaceAll(jotated_form, "ђъ", "ђь");
+
+  //this is a bullshit hack to get around the problem of jo-stem displacement of masc_i-stem nouns, which is only possible in my system on stems ending with /nlr/ since they have corresponding palatal phonemes. гю га etc. break everything, so they just get dumbly reconstructed with /da/
+  replaceAll(jotated_form, "rǢ", "ŕǢ");
+  replaceAll(jotated_form, "nǢ", "ńǢ");
+  replaceAll(jotated_form, "lǢ", "ĺǢ");
 }
 
 std::string deep_clean_Cyr(std::string form_cell)
@@ -408,7 +466,8 @@ std::string Reconstruct(std::string cyr_id, std::string morph_tag, int lemma_id)
     changeLemma_field(lemma, morph_tag, deep_clean_Cyr(cyr_id)); // pass object by reference to a function so I can change one of its members directly
 
 
-    lcs_reconstruction = Dejotate(lemma.lemma_form);
+    Dejotate(lemma.lemma_form);
+    return lemma.lemma_form;
   }
   return lcs_reconstruction;
 }
@@ -424,15 +483,19 @@ std::array<std::string, 2> ReconstructMorphReplace(std::string cyr_id, std::stri
   {
     Lemma lemma = it->second; // retrieve the object stored in the memory address of the iterator
 
-    changeLemma_field(lemma, morph_tag, deep_clean_Cyr(cyr_id)); // pass object by reference to a function so I can change one of its members directly
+    changeLemma_field(lemma, morph_tag, cyr_id); // pass object by reference to a function so I can change one of its members directly
 
     if(lemma.lemma_form.substr(0, 7) != "corrupt"){
-      lcs_reconstruction = Dejotate(lemma.lemma_form);
-      lcs_morph_replace = Dejotate(lemma.morph_replace);
+      Dejotate(lemma.lemma_form);
+      Dejotate(lemma.morph_replace);
+      // lcs_reconstruction = Dejotate(lemma.lemma_form);
+      // lcs_morph_replace = Dejotate(lemma.morph_replace);
+      
+      return std::array<std::string, 2>{lemma.lemma_form, lemma.morph_replace};
     }
   }
-  std::array<std::string, 2> result_array {lcs_reconstruction, lcs_morph_replace};
-  return result_array;
+  return std::array<std::string, 2>{"", ""};
+
 }
 
 std::string ReconstructLine(std::string text_line)
@@ -471,8 +534,8 @@ std::string ReconstructLine(std::string text_line)
 
     changeLemma_field(lemma, morph_tag, cyr_id); // pass object by reference to a function so I can change one of its members directly
 
-
-    lcs_reconstruction += Dejotate(lemma.lemma_form);
+    Dejotate(lemma.lemma_form);
+    lcs_reconstruction += lemma.lemma_form;
   }
   return lcs_reconstruction;
 

@@ -492,7 +492,7 @@ int main () {
         std::vector<CorpusDBInfo> corpus_vec;
         buildDataStructures("chu_lemmas_master.csv", "chu_words_full_with_titles_untagged_autotags_added_with_assem_NEW.csv", lemma_list, all_lemmas_map, inflexion_class_map, corpus_vec);
 
-        std::cout << "reconstructed lemma count: " << lemma_list.size() << "\n";
+        std::cout << "Reconstruction complete\nreconstructed lemma count: " << lemma_list.size() << "\n";
         std::cout << "all chu lemma count: " << all_lemmas_map.size() << "\n";
         std::cout << "corpus_vec size: " << corpus_vec.size() << "\n";
 
