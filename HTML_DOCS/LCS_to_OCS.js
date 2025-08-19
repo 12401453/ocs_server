@@ -422,7 +422,7 @@ const orv_mappings = {
   'ŕ' : 'р҄',
 }
 
-const convertToORV = (lcs_word, inflexion_class, lemma_id) => {
+const convertToORV = (lcs_word, pv2_3_exists, lemma_id) => {
 
   lcs_word = lcs_word.replaceAll("ę̌", "ě").replaceAll("y̨", "a").replaceAll("Q", "ь");
   lcs_word = lcs_word.replaceAll("ĺ̥", "l̥");
@@ -430,7 +430,7 @@ const convertToORV = (lcs_word, inflexion_class, lemma_id) => {
   lcs_word = lcs_word.replace(/^ak/, "jǢk").replace(/^av/, "jǢv");
   lcs_word = yeetTlDl(lcs_word);
 
-  if(inflexion_class == 1013 || inflexion_class == 1029 || inflexion_class == 1036 || inflexion_class == 1057 || inflexion_class == 1017 || lemma_id == 362 || lemma_id == 2608 /*vьxakъ and vьxako*/) lcs_word = applyPV3(lcs_word);
+  if(pv2_3_exists) lcs_word = applyPV3(lcs_word);
   lcs_word = denasalise(lcs_word);
   lcs_word = russifyDoublets(lcs_word);
 
@@ -469,8 +469,9 @@ const russifyOCS = () => {
   document.querySelectorAll("[data-lcs_recon]").forEach(tt => {
     const ocs_form = tt.firstChild.textContent
     const lemma_id = Number(tt.dataset.lemma_id);
+    const pv2_3_exists = tt.dataset.pv3 == "1" ? true : false;
     original_ocs_forms.push(ocs_form);
-    tt.firstChild.textContent = convertToORV(tt.dataset.lcs_recon, Number(tt.dataset.inflexion), lemma_id);
+    tt.firstChild.textContent = convertToORV(tt.dataset.lcs_recon, pv2_3_exists, lemma_id);
     tt.classList.add("converted");
   });
   ttPosition();

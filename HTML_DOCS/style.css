@@ -1182,7 +1182,7 @@ border-bottom: 2px solid rgb(23, 33, 54, 0);
   text-decoration: underline;
 }
 
-#regex_box {
+.quicksearch_option_box {
   display: flex;
   flex-flow: column nowrap;
   width: 35px;
@@ -1190,7 +1190,7 @@ border-bottom: 2px solid rgb(23, 33, 54, 0);
   justify-content: center;
   cursor: pointer;
 }
-#regex_box_label {
+.quicksearch_option_box_label {
   font-family: IBM_PLEX_SANS;
   font-size: 10.5px;
   color: #cbd9f4;
@@ -1199,7 +1199,7 @@ border-bottom: 2px solid rgb(23, 33, 54, 0);
   user-select: none;
   opacity: 0.8;
 }
-#regex_checkbox {
+.quicksearch_option_checkbox {
   opacity: 0.8;
   cursor: pointer;
 }
