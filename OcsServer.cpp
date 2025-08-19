@@ -1988,7 +1988,201 @@ bool OcsServer::generateInflection(std::string _POST[3], int clientSocket) {
 
 }
 
+void OcsServer::writeSearchResults(const std::vector<int> &result_toknos_vec, sqlite3_stmt *statement1, sqlite3_stmt *statement2, std::ostringstream &text_results, std::ostringstream& lcs_results, std::ostringstream& tokno_results){
+    std::string lcs_result;
+    std::string chu_word_torot;
+    std::string presentation_before;
+    std::string presentation_after;
 
+    std::ostringstream text_content_result_oss;
+
+    for(const int& result_tokno : result_toknos_vec) {
+        sqlite3_bind_int(statement1, 1, result_tokno);
+        sqlite3_step(statement1);
+        const unsigned char* raw_lcs = sqlite3_column_text(statement1, 0);
+        if(raw_lcs != nullptr) lcs_result = (const char*)raw_lcs;
+        int sentence_no = sqlite3_column_int(statement1, 1);
+
+        // std::cout << "lcs_result: " << lcs_result << "\n";
+        // std::cout << "sentence_no: " << sentence_no << "\n";
+
+        sqlite3_reset(statement1);
+        sqlite3_clear_bindings(statement1);
+
+        lcs_results << "\"" << lcs_result << "\"" << ",";
+        tokno_results << result_tokno << ",";
+
+        text_content_result_oss.str("");
+        sqlite3_bind_int(statement2, 1, sentence_no);
+        sqlite3_bind_int(statement2, 2, result_tokno + 5);
+        sqlite3_bind_int(statement2, 3, result_tokno - 5);
+
+        while(sqlite3_step(statement2) == SQLITE_ROW) {
+            text_content_result_oss << applySuperscripts((const char*)sqlite3_column_text(statement2, 2));
+            if(sqlite3_column_int(statement2, 0) == result_tokno) {
+                text_content_result_oss << "<span class=\"result_word\">" + applySuperscripts((const char*)sqlite3_column_text(statement2, 1)) + "</span>";
+            }
+            else text_content_result_oss << applySuperscripts((const char*)sqlite3_column_text(statement2, 1));
+            
+            text_content_result_oss << applySuperscripts((const char*)sqlite3_column_text(statement2, 3));
+        }
+        text_results << "\"" << escapeQuotes(text_content_result_oss.str()) << "\",";
+
+        sqlite3_reset(statement2);
+        sqlite3_clear_bindings(statement2);
+    }
+
+}
+
+void OcsServer::trigramSearch(sqlite3* db_connection, const std::string& column_name, std::string query, int tokno_start, int tokno_end, int clientSocket) {
+        std::cout << "PRAGMA return_code: " << sqlite3_exec(db_connection, "PRAGMA case_sensitive_like = ON", nullptr, nullptr, nullptr) << "\n";
+
+        //start by getting the text_title information so we can say which text the results come from on the front-end (wasteful to do it every search but this way will stop us having to update Javascript whenever the database changes)
+
+        sqlite3_stmt* titles_stmt;
+        const char* sql_titles_select = "SELECT text_title, tokno_start, tokno_end FROM texts";
+        sqlite3_prepare_v2(db_connection, sql_titles_select, -1, &titles_stmt, NULL);
+
+        std::ostringstream text_title_info;
+        std::string text_title;
+        int title_tokno_start = 0;
+        int title_tokno_end = 0;
+        text_title_info << '[';
+        while(sqlite3_step(titles_stmt) == SQLITE_ROW) {
+            text_title_info << "[\"" << (const char*)sqlite3_column_text(titles_stmt, 0) << "\",";
+            text_title_info << sqlite3_column_int(titles_stmt, 1) << ',' << sqlite3_column_int(titles_stmt, 2) << "],";
+        }
+        text_title_info.seekp(-1, std::ios_base::cur);
+        text_title_info << ']';
+        sqlite3_finalize(titles_stmt);
+
+        icu::UnicodeString unicode_query = query.c_str();
+        int32_t num_chars = unicode_query.countChar32();
+
+        std::vector<int> result_toknos_vec;
+        result_toknos_vec.reserve(256);
+
+        sqlite3_stmt* trigram_stmt;
+        std::string sql_trigram_select;
+        if(num_chars < 3) {
+            sql_trigram_select = "SELECT tokno FROM "+column_name+" WHERE tokno >= ? AND tokno <= ? AND trigram LIKE ?";
+            query = query.append("%");
+
+            sqlite3_prepare_v2(db_connection, sql_trigram_select.c_str(), -1, &trigram_stmt, NULL);
+            sqlite3_bind_int(trigram_stmt, 1, tokno_start);
+            sqlite3_bind_int(trigram_stmt, 2, tokno_end);
+            sqlite3_bind_text(trigram_stmt, 3, query.c_str(), -1, SQLITE_STATIC);
+            int prev_tokno = 0;
+            while(sqlite3_step(trigram_stmt) == SQLITE_ROW) {
+                int result_tokno = sqlite3_column_int(trigram_stmt, 0);
+                if(result_tokno != prev_tokno) {
+                    result_toknos_vec.emplace_back(result_tokno);
+                }
+            }
+            sqlite3_finalize(trigram_stmt);
+        }
+        else {
+            sql_trigram_select = "SELECT tokno FROM lcs_trigrams WHERE tokno >= ? AND tokno <= ? AND trigram = ?";
+            sqlite3_prepare_v2(db_connection, sql_trigram_select.c_str(), -1, &trigram_stmt, NULL);
+
+            std::string query_trigram;
+            int32_t trigram_start_offset = 0;
+
+            int32_t num_of_trigrams = num_chars - 2;
+            std::unordered_map<int, int> tokno_trigram_matches_map;
+            tokno_trigram_matches_map.reserve(512);
+            while(trigram_start_offset + 2 < num_chars) {
+                sqlite3_bind_int(trigram_stmt, 1, tokno_start);
+                sqlite3_bind_int(trigram_stmt, 2, tokno_end);
+                unicode_query.tempSubString(trigram_start_offset, 3).toUTF8String(query_trigram);
+                sqlite3_bind_text(trigram_stmt, 3, query_trigram.c_str(), -1, SQLITE_STATIC);
+
+                int result_tokno = 0;
+                while(sqlite3_step(trigram_stmt) == SQLITE_ROW) {
+                    int new_result_tokno = sqlite3_column_int(trigram_stmt, 0);
+                    if(result_tokno == new_result_tokno) continue; //this prevents double-matches for words which contain the same trigram more than once
+                    result_tokno = new_result_tokno;
+                    if(tokno_trigram_matches_map.contains(result_tokno)) {
+                        tokno_trigram_matches_map[result_tokno]++;
+                    }
+                    else {
+                        tokno_trigram_matches_map.emplace(result_tokno, 1);
+                    }
+                }
+                sqlite3_reset(trigram_stmt);
+                sqlite3_clear_bindings(trigram_stmt);
+
+                query_trigram.clear();
+                trigram_start_offset++;
+            }
+            sqlite3_finalize(trigram_stmt);
+
+            for(const auto& tokno_trigram_match : tokno_trigram_matches_map) {
+                if(tokno_trigram_match.second == num_of_trigrams) {
+                    result_toknos_vec.emplace_back(tokno_trigram_match.first);
+                }
+            }
+        }
+
+        int results_count = result_toknos_vec.size();
+
+        if(results_count > 5000) {
+
+            std::cout << "too many results\n";
+            std::string json_str = "{\"error\":\"Too many results, please narrow the search query\"}";
+            int content_length = json_str.size();
+
+            std::ostringstream post_response;
+            post_response << "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: " << content_length << "\r\n\r\n" << json_str;
+
+            int length = post_response.str().size() + 1;
+            sendToClient(clientSocket, post_response.str().c_str(), length);
+            return;
+        }
+
+
+        sqlite3_stmt* statement1;
+        sqlite3_stmt* statement2;     
+
+        const char* sql_text1 = "SELECT autoreconstructed_lcs, sentence_no FROM corpus WHERE tokno = ?";
+        const char* sql_text2 = "SELECT tokno, chu_word_torot, presentation_before, presentation_after FROM corpus WHERE sentence_no = ? AND tokno <= ? AND tokno >= ?";
+        sqlite3_prepare_v2(db_connection, sql_text1, -1, &statement1, NULL);
+        sqlite3_prepare_v2(db_connection, sql_text2, -1, &statement2, NULL);
+        
+
+        std::ostringstream lcs_results;
+        lcs_results << "[";
+        std::ostringstream text_results;
+        text_results << "[";
+        std::ostringstream tokno_results;
+        tokno_results << "[";
+
+        std::sort(result_toknos_vec.begin(), result_toknos_vec.end());
+
+        writeSearchResults(result_toknos_vec, statement1, statement2, text_results, lcs_results, tokno_results);
+    
+        sqlite3_finalize(statement1);
+        sqlite3_finalize(statement2);
+                
+        if(results_count > 0) {
+            lcs_results.seekp(-1, std::ios_base::cur);
+            text_results.seekp(-1, std::ios_base::cur);
+            tokno_results.seekp(-1, std::ios_base::cur);
+        }
+
+        lcs_results << "]";
+        text_results << "]";
+        tokno_results << "]";    
+
+        std::string json_str = "[" + lcs_results.str() + "," + text_results.str() + "," + tokno_results.str() + "," + text_title_info.str() + "]";
+        int content_length = json_str.size();
+
+        std::ostringstream post_response;
+        post_response << "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: " << content_length << "\r\n\r\n" << json_str;
+
+        int length = post_response.str().size() + 1;
+        sendToClient(clientSocket, post_response.str().c_str(), length);
+}
 
 bool OcsServer::lcsTrigramSearch(std::string _POST[3], int clientSocket) {
     //this is a trick to get wildcarded (LIKE '%query%') SELECT statements to use a database-index, which ordinarily they can't do, because otherwise such queries over the full corpus would scale linearly with corpus-size
@@ -2055,6 +2249,7 @@ bool OcsServer::lcsTrigramSearch(std::string _POST[3], int clientSocket) {
 
             int32_t num_of_trigrams = num_chars - 2;
             std::unordered_map<int, int> tokno_trigram_matches_map;
+            tokno_trigram_matches_map.reserve(512);
             while(trigram_start_offset + 2 < num_chars) {
                 sqlite3_bind_int(trigram_stmt, 1, tokno_start);
                 sqlite3_bind_int(trigram_stmt, 2, tokno_end);
@@ -2123,12 +2318,13 @@ bool OcsServer::lcsTrigramSearch(std::string _POST[3], int clientSocket) {
         std::ostringstream tokno_results;
         tokno_results << "[";
 
-        std::string lcs_result = "";
+        std::sort(result_toknos_vec.begin(), result_toknos_vec.end());
+
+        writeSearchResults(result_toknos_vec, statement1, statement2, text_results, lcs_results, tokno_results);
+        /*std::string lcs_result = "";
         std::string chu_word_torot = "";
         std::string present_before = "";
         std::string presentation_after = "";
-
-        std::sort(result_toknos_vec.begin(), result_toknos_vec.end());
 
         for(const int& result_tokno : result_toknos_vec) {
             sqlite3_bind_int(statement1, 1, result_tokno);
@@ -2164,7 +2360,7 @@ bool OcsServer::lcsTrigramSearch(std::string _POST[3], int clientSocket) {
 
             sqlite3_reset(statement2);
             sqlite3_clear_bindings(statement2);
-        }
+        } */
         sqlite3_finalize(statement1);
         sqlite3_finalize(statement2);
                 
@@ -2192,6 +2388,25 @@ bool OcsServer::lcsTrigramSearch(std::string _POST[3], int clientSocket) {
     }
     else {
         std::cout << "Database connection failed in lcsTrigramSearch()" << std::endl;
+        return false;
+    }
+}
+
+bool OcsServer::ocsFuzzySearch(std::string _POST[3], int clientSocket) {
+
+    sqlite3* DB;
+
+    if(!sqlite3_open(m_DB_path, &DB)) {
+        std::string query = URIDecode(_POST[0]);
+        int tokno_start = safeStrToInt(_POST[1]);
+        int tokno_end = safeStrToInt(_POST[2]);
+    
+    }
+
+
+
+    else {
+        std::cout << "Database connection failed in ocsFuzzySearch()" << std::endl;
         return false;
     }
 }

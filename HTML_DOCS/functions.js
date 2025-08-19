@@ -2352,7 +2352,7 @@ const convertToCyr = () => {
 };
 
 
-const lcsPageSearch = (query) => {
+/*const lcsPageSearch = (query) => {
   if(query == "") return;
   query = query.replaceAll("ŕ̥", "W").replaceAll("r̥", "X").replaceAll("ĺ̥", "Y").replaceAll("l̥", "Z")
   resetLcsPageSearch();
@@ -2363,7 +2363,7 @@ const lcsPageSearch = (query) => {
       reconstructed_word.classList.add("pulsate");
     }
   })
-};
+}; */
 const resetLcsPageSearch = () => {
   document.querySelectorAll(".pulsate").forEach(elem => elem.classList.remove("pulsate"));
 };
@@ -2713,7 +2713,14 @@ const removeSearchLoadSpinner = () => {
 
 const lcsSearch = (query, regex=false) => {
   let url = "lcs_trigram_search.php";
-  if(regex) url = "lcs_regex_search.php";
+
+  if(app_state.search_type == 1){
+    if(regex) url = "lcs_regex_search.php";
+  }
+  else if(app_state.search_type == 2) {
+    url = "ocs_search.php";
+    if(app_state.fuzzy_search) url = "ocs_fuzzy_search.php";
+  }
   
   resetLcsPageSearch();
   if(query.trim() == "") {

@@ -687,8 +687,8 @@ int main () {
         sqlite3_stmt* stmt_update_corpus;
         sqlite3_prepare_v2(DB, "UPDATE corpus SET inflexion_class_id = ?, inflexion_class = ? WHERE lemma_id = ?", -1, &stmt_update_corpus, nullptr);
 
-        std::ofstream orv_lemmas_json_file("../HTML_DOCS/orv_lemmas_json.json");
-        orv_lemmas_json_file << "[";
+        std::ofstream lemmas_json_file("../HTML_DOCS/orv_lemmas_json.json");
+        lemmas_json_file << "[";
         for(const auto& lemma_row : all_lemmas_map) {
 
           sqlite3_bind_int(lemma_stmt, 1, lemma_row.second.lemma_id);
@@ -713,7 +713,7 @@ int main () {
             sqlite3_clear_bindings(stmt_update_corpus);
 
             if(lemma_row.second.noun_verb != 0) {
-              orv_lemmas_json_file << "\n  [" << lemma_row.second.lemma_id << ", \"" << lemma_row.second.stem_lcs << "\",\"" << lemma_row.second.noun_verb << "\",\"" << lemma_row.second.inflexion_class << "\",\"" << lemma_row.second.lemma_lcs << "\",\"" << lemma_row.second.pv2_3_lemma << "\"],";
+              lemmas_json_file << "\n  [" << lemma_row.second.lemma_id << ", \"" << lemma_row.second.stem_lcs << "\",\"" << lemma_row.second.noun_verb << "\",\"" << lemma_row.second.inflexion_class << "\",\"" << lemma_row.second.lemma_lcs << "\",\"" << lemma_row.second.pv2_3_lemma << "\"],";
             }
           }
 
@@ -726,9 +726,9 @@ int main () {
           sqlite3_reset(lemma_stmt);
           sqlite3_clear_bindings(lemma_stmt);
         }
-        orv_lemmas_json_file.seekp(-1, std::ios_base::cur);
-        orv_lemmas_json_file << "\n]";
-        orv_lemmas_json_file.close();
+        lemmas_json_file.seekp(-1, std::ios_base::cur);
+        lemmas_json_file << "\n]";
+        lemmas_json_file.close();
         sqlite3_finalize(stmt_update_corpus);
         sqlite3_finalize(lemma_stmt);
 

@@ -471,7 +471,7 @@ void noun_Flect(Lemma &lemma_ref, short int int_morph_tag[10], std::string cyr_i
   }
 
   // deviant u-stem desiences on masc o-stems (incomplete)
-  if (conj_type == "masc_o" && (row_no == 4 || row_no == 15 || row_no == 17 || row_no == 21))
+  if ((conj_type == "masc_o" || conj_type == "masc_o_in") && (row_no == 4 || row_no == 15 || row_no == 17 || row_no == 21))
   {
     if (Sniff(cyr_id, "ов", 3))
       outer_map_no++;
