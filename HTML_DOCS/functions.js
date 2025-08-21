@@ -2718,8 +2718,14 @@ const lcsSearch = (query, regex=false) => {
     if(regex) url = "lcs_regex_search.php";
   }
   else if(app_state.search_type == 2) {
-    url = "ocs_search.php";
-    if(app_state.fuzzy_search) url = "ocs_fuzzy_search.php";
+    if(app_state.fuzzy_search) {
+      url = "cyr_fuzzy_search.php";
+      query = cleanWord(query, chu_fuzzy_search_map);
+    }
+    else {
+      url = "cyr_search.php";
+      query = cleanWord(query, remove_punct_map);
+    }
   }
   
   resetLcsPageSearch();

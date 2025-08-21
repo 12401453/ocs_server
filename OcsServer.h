@@ -56,12 +56,13 @@ class OcsServer : public TcpListener {
         bool lemmaTooltips(std::string _POST[1], int clientSocket);
 
         void writeSearchResults(const std::vector<int>& result_toknos_vec, sqlite3_stmt* statement1, sqlite3_stmt* statement2, std::ostringstream& text_results, std::ostringstream& lcs_results, std::ostringstream& tokno_results);
-        void trigramSearch(sqlite3* db_connection, const std::string& column_name, std::string query, int tokno_start, int tokno_end, int clientSocket);
+        void trigramSearch(sqlite3* db_connection, const std::string& trigram_table, const std::string& target_column, std::string query, int tokno_start, int tokno_end, int clientSocket);
         
         bool lcsSearch(std::string _POST[3], int clientSocket);
         bool lcsRegexSearch(std::string _POST[3], int clientSocket);
         bool lcsTrigramSearch(std::string _POST[3], int clientSocket);
-        bool ocsFuzzySearch(std::string _POST[3], int clientSocket);
+        bool cyrFuzzySearch(std::string _POST[3], int clientSocket);
+        bool cyrSearch(std::string _POST[3], int clientSocket);
         
         bool retrieveText(std::string text_id[1], int clientSocket);
         bool retrieveTextSubtitle(std::string text_id[2], int clientSocket);

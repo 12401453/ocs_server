@@ -694,6 +694,12 @@ void OcsServer::handlePOSTedData(const char* post_data, int clientSocket) {
     else if(!strcmp(m_url, "/generate_inflection.php")) {
         bool php_func_success = generateInflection(post_values, clientSocket);
     }
+    else if(!strcmp(m_url, "/cyr_search.php")) {
+        bool php_func_success = cyrSearch(post_values, clientSocket);
+    }
+    else if(!strcmp(m_url, "/cyr_fuzzy_search.php")) {
+        bool php_func_success = cyrFuzzySearch(post_values, clientSocket);
+    }
 
     std::cout << "m_url: " << m_url << std::endl;
     
@@ -730,6 +736,8 @@ int OcsServer::getPostFields(const char* url) {
     else if(!strcmp(url, "/lcs_regex_search.php")) return 3;
     else if(!strcmp(url, "/greek_tooltips.php")) return 2;
     else if(!strcmp(url, "/generate_inflection.php")) return 3;
+    else if(!strcmp(url, "/cyr_search.php")) return 3;
+    else if(!strcmp(url, "/cyr_fuzzy_search.php")) return 3;
     else return -1;
 }
 
@@ -2034,7 +2042,7 @@ void OcsServer::writeSearchResults(const std::vector<int> &result_toknos_vec, sq
 
 }
 
-void OcsServer::trigramSearch(sqlite3* db_connection, const std::string& column_name, std::string query, int tokno_start, int tokno_end, int clientSocket) {
+void OcsServer::trigramSearch(sqlite3* db_connection, const std::string& trigram_table, const std::string& target_column, std::string query, int tokno_start, int tokno_end, int clientSocket) {
         std::cout << "PRAGMA return_code: " << sqlite3_exec(db_connection, "PRAGMA case_sensitive_like = ON", nullptr, nullptr, nullptr) << "\n";
 
         //start by getting the text_title information so we can say which text the results come from on the front-end (wasteful to do it every search but this way will stop us having to update Javascript whenever the database changes)
@@ -2065,7 +2073,7 @@ void OcsServer::trigramSearch(sqlite3* db_connection, const std::string& column_
         sqlite3_stmt* trigram_stmt;
         std::string sql_trigram_select;
         if(num_chars < 3) {
-            sql_trigram_select = "SELECT tokno FROM "+column_name+" WHERE tokno >= ? AND tokno <= ? AND trigram LIKE ?";
+            sql_trigram_select = "SELECT tokno FROM "+trigram_table+" WHERE tokno >= ? AND tokno <= ? AND trigram LIKE ?";
             query = query.append("%");
 
             sqlite3_prepare_v2(db_connection, sql_trigram_select.c_str(), -1, &trigram_stmt, NULL);
@@ -2082,7 +2090,7 @@ void OcsServer::trigramSearch(sqlite3* db_connection, const std::string& column_
             sqlite3_finalize(trigram_stmt);
         }
         else {
-            sql_trigram_select = "SELECT tokno FROM lcs_trigrams WHERE tokno >= ? AND tokno <= ? AND trigram = ?";
+            sql_trigram_select = "SELECT tokno FROM "+trigram_table+" WHERE tokno >= ? AND tokno <= ? AND trigram = ?";
             sqlite3_prepare_v2(db_connection, sql_trigram_select.c_str(), -1, &trigram_stmt, NULL);
 
             std::string query_trigram;
@@ -2144,9 +2152,9 @@ void OcsServer::trigramSearch(sqlite3* db_connection, const std::string& column_
         sqlite3_stmt* statement1;
         sqlite3_stmt* statement2;     
 
-        const char* sql_text1 = "SELECT autoreconstructed_lcs, sentence_no FROM corpus WHERE tokno = ?";
+        std::string sql_text1 = "SELECT "+target_column+", sentence_no FROM corpus WHERE tokno = ?";
         const char* sql_text2 = "SELECT tokno, chu_word_torot, presentation_before, presentation_after FROM corpus WHERE sentence_no = ? AND tokno <= ? AND tokno >= ?";
-        sqlite3_prepare_v2(db_connection, sql_text1, -1, &statement1, NULL);
+        sqlite3_prepare_v2(db_connection, sql_text1.c_str(), -1, &statement1, NULL);
         sqlite3_prepare_v2(db_connection, sql_text2, -1, &statement2, NULL);
         
 
@@ -2392,21 +2400,36 @@ bool OcsServer::lcsTrigramSearch(std::string _POST[3], int clientSocket) {
     }
 }
 
-bool OcsServer::ocsFuzzySearch(std::string _POST[3], int clientSocket) {
-
+bool OcsServer::cyrFuzzySearch(std::string _POST[3], int clientSocket) {
     sqlite3* DB;
-
     if(!sqlite3_open(m_DB_path, &DB)) {
         std::string query = URIDecode(_POST[0]);
         int tokno_start = safeStrToInt(_POST[1]);
-        int tokno_end = safeStrToInt(_POST[2]);
-    
+        int tokno_end = safeStrToInt(_POST[2]);     
+        trigramSearch(DB, "chu_normalised_trigrams", "chu_word_torot", query, tokno_start, tokno_end, clientSocket);
+        sqlite3_close(DB);
+        
+        return true;
     }
-
-
-
     else {
-        std::cout << "Database connection failed in ocsFuzzySearch()" << std::endl;
+        std::cout << "Database connection failed in cyrFuzzySearch()" << std::endl;
+        return false;
+    }
+}
+
+bool OcsServer::cyrSearch(std::string _POST[3], int clientSocket) {
+    sqlite3* DB;
+    if(!sqlite3_open(m_DB_path, &DB)) {
+        std::string query = URIDecode(_POST[0]);
+        int tokno_start = safeStrToInt(_POST[1]);
+        int tokno_end = safeStrToInt(_POST[2]);     
+        trigramSearch(DB, "chu_word_clean_trigrams", "chu_word_torot", query, tokno_start, tokno_end, clientSocket);
+        sqlite3_close(DB);
+        
+        return true;
+    }
+    else {
+        std::cout << "Database connection failed in cyrSearch()" << std::endl;
         return false;
     }
 }

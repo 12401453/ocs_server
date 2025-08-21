@@ -234,6 +234,71 @@ int conj_type_Trunc(std::string conj_type) {
   else return 0;
 }
 
+void removeShit(std::string& dirty_word) {
+  replaceAll(dirty_word, "꙽", "");
+  replaceAll(dirty_word, "\uF002", "");
+  replaceAll(dirty_word, "\uF102", "");
+  replaceAll(dirty_word, "$", ""); //these four are characters which I may or may not use to indicate supralinears in the database
+  replaceAll(dirty_word, "@", "");
+  replaceAll(dirty_word, "—", "");
+  replaceAll(dirty_word, "·", "");
+  replaceAll(dirty_word, "̇", "");
+  replaceAll(dirty_word, "\u0308", "");
+  replaceAll(dirty_word, "⁛", "");
+  replaceAll(dirty_word, "῾", "");
+  replaceAll(dirty_word, "᾽", "");
+  replaceAll(dirty_word, "̅", "");
+  replaceAll(dirty_word, "̄", "");
+  replaceAll(dirty_word, "̀", "");
+  replaceAll(dirty_word, ">", "");
+  replaceAll(dirty_word, "/", "");
+  replaceAll(dirty_word, "\"", "");
+  replaceAll(dirty_word, "͡", "");
+  replaceAll(dirty_word, "·", "");
+  replaceAll(dirty_word, "̏", "");
+    //" " : "",
+  replaceAll(dirty_word, "+", "");
+  replaceAll(dirty_word, "⁜", "");
+  replaceAll(dirty_word, "͠", "");
+  replaceAll(dirty_word, "!", "");
+  replaceAll(dirty_word, "҅", "");
+  replaceAll(dirty_word, "҆", "");
+  replaceAll(dirty_word, "҄", "");
+  replaceAll(dirty_word, "͑", "");
+  replaceAll(dirty_word, "͗", "");
+  replaceAll(dirty_word, "̆", "");
+  replaceAll(dirty_word, "̈", "");
+  replaceAll(dirty_word, "̑", "");
+  replaceAll(dirty_word, "̒", "");
+  replaceAll(dirty_word, "̓", "");
+  replaceAll(dirty_word, "̔", "");
+  replaceAll(dirty_word, "̕", "");
+  replaceAll(dirty_word, "͆", "");
+  replaceAll(dirty_word, "͛", "");
+  replaceAll(dirty_word, "͞", "");
+  replaceAll(dirty_word, "ͨ", "");
+  replaceAll(dirty_word, "҃", "");
+  replaceAll(dirty_word, "҇", "");
+  replaceAll(dirty_word, "ꙿ", "");
+  replaceAll(dirty_word, "꙯", "");
+  replaceAll(dirty_word, "'", "");
+  replaceAll(dirty_word, "(", "");
+  replaceAll(dirty_word, ")", "");
+  replaceAll(dirty_word, "-", "");
+  replaceAll(dirty_word, ".", "");
+  replaceAll(dirty_word, ":", "");
+  replaceAll(dirty_word, "=", "");
+  replaceAll(dirty_word, "?", "");
+  replaceAll(dirty_word, "[", "");
+  replaceAll(dirty_word, "]", "");
+  replaceAll(dirty_word, "{", "");
+  replaceAll(dirty_word, "}", "");
+  replaceAll(dirty_word, "̂", "");
+  replaceAll(dirty_word, "ʼ", "");
+  replaceAll(dirty_word, "ⸯ", "");
+  replaceAll(dirty_word, "’", "");
+}
+
 std::unordered_map <std::string, int> pos_map = {
   {"A-", 1},
   {"Df", 2},
@@ -313,9 +378,9 @@ std::unordered_map<int, std::string> text_id_map = {
 };
 
 //needed for the step where we add the lcs_trigrams table
-struct LcsRow {
+struct TrigrammifiableRow {
   int tokno;
-  icu::UnicodeString lcs_unicode;
+  icu::UnicodeString word_unicode;
   int32_t num_chars;
 };
 
@@ -385,6 +450,65 @@ struct CorpusDBInfo {
   std::string autoreconstructed_lcs;
   std::string autoreconstructed_morph_replace;
 };
+
+void writeTrigramsTable(sqlite3* DB, const std::string& corpus_column_name, const std::string& trigrams_table_name, bool remove_punct=false) {
+  std::cout << "Writing " << corpus_column_name << " trigrams table into database...\n";
+
+  sqlite3_exec(DB, std::string("DROP TABLE IF EXISTS "+trigrams_table_name+";CREATE TABLE "+trigrams_table_name+" (tokno INTEGER, trigram TEXT)").c_str(), nullptr, nullptr, nullptr);
+  sqlite3_stmt* stmt_select;
+  std::string sql_select = "SELECT tokno, "+corpus_column_name+" FROM corpus";
+  
+  sqlite3_prepare_v2(DB, sql_select.c_str(), -1, &stmt_select, NULL);
+  
+  std::vector<TrigrammifiableRow> rows_vec;
+  rows_vec.reserve(524288);
+
+  std::string word_str;
+  
+  while(sqlite3_step(stmt_select) == SQLITE_ROW) {
+      int tokno = sqlite3_column_int(stmt_select, 0);
+      
+      const unsigned char* word_raw = sqlite3_column_text(stmt_select, 1);
+      if(word_raw != nullptr) {
+          word_str = (const char*)word_raw;
+          if(remove_punct) {
+            removeShit(word_str);
+          }
+          icu::UnicodeString word_unicode = word_str.c_str();
+          
+          int32_t num_chars = word_unicode.countChar32();
+          
+          rows_vec.emplace_back(tokno, word_unicode, num_chars);
+          
+      }
+  }
+  sqlite3_finalize(stmt_select);
+  
+  std::string sql_insert = "INSERT INTO "+trigrams_table_name+" (tokno, trigram) VALUES (?, ?)";
+  sqlite3_stmt* stmt_insert;
+  
+  sqlite3_prepare_v2(DB, sql_insert.c_str(), -1, &stmt_insert, NULL);
+  for(const auto& row : rows_vec) {
+      
+      std::string trigram;
+      
+      int32_t trigram_start_offset = 0;
+      while(trigram_start_offset /*+ 2*/ < row.num_chars) {
+          row.word_unicode.tempSubString(trigram_start_offset, 3).toUTF8String(trigram);
+          sqlite3_bind_int(stmt_insert, 1, row.tokno);
+          sqlite3_bind_text(stmt_insert, 2, trigram.c_str(), -1, SQLITE_STATIC);
+          sqlite3_step(stmt_insert);
+          sqlite3_reset(stmt_insert);
+          sqlite3_clear_bindings(stmt_insert);      
+          
+          trigram.clear();
+          trigram_start_offset++;
+      }
+  }
+  sqlite3_finalize(stmt_insert);
+  
+  sqlite3_exec(DB, std::string("CREATE INDEX "+corpus_column_name+"_index ON "+trigrams_table_name+" (trigram COLLATE BINARY)").c_str(), nullptr, nullptr, nullptr);//I perhaps should use a join index here; I took out the tokno index because it prevents my queries from using the more important trigram index, since my WHERE clause filters by both
+}
 
 void buildDataStructures(std::string lemma_filename, std::string words_filename, std::unordered_map<int, Lemma>& lemma_list, std::unordered_map<std::string, LemmaDBInfo>& all_lemmas_map, std::unordered_map<std::string, int>& inflexion_class_map, std::vector<CorpusDBInfo>& corpus_vec) {
   
@@ -535,7 +659,7 @@ int main () {
         std::vector<CorpusDBInfo> corpus_vec;
         buildDataStructures("orv_lemmas_master.csv", "orv_words_full_with_titles_untagged.csv", lemma_list, all_lemmas_map, inflexion_class_map, corpus_vec);
 
-        std::cout << "reconstructed lemma count: " << lemma_list.size() << "\n";
+        std::cout << "Reconstruction complete\n\nreconstructed lemma count: " << lemma_list.size() << "\n";
         std::cout << "all orv lemma count: " << all_lemmas_map.size() << "\n";
         std::cout << "corpus_vec size: " << corpus_vec.size() << "\n";
 
@@ -572,7 +696,8 @@ int main () {
         sqlite3_exec(DB, "DROP TABLE IF EXISTS inflexion_classes;CREATE TABLE inflexion_classes (inflexion_class_id INTEGER PRIMARY KEY, inflexion_class_name TEXT)", nullptr, nullptr, nullptr);
         sqlite3_exec(DB, "DROP TABLE IF EXISTS texts;CREATE TABLE texts (text_id INTEGER PRIMARY KEY, text_title TEXT, tokno_start INTEGER, tokno_end INTEGER)", nullptr, nullptr, nullptr);
         sqlite3_exec(DB, "DROP TABLE IF EXISTS subtitles;CREATE TABLE subtitles (subtitle_id INTEGER PRIMARY KEY, subtitle_text TEXT, text_id INTEGER, tokno_start INTEGER, tokno_end INTEGER)", nullptr, nullptr, nullptr);
-        sqlite3_exec(DB, "DROP TABLE IF EXISTS lcs_trigrams;CREATE TABLE lcs_trigrams (tokno INTEGER, trigram TEXT)", nullptr, nullptr, nullptr);
+        /*sqlite3_exec(DB, "DROP TABLE IF EXISTS lcs_trigrams;CREATE TABLE lcs_trigrams (tokno INTEGER, trigram TEXT)", nullptr, nullptr, nullptr);
+        sqlite3_exec(DB, "DROP TABLE IF EXISTS chu_clean_trigrams;CREATE TABLE chu_clean_trigrams (tokno INTEGER, trigram TEXT)", nullptr, nullptr, nullptr);*/
 
 
         const char *sql_text = "INSERT INTO corpus (chu_word_torot, chu_word_normalised, morph_tag, lemma_id, sentence_no, presentation_before, presentation_after, autoreconstructed_lcs, autoreconstructed_morph_replace, auto_tagged, pv2_3_exists) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -746,7 +871,7 @@ int main () {
 
         
 
-        std::cout << "Writing trigrams table into database...\n";
+        /*std::cout << "Writing trigrams table into database...\n";
         //add the lcs_trigrams and an index on the trigrams table to make searches faster (does the same as the separate trigram_index.cpp program)
         sqlite3_stmt* stmt_select;
         const char* sql_select = "SELECT tokno, autoreconstructed_lcs FROM corpus";
@@ -792,7 +917,7 @@ int main () {
           // }
 
           int32_t trigram_start_offset = 0;
-          while(trigram_start_offset /*+ 2*/ < row.num_chars) {
+          while(trigram_start_offset < row.num_chars) {
             //int32_t substr_length = row.num_chars - trigram_start_offset > 2 ? 3 : 
             row.lcs_unicode.tempSubString(trigram_start_offset, 3).toUTF8String(trigram);
             sqlite3_bind_int(stmt_insert, 1, row.tokno);
@@ -809,7 +934,11 @@ int main () {
 
         sqlite3_finalize(stmt_insert);
 
-        sqlite3_exec(DB, "CREATE INDEX trigram_index ON lcs_trigrams (trigram COLLATE BINARY)", nullptr, nullptr, nullptr);//I perhaps should use a join index here; I took out the tokno index because it prevents my queries from using the more important trigram index, since my WHERE clause filters by both
+        sqlite3_exec(DB, "CREATE INDEX trigram_index ON lcs_trigrams (trigram COLLATE BINARY)", nullptr, nullptr, nullptr);//I perhaps should use a join index here; I took out the tokno index because it prevents my queries from using the more important trigram index, since my WHERE clause filters by both */
+        
+        writeTrigramsTable(DB, "autoreconstructed_lcs", "lcs_trigrams");
+        writeTrigramsTable(DB, "chu_word_torot", "chu_word_clean_trigrams", true);
+        writeTrigramsTable(DB, "chu_word_normalised", "chu_normalised_trigrams");
 
         
         std::cout << sqlite3_exec(DB, sql_COMMIT, nullptr, nullptr, nullptr);
