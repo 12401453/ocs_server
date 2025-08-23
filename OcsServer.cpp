@@ -750,7 +750,7 @@ void OcsServer::setCookies(std::ostringstream &http_response_ss) {
 bool OcsServer::readCookie(std::string cookie[3], const char* msg) {
     int cookie_start = c_strFind(msg, "\r\nCookie") + 9;
     if(cookie_start == 8) {
-        m_cookies[0] = "1";
+        m_cookies[0] = "4";
         m_cookies[1] = "1";
         m_cookies[2] = "1";
         return false; //c_strFind() returns -1 if unsuccessful, but I've just added 9 to it so the number signalling no cookies is 8
