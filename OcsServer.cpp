@@ -2216,7 +2216,7 @@ bool OcsServer::lcsTrigramSearch(std::string _POST[3], int clientSocket) {
                     int new_result_tokno = sqlite3_column_int(trigram_stmt, 0);
                     if(result_tokno == new_result_tokno) continue; //this prevents double-matches for words which contain the same trigram more than once
                     
-                    int new_rowid = sqlite3_column_int(trigram_stmt, 1); //this prevents cases like "golgol" from matching "golgoĺ" by stopping the second "gol" from rematching the first "gol" trigram and thus increasing the number of trigram-matches to 4 (== match) when it should be 3
+                    int new_rowid = sqlite3_column_int(trigram_stmt, 1); //this prevents cases like "golgol" from matching "golgoĺ" by stopping the second "gol" in the query from rematching the first "gol" trigram and thus increasing the number of trigram-matches to 4 (== match) when it should be 3
                     if(counted_trigram_rowids.contains(new_rowid)) {
                         continue;
                     }
