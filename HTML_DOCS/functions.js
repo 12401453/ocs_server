@@ -2384,7 +2384,7 @@ const lemmaTooltip = function (show_load_spinner) {
   const lemma_set_words = new Array();
   for (const word of document.getElementsByClassName("tooltip")){
     const word_lemma_id = word.dataset.lemma_id;
-    if(word_lemma_id != "0") {
+    if(word_lemma_id != "0" && word_lemma_id != undefined) {
       page_lemma_ids_set.add(word_lemma_id);
       lemma_set_words.push(word);
     }

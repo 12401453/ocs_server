@@ -9,6 +9,7 @@
 #include <vector>
 #include <algorithm>
 #include <iomanip>
+#include <unordered_set>
 
 void OcsServer::onMessageReceived(int clientSocket, const char* msg, int length) {
 
@@ -48,7 +49,7 @@ void OcsServer::onMessageReceived(int clientSocket, const char* msg, int length)
             msg_url[i - 4] = msg[i];
             std::cout << msg[i];
         }
-        std::cout << std::endl;
+        std::cout << "\n";
         msg_url[lb_pos - 13] = '\0';
 
         short int page_type = 0;
@@ -64,11 +65,14 @@ void OcsServer::onMessageReceived(int clientSocket, const char* msg, int length)
         strcpy(url_c_str, "HTML_DOCS");
         strcat(url_c_str, msg_url);
 
+        std::cout << "page_type: " << page_type << "\n";
+
         bool cookies_present = false;
-        if(page_type > 0) cookies_present = readCookie(m_cookies, msg); //want to avoid reading cookies when serving auxilliary files like stylesheets
-        std::cout << "Cookies present? " << cookies_present << std::endl;
+        Cookies l_cookies;
+        if(page_type > 0) cookies_present = readCookie(msg, l_cookies); //want to avoid reading cookies when serving auxilliary files like stylesheets
+        std::cout << "Cookies present? " << cookies_present << "\n";
         if(cookies_present) {
-            std::cout << "text_id cookie: " << m_cookies[0] << "; current_pageno cookie: " << m_cookies[1] << "; subtitle_id cookie: " << m_cookies[2]  << std::endl;
+            std::cout << "text_id cookie: " << l_cookies.text_id << "; current_pageno cookie: " << l_cookies.current_pageno << "; subtitle_id cookie: " << l_cookies.subtitle_id  << "\n";
         }
 
         std::string content = "<h1>404 Not Found</h1>"; 
@@ -80,7 +84,7 @@ void OcsServer::onMessageReceived(int clientSocket, const char* msg, int length)
             fil_ext[i] = url_c_str[url_size - 5 + i];
         }
         fil_ext[4] = '\0';
-        std::cout << "fil_ext = " << fil_ext << std::endl;
+        std::cout << "fil_ext = " << fil_ext << "\n";
 
         if(!strcmp(fil_ext, ".css")) {
             content_type = "text/css";
@@ -119,7 +123,7 @@ void OcsServer::onMessageReceived(int clientSocket, const char* msg, int length)
         } 
 
 
-        buildGETContent(page_type, url_c_str, content, cookies_present);       
+        buildGETContent(page_type, url_c_str, content, cookies_present, l_cookies);       
 
      
 
@@ -128,7 +132,7 @@ void OcsServer::onMessageReceived(int clientSocket, const char* msg, int length)
     //    oss << "Cache-Control: no-cache, private \r\n";
         oss << "Content-Type: " << content_type << "\r\n";
         oss << "Content-Length: " << content.size() << "\r\n";
-        setCookies(oss);
+        if(page_type > 0)setCookies(oss, l_cookies);
         oss << "\r\n";
         oss << content;
 
@@ -261,7 +265,7 @@ int OcsServer::checkHeaderEnd(const char* msg) {
     else return -1;
 }
 
- void OcsServer::buildGETContent(short int page_type, char* url_c_str, std::string &content, bool cookies_present) {
+ void OcsServer::buildGETContent(short int page_type, char* url_c_str, std::string &content, bool cookies_present, Cookies& l_cookies) {
     
     std::ifstream urlFile;
     urlFile.open(url_c_str);
@@ -272,19 +276,22 @@ int OcsServer::checkHeaderEnd(const char* msg) {
 
         std::ostringstream ss_text;
         std::string line;
+
+        std::string l_page_toknos_arr;
+
         while (std::getline(urlFile, line))
         {   
-            if(page_type > 0 && line.find("<?php") != -1) insertTextSelect(ss_text);
-            else if(page_type == 1 /*&& cookies_present */ && line.find("<?cky") != -1) void_retrieveText(ss_text); 
-            else if(page_type == 1 && line.find("<?cky") != -1) ss_text << "<br><br><div id=\"textbody\"></div>\n";
+            if(page_type > 0 && line.find("<?php") != -1) insertTextSelect(ss_text, l_cookies);
+            else if(page_type == 1 && line.find("<?cky") != -1) void_retrieveText(ss_text, l_page_toknos_arr, l_cookies); 
+            //else if(page_type == 1 && line.find("<?cky") != -1) ss_text << "<br><br><div id=\"textbody\"></div>\n";
             
             //For some reason I do not understand, if you insert a <script> tag to declare the below JS variable outside of the script tag at the bottom, on Chrome Android the server very often will get stuck for absolutely ages on loading the Bookerly font file when you refresh the page, and the javascript engine will freeze for about 5-10seconds, but this never happens on Desktop. Thus I've had to make up another bullshit <?js tag to signal where to insert this C++-generated JS
             else if(page_type == 1 /*&& cookies_present*/ && line.find("<?js") != -1) { //the insertTextSelect() function should set all the cookie-values if they are absent, and I need this to run when there are no cookies inorder to set the page_toknos_arr javascript-array to the correct value or functions will break
-                ss_text << "let cookie_textselect = " << m_cookies[0] << ";\n";
-                ss_text << "page_toknos_arr = " << m_page_toknos_arr << ";\n";
+                ss_text << "let cookie_textselect = " << /* m_cookies[0] */ l_cookies.text_id  << ";\n";
+                ss_text << "page_toknos_arr = " << l_page_toknos_arr << ";\n";
                 ss_text << "if(page_toknos_arr.length > 1) {document.getElementById('pagenos').addEventListener('click', selectText_splitup);\ndocument.getElementById('pagenos').addEventListener('keydown', selectText_splitup);}\n";
                 //ss_text << "dt_end = " << m_dt_end << ";\n";
-                ss_text << "current_pageno = " << m_cookies[1] << ";\n";
+                ss_text << "current_pageno = " << /* m_cookies[1] */ l_cookies.current_pageno << ";\n";
             }
             else if(page_type == 1 && line.find("<?js") != -1) ss_text << "let cookie_textselect = 0;\n";
 
@@ -303,7 +310,7 @@ int OcsServer::checkHeaderEnd(const char* msg) {
 }
 
 
-void OcsServer::insertTextSelect(std::ostringstream &html) {
+void OcsServer::insertTextSelect(std::ostringstream &html, Cookies& l_cookies) {
     sqlite3* DB;
     sqlite3_stmt* statement;
 
@@ -315,9 +322,11 @@ void OcsServer::insertTextSelect(std::ostringstream &html) {
         prep_code = sqlite3_prepare_v2(DB, sql_text, -1, &statement, NULL);
 
         int text_id = 0;
-        int cookie_text_id = safeStrToInt(m_cookies[0]);
+        // int cookie_text_id = safeStrToInt(m_cookies[0]);
+        int cookie_text_id = safeStrToInt(l_cookies.text_id);
         bool cookie_text_id_exists = false;
-        int cookie_subtitle_id = safeStrToInt(m_cookies[2]);
+        // int cookie_subtitle_id = safeStrToInt(m_cookies[2]);
+        int cookie_subtitle_id = safeStrToInt(l_cookies.subtitle_id);
         const char* text_title;
         int tokno_start = 0;
         int tokno_end = 0;
@@ -339,12 +348,15 @@ void OcsServer::insertTextSelect(std::ostringstream &html) {
         }
         sqlite3_finalize(statement);
         if(!cookie_text_id_exists) {
-            m_cookies[0] = "1";
-            m_cookies[1] = "1";
+            //m_cookies[0] = "1";
+            l_cookies.text_id = "1";
+            // m_cookies[1] = "1";
+            l_cookies.current_pageno = "1";
             cookie_text_id = 1;
         }
         else {
-            m_cookies[0] = std::to_string(cookie_text_id);
+            // m_cookies[0] = std::to_string(cookie_text_id);
+            l_cookies.text_id = std::to_string(cookie_text_id);
         }
         html << "</select><select id=\"subtitle_select\" name=\"chapselect\" autocomplete=\"off\" style=\"width: 150px;\">";
 
@@ -388,11 +400,14 @@ void OcsServer::insertTextSelect(std::ostringstream &html) {
 
         sqlite3_finalize(statement);
         if(!cookie_subtitle_id_exists) {
-            m_cookies[2] = std::to_string(first_subtitle_id);
-            m_cookies[1] = "1";
+            // m_cookies[2] = std::to_string(first_subtitle_id);
+            l_cookies.subtitle_id = std::to_string(first_subtitle_id);
+            // m_cookies[1] = "1";
+            l_cookies.current_pageno = "1";
         }
         else {
-            m_cookies[2] = std::to_string(cookie_subtitle_id);
+            // m_cookies[2] = std::to_string(cookie_subtitle_id);
+            l_cookies.subtitle_id = std::to_string(cookie_subtitle_id);
         }
         html << "</select>";
         sqlite3_close(DB); 
@@ -741,44 +756,47 @@ int OcsServer::getPostFields(const char* url) {
     else return -1;
 }
 
-void OcsServer::setCookies(std::ostringstream &http_response_ss) {
-    for(int i = 0; i < 3; i++) {
-        http_response_ss << "Set-Cookie: " << m_cookie_names[i] << "=" << m_cookies[i] << "; Max-Age=157680000\r\n";
-    }
+void OcsServer::setCookies(std::ostringstream &http_response_ss, Cookies& l_cookies) {
+  auto cookie_values = l_cookies.asArray();
+   for(size_t i = 0; i < std::size(cookie_values); ++i) {
+    http_response_ss << "Set-Cookie:" << l_cookies.keys[i] << *cookie_values[i] << "; Max-Age=157680000\r\n";
+    std::cout << "Set-Cookie:" << l_cookies.keys[i] << *cookie_values[i] << "; Max-Age=157680000\r\n";
+   } 
 } 
 
-bool OcsServer::readCookie(std::string cookie[3], const char* msg) {
+bool OcsServer::readCookie(const char* msg, Cookies& l_cookies) {
     int cookie_start = c_strFind(msg, "\r\nCookie") + 9;
     if(cookie_start == 8) {
-        m_cookies[0] = "4";
-        m_cookies[1] = "1";
-        m_cookies[2] = "1";
+        
+        l_cookies.text_id = "4";
+        l_cookies.current_pageno = "1";
+        l_cookies.subtitle_id = "1";
         return false; //c_strFind() returns -1 if unsuccessful, but I've just added 9 to it so the number signalling no cookies is 8
     }
-    const char* cookie_keys[3] {" text_id=", " current_pageno=", " subtitle_id="};
 
-    for(int i = 0; i < 3; i++) {
-        int cookieName_start = c_strFind(msg+cookie_start, cookie_keys[i]);
-        if(i == 0 && cookieName_start == -1) return false;
+    std::array<std::string*, 3> cookies_values = l_cookies.asArray();
+    for(size_t i = 0; i < std::size(l_cookies.keys); ++i) {
+        int cookieName_start = c_strFind(msg+cookie_start, l_cookies.keys[i]);
+        if(i == 0 && cookieName_start == -1) {
+            *cookies_values[i] = "4";
+            return false;
+        }
         if(cookieName_start == -1) {
-            cookie[i] = "1";
+            *cookies_values[i] = "1";
             break;
         }
-        //printf("cookieName_start: %i\n", cookieName_start);
 
-        int cookieName_length = strlen(cookie_keys[i]);
+        int cookieName_length = strlen(l_cookies.keys[i]);
 
         int val_length = c_strFindNearest(msg+cookie_start+cookieName_start + cookieName_length, ";", "\r\n");
-        //std::cout << "Cookie val_length: " << val_length << "\n";
 
         char val[val_length + 1];
         for(int j = 0; j < val_length; j++) {
             val[j] = (msg + cookie_start + cookieName_start + cookieName_length)[j];
-            //printf("val[j] = %c\n", val[j]);
         }
         val[val_length] = '\0';
 
-        cookie[i] = val;
+        *cookies_values[i] = val;
     }
 
     return true;
@@ -1134,11 +1152,11 @@ bool OcsServer::retrieveText(std::string _POST[1], int clientSocket) {
         }
         if(pageno_count == 1) first_page_toknos[1] = first_tokno_end + 1;
         page_toknos_arr << "," << first_tokno_end << "]]";
-        m_page_toknos_arr = page_toknos_arr.str();
-        m_pageno_count = pageno_count;
+        //m_page_toknos_arr = page_toknos_arr.str();
+        //m_pageno_count = pageno_count;
         sqlite3_finalize(statement);
 
-        m_cookies[1] = "1";
+        //m_cookies[1] = "1";
 
         std::ostringstream html;
         html << "<br><div id=\"textbody\">";
@@ -1187,7 +1205,7 @@ bool OcsServer::retrieveText(std::string _POST[1], int clientSocket) {
         else {
             html << "<br>";
         }
-        std::cout << m_page_toknos_arr << "\n";
+        //std::cout << m_page_toknos_arr << "\n";
 
         std::stringstream json_response_ss;
         json_response_ss << "{\"html\":\"" << escapeQuotes(html.str()) << "\",\"pagenos\":" << page_toknos_arr.str() << ",\"subtitles_json\":" << subtitle_toknos_json.str() << "}";
@@ -1253,41 +1271,14 @@ bool OcsServer::retrieveTextSubtitle(std::string _POST[2], int clientSocket) {
         }
         if(pageno_count == 1) first_page_toknos[1] = tokno_end + 1;
         page_toknos_arr << "," << tokno_end << "]]";
-        m_page_toknos_arr = page_toknos_arr.str();
-        m_pageno_count = pageno_count;
+        //m_page_toknos_arr = page_toknos_arr.str();
+        //m_pageno_count = pageno_count;
         sqlite3_finalize(statement);
 
         std::ostringstream html;
         html << "<br><div id=\"textbody\">";
         writeTextBody(html, DB, first_page_toknos[0], first_page_toknos[1] - 1);
-        html << "</div>";
-
-        // sql_text = "SELECT chu_word_torot, presentation_before, presentation_after, sentence_no FROM corpus WHERE tokno >= ? AND tokno <= ?";
-        // sqlite3_prepare_v2(DB, sql_text, -1, &statement, NULL);
-        // sqlite3_bind_int(statement, 1, first_page_toknos[0]);
-        // sqlite3_bind_int(statement, 2, first_page_toknos[1] - 1);
-        // const char* chu_word_torot;
-        // const char* presentation_before;
-        // const char* presentation_after;
-        // int sentence_number_previous = 0;
-        // int sentence_no_current = 0;
-        // html << "<br><div id=\"textbody\">";
-        // while(sqlite3_step(statement) == SQLITE_ROW) {
-        //     chu_word_torot = (const char*)sqlite3_column_text(statement, 0);
-        //     presentation_before = (const char*)sqlite3_column_text(statement, 1);
-        //     presentation_after = (const char*)sqlite3_column_text(statement, 2);
-        //     sentence_no_current = sqlite3_column_int(statement, 3);
-
-        //     if(sentence_number_previous > 0 && sentence_no_current > sentence_number_previous) {
-        //         html << "  |  ";
-        //     }
-
-        //     html << "<span class=\"chunk\">" << presentation_before << "<span class=\"tooltip\" data-sentence_no=\"" << sentence_no_current << "\">" << chu_word_torot << "</span>" << presentation_after << "</span>";
-        //     sentence_number_previous = sentence_no_current;
-
-        // };
-        // sqlite3_finalize(statement);
-        // html << "</div>";       
+        html << "</div>";       
 
         if(pageno_count > 1) {
             html << "<br><br><div id='pageno_footer'><div id=\"pagenos\">";
@@ -1304,7 +1295,7 @@ bool OcsServer::retrieveTextSubtitle(std::string _POST[2], int clientSocket) {
         else {
             html << "<br>";
         }
-        std::cout << m_page_toknos_arr << "\n";
+        //std::cout << m_page_toknos_arr << "\n";
 
         std::stringstream json_response_ss;
         json_response_ss << "{\"html\":\"" << escapeQuotes(html.str()) << "\",\"pagenos\":" << page_toknos_arr.str() << "}";
@@ -1338,34 +1329,7 @@ bool OcsServer::retrieveTextPageNo(std::string _POST[2], int clientSocket) {
         const char *sql_text;
 
         std::ostringstream html;
-        writeTextBody(html, DB, tokno_start, tokno_end);
-
-        // sql_text = "SELECT chu_word_torot, presentation_before, presentation_after, sentence_no FROM corpus WHERE tokno >= ? AND tokno <= ?";
-        // sqlite3_prepare_v2(DB, sql_text, -1, &statement, NULL);
-        // sqlite3_bind_int(statement, 1, first_page_toknos[0]);
-        // sqlite3_bind_int(statement, 2, first_page_toknos[1] - 1);
-        // const char* chu_word_torot;
-        // const char* presentation_before;
-        // const char* presentation_after;
-        // int sentence_number_previous = 0;
-        // int sentence_no_current = 0;
-        // html << "<br><div id=\"textbody\">";
-        // while(sqlite3_step(statement) == SQLITE_ROW) {
-        //     chu_word_torot = (const char*)sqlite3_column_text(statement, 0);
-        //     presentation_before = (const char*)sqlite3_column_text(statement, 1);
-        //     presentation_after = (const char*)sqlite3_column_text(statement, 2);
-        //     sentence_no_current = sqlite3_column_int(statement, 3);
-
-        //     if(sentence_number_previous > 0 && sentence_no_current > sentence_number_previous) {
-        //         html << "  |  ";
-        //     }
-
-        //     html << "<span class=\"chunk\">" << presentation_before << "<span class=\"tooltip\" data-sentence_no=\"" << sentence_no_current << "\">" << chu_word_torot << "</span>" << presentation_after << "</span>";
-        //     sentence_number_previous = sentence_no_current;
-
-        // };
-        // sqlite3_finalize(statement);
-        // html << "</div>";       
+        writeTextBody(html, DB, tokno_start, tokno_end);      
 
         int content_length = html.str().size();
         std::ostringstream post_response_ss;
@@ -1384,11 +1348,14 @@ bool OcsServer::retrieveTextPageNo(std::string _POST[2], int clientSocket) {
     }
 }
 
-void OcsServer::void_retrieveText(std::ostringstream &html) {
+void OcsServer::void_retrieveText(std::ostringstream &html, std::string& l_page_toknos_arr, Cookies& l_cookies) {
     //these should all have been corrected to sensible values by the insertTextSelect() function
-    int cookie_textselect = safeStrToInt(m_cookies[0]);
-    int cookie_pageno = safeStrToInt(m_cookies[1]);
-    int cookie_subtitle_id = safeStrToInt(m_cookies[2]);  
+    // int cookie_textselect = safeStrToInt(m_cookies[0]);
+    // int cookie_pageno = safeStrToInt(m_cookies[1]);
+    // int cookie_subtitle_id = safeStrToInt(m_cookies[2]);
+    int cookie_textselect = safeStrToInt(l_cookies.text_id);
+    int cookie_pageno = safeStrToInt(l_cookies.current_pageno);
+    int cookie_subtitle_id = safeStrToInt(l_cookies.subtitle_id);
 
     int sentences_per_page = 30;
     std::ostringstream page_toknos_arr;
@@ -1437,53 +1404,31 @@ void OcsServer::void_retrieveText(std::ostringstream &html) {
         }
         page_toknos_vec.push_back(tokno_end + 1);
         page_toknos_arr << "," << tokno_end << "]]";
-        m_page_toknos_arr = page_toknos_arr.str();
-        m_pageno_count = pageno_count;
+        //m_page_toknos_arr = page_toknos_arr.str();
+        l_page_toknos_arr = page_toknos_arr.str();
+        
+        //m_pageno_count = pageno_count;
         sqlite3_finalize(statement);
 
         if(cookie_pageno > pageno_count) {
             cookie_pageno = 1;
         }
-        m_cookies[1] = std::to_string(cookie_pageno);
+        // m_cookies[1] = std::to_string(cookie_pageno);
+        l_cookies.current_pageno = std::to_string(cookie_pageno);        
 
         html << "<br><div id=\"textbody\">";
         writeTextBody(html, DB, page_toknos_vec[cookie_pageno - 1], page_toknos_vec[cookie_pageno] - 1);
 
-        // sql_text = "SELECT chu_word_torot, presentation_before, presentation_after, sentence_no FROM corpus WHERE tokno >= ? AND tokno <= ?"; // OR text_word = '\n')";
-        // sqlite3_prepare_v2(DB, sql_text, -1, &statement, NULL);
-        // sqlite3_bind_int(statement, 1, page_toknos_vec[cookie_pageno - 1]);
-        // sqlite3_bind_int(statement, 2, page_toknos_vec[cookie_pageno] - 1);
-        // const char* chu_word_torot;
-        // const char* presentation_before;
-        // const char* presentation_after;
-        // int sentence_number_previous = 0;
-        // int sentence_no_current = 0;
-
-        // while(sqlite3_step(statement) == SQLITE_ROW) {
-        //     chu_word_torot = (const char*)sqlite3_column_text(statement, 0);
-        //     presentation_before = (const char*)sqlite3_column_text(statement, 1);
-        //     presentation_after = (const char*)sqlite3_column_text(statement, 2);
-        //     sentence_no_current = sqlite3_column_int(statement, 3);
-
-        //     if(sentence_number_previous > 0 && sentence_no_current != sentence_number_previous) {
-        //         html << "  |  ";
-        //     }
-
-        //     html << "<span class=\"chunk\">" << presentation_before << "<span class=\"tooltip\" data-sentence_no=\"" << sentence_no_current << "\">" << chu_word_torot << "</span>" << presentation_after << "</span>";
-        //     sentence_number_previous = sentence_no_current;
-
-        // };
-        // sqlite3_finalize(statement);
         html << "</div>";       
 
-        if(m_pageno_count > 1) {
+        if(pageno_count > 1) {
             html << "<br><br><div id='pageno_footer'><div id=\"pagenos\">";
             html << "<div id=\"pageno_leftarrow\" class=\"nav_arrow\">&lt;</div>";
             html << "<textarea id=\"pageno_box\" spellcheck=\"false\" autocomplete=\"off\">";
-            html << m_cookies[1];
+            html << l_cookies.current_pageno;
             html << "</textarea>";
             html << "<div class=\"pageno_text\" style=\"width: 40px;\">of</div>";
-            html << "<div class=\"pageno_text\">" << m_pageno_count << "</div>";
+            html << "<div class=\"pageno_text\">" << pageno_count << "</div>";
             
             html << "<div id=\"pageno_rightarrow\" class=\"nav_arrow\">&gt;</div>";             
             html << "</div></div>";
@@ -1491,7 +1436,7 @@ void OcsServer::void_retrieveText(std::ostringstream &html) {
         else {
             html << "<br>";
         }
-        std::cout << m_page_toknos_arr << "\n";
+        std::cout << l_page_toknos_arr << "\n";
 
         sqlite3_close(DB); 
 
@@ -1668,11 +1613,11 @@ bool OcsServer::retrieveTextFromSearch(std::string _POST[1], int clientSocket) {
 
         page_toknos_vec.push_back(tokno_end + 1);
         page_toknos_arr << "," << tokno_end << "]]";
-        m_page_toknos_arr = page_toknos_arr.str();
-        m_pageno_count = pageno_count;
+        //m_page_toknos_arr = page_toknos_arr.str();
+        //m_pageno_count = pageno_count;
         sqlite3_finalize(statement);
 
-        m_cookies[1] = std::to_string(result_pageno);
+        //m_cookies[1] = std::to_string(result_pageno);
 
         std::ostringstream html;
         html << "<br><div id=\"textbody\">";
@@ -1680,7 +1625,7 @@ bool OcsServer::retrieveTextFromSearch(std::string _POST[1], int clientSocket) {
 
         html << "</div>";
 
-        if (m_pageno_count > 1) {
+        if (pageno_count > 1) {
             html << "<br><br><div id='pageno_footer'><div id=\"pagenos\">";
             html << "<div id=\"pageno_leftarrow\" class=\"nav_arrow\">&lt;</div>";
             html << "<textarea id=\"pageno_box\" spellcheck=\"false\" autocomplete=\"off\">";
@@ -1695,7 +1640,7 @@ bool OcsServer::retrieveTextFromSearch(std::string _POST[1], int clientSocket) {
         else {
             html << "<br>";
         }
-        std::cout << m_page_toknos_arr << "\n";
+        //std::cout << m_page_toknos_arr << "\n";
 
         std::string json_str = "{\"html\":\"" + escapeQuotes(html.str()) + "\",\"subtitles_html\":\"" + escapeQuotes(subtitles_html.str()) + "\",\"page_toknos\":" + page_toknos_arr.str() + ",\"text_id\":" + std::to_string(text_id) + ",\"result_pageno\":" + std::to_string(result_pageno) + ",\"subtitle_id\":" + std::to_string(selected_subtitle_id) + "}";
         int content_length = json_str.size();
@@ -2249,7 +2194,7 @@ bool OcsServer::lcsTrigramSearch(std::string _POST[3], int clientSocket) {
             sqlite3_finalize(trigram_stmt);
         }
         else {
-            sql_trigram_select = "SELECT tokno FROM lcs_trigrams WHERE tokno >= ? AND tokno <= ? AND trigram = ?";
+            sql_trigram_select = "SELECT tokno, rowid FROM lcs_trigrams WHERE tokno >= ? AND tokno <= ? AND trigram = ?"; // ORDER BY tokno but should do it anyway
             sqlite3_prepare_v2(DB, sql_trigram_select, -1, &trigram_stmt, NULL);
 
             std::string query_trigram;
@@ -2258,6 +2203,8 @@ bool OcsServer::lcsTrigramSearch(std::string _POST[3], int clientSocket) {
             int32_t num_of_trigrams = num_chars - 2;
             std::unordered_map<int, int> tokno_trigram_matches_map;
             tokno_trigram_matches_map.reserve(512);
+            std::unordered_set<int> counted_trigram_rowids;
+            counted_trigram_rowids.reserve(512);
             while(trigram_start_offset + 2 < num_chars) {
                 sqlite3_bind_int(trigram_stmt, 1, tokno_start);
                 sqlite3_bind_int(trigram_stmt, 2, tokno_end);
@@ -2268,6 +2215,15 @@ bool OcsServer::lcsTrigramSearch(std::string _POST[3], int clientSocket) {
                 while(sqlite3_step(trigram_stmt) == SQLITE_ROW) {
                     int new_result_tokno = sqlite3_column_int(trigram_stmt, 0);
                     if(result_tokno == new_result_tokno) continue; //this prevents double-matches for words which contain the same trigram more than once
+                    
+                    int new_rowid = sqlite3_column_int(trigram_stmt, 1); //this prevents cases like "golgol" from matching "golgoĺ" by stopping the second "gol" from rematching the first "gol" trigram and thus increasing the number of trigram-matches to 4 (== match) when it should be 3
+                    if(counted_trigram_rowids.contains(new_rowid)) {
+                        continue;
+                    }
+                    else {
+                        counted_trigram_rowids.insert(new_rowid);
+                    }
+
                     result_tokno = new_result_tokno;
                     if(tokno_trigram_matches_map.contains(result_tokno)) {
                         tokno_trigram_matches_map[result_tokno]++;

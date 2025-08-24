@@ -31,6 +31,24 @@ class OcsServer : public TcpListener {
         virtual void onMessageReceived(int clientSocket, const char *msg, int length);
 
     private:
+
+        struct Cookies {
+            std::string text_id;
+            std::string current_pageno;
+            std::string subtitle_id;
+
+            static constexpr std::array<const char*, 3> keys = {
+                " text_id=",
+                " current_pageno=",
+                " subtitle_id="
+            };
+        
+            // array-view of the values
+            std::array<std::string*, 3> asArray() {
+                return { &text_id, &current_pageno, &subtitle_id };
+            }
+        };
+
         int getRequestType(const char* msg);     
         
         //bool c_strStartsWith(const char* str1, const char* str2);
@@ -41,8 +59,8 @@ class OcsServer : public TcpListener {
         int safeStrToInt(const std::string &string_number, int default_result=1);
         sqlite_int64 safeStrToInt64(const std::string &string_number, sqlite3_int64 default_result=1);
 
-        void buildGETContent(short int page_type, char* url_c_str, std::string &content, bool cookies_present);
-        void insertTextSelect(std::ostringstream &html);
+        void buildGETContent(short int page_type, char* url_c_str, std::string &content, bool cookies_present, Cookies& l_cookies);
+        void insertTextSelect(std::ostringstream &html, Cookies& l_cookies);
         void sendBinaryFile(char* url_c_str, int clientSocket, const std::string &content_type);
         
         int checkHeaderEnd(const char* msg);
@@ -50,8 +68,8 @@ class OcsServer : public TcpListener {
         void setURL(const char* msg);
         int getPostFields(const char* url);
         void handlePOSTedData(const char* post_data, int clientSocket);
-        bool readCookie(std::string cookie[3], const char* msg);
-        void setCookies(std::ostringstream &http_response_ss);
+        bool readCookie(const char* msg, Cookies& l_cookies);
+        void setCookies(std::ostringstream &http_response_ss, Cookies& l_cookies);
 
         bool lemmaTooltips(std::string _POST[1], int clientSocket);
 
@@ -67,7 +85,7 @@ class OcsServer : public TcpListener {
         bool retrieveText(std::string text_id[1], int clientSocket);
         bool retrieveTextSubtitle(std::string text_id[2], int clientSocket);
         bool retrieveTextPageNo(std::string text_id[2], int clientSocket);
-        void void_retrieveText(std::ostringstream &html);
+        void void_retrieveText(std::ostringstream &html, std::string& l_page_toknos_arr, Cookies& l_cookies);
 
         bool gorazdLookup(std::string _POST[2], int clientSocket);
         std::string curlGorazd(std::string plain_query, std::string uri_encoded_query);
@@ -95,13 +113,13 @@ class OcsServer : public TcpListener {
         char                m_url[50]; //only applies to POST urls
         const char*         m_DB_path;
         //these global cookies-related member-variables are not safe for the multithreaded TcpListener, because 2 incoming GET requests with different cookie-values will totally fuck up the reading and setting of these values. I need an actual proper strategy for making the server multi-threaded that isn't completely retarded
-        std::string         m_cookies[3] {"1", "1", "1"};
-        std::string         m_cookie_names[3] {"text_id", "current_pageno", "subtitle_id"};
+        //std::string         m_cookies[3] {"1", "1", "1"};
+        //const std::string         m_cookie_names[3] {"text_id", "current_pageno", "subtitle_id"};
         bool                m_show_output;
 
         std::string         m_dict_cookies;
         
-        std::string         m_page_toknos_arr {"[]"};
-        int                 m_pageno_count;
+        //std::string         m_page_toknos_arr {"[]"};
+        //int                 m_pageno_count;
         int m_sentences_per_page {30};
 };

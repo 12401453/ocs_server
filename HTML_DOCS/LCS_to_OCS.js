@@ -113,7 +113,6 @@ const chu_mappings = {
   'šћ' : 'щ',
   'žǯ' : 'жд',
   'žђ' : 'жд',
-  'zr' : 'здр',
   //this one is just for *mĺ̥dnьji
   'dn' : 'n',
   'ǵ' : 'ꙉ',
@@ -196,6 +195,8 @@ const convertToOCS = (lcs_word, pv2_3_exists, lemma_id) => {
   lcs_word = lcs_word.replace(/^ak/, "jǢk"); //not really justified other than by the extreme rarity of ак- spellings in OCS
 
   lcs_word = yeetTlDl(lcs_word);
+
+  lcs_word = lcs_word.replaceAll('zr', 'zdr');
 
   let ORT_pos =  lcs_word.search(ORT_regex);
   let PV2_pos = lcs_word.search(PV2_regex);
@@ -374,7 +375,6 @@ const orv_mappings = {
   'šћ' : 'щ',
   'žǯ' : 'жд',
   'žђ' : 'жд',
-  'zr' : 'здр',
   //this one is just for *mĺ̥dnьji
   'dn' : 'n',
   'ǵ' : 'ꙉ',
@@ -429,6 +429,8 @@ const convertToORV = (lcs_word, pv2_3_exists, lemma_id) => {
 
   lcs_word = lcs_word.replace(/^ak/, "jǢk").replace(/^av/, "jǢv");
   lcs_word = yeetTlDl(lcs_word);
+
+  lcs_word = lcs_word.replaceAll('zr', 'zdr');
 
   if(pv2_3_exists) lcs_word = applyPV3(lcs_word);
   lcs_word = denasalise(lcs_word);
