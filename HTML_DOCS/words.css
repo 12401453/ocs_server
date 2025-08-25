@@ -10,6 +10,11 @@ html {
   overflow-y: scroll; /* makes sure vertical scrollbar is always present to prevent horizontal movement*/
 }
 
+body {
+  margin: 0px;
+  padding: 0px;
+}
+
 a {
     text-decoration: none;
     color: #cbd9f4a6;

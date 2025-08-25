@@ -36,16 +36,18 @@ class OcsServer : public TcpListener {
             std::string text_id;
             std::string current_pageno;
             std::string subtitle_id;
+            std::string theme;
 
-            static constexpr std::array<const char*, 3> keys = {
+            static constexpr std::array<const char*, 4> keys = {
                 " text_id=",
                 " current_pageno=",
-                " subtitle_id="
+                " subtitle_id=",
+                " theme="
             };
         
             // array-view of the values
-            std::array<std::string*, 3> asArray() {
-                return { &text_id, &current_pageno, &subtitle_id };
+            std::array<std::string*, 4> asArray() {
+                return { &text_id, &current_pageno, &subtitle_id, &theme };
             }
         };
 

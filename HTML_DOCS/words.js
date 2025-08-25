@@ -1,6 +1,11 @@
 
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+const app_state = {
+  theme: 0
+}
+
 let lemmas_json = Object.create(null);
 
 fetch("chu_lemmas_json.json")
@@ -231,3 +236,14 @@ lemma_searchbox.addEventListener('keydown', (event) => {
   }
 }); //this is needed because 'input' events have no .key property (only inputType == "insertLineBreak"), and keydown events fire before the textarea's value updates
 //---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+app_state.theme = document.getElementById("theme_switcher").src.endsWith("moon-stars.svg") ? 1 : 0;
+const theme_urls = [["light_theme.css", "sun.svg", "Switch to dark theme"], ["dark_theme.css", "moon-stars.svg", "Switch to light theme"]];
+const switchTheme = (event) => {
+  app_state.theme = (app_state.theme + 1)%2;
+  document.getElementById("colour_theme").href = theme_urls[app_state.theme][0];
+  document.getElementById("theme_switcher").src = theme_urls[app_state.theme][1];
+  document.getElementById("theme_switcher").title = theme_urls[app_state.theme][2];
+
+  document.cookie = "theme=" + String(app_state.theme);
+};
+document.getElementById("theme_switcher").addEventListener('click', switchTheme);

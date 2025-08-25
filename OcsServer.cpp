@@ -295,6 +295,15 @@ int OcsServer::checkHeaderEnd(const char* msg) {
             }
             else if(page_type == 1 && line.find("<?js") != -1) ss_text << "let cookie_textselect = 0;\n";
 
+            else if(page_type > 0 && line.find("<?thm_lnk") != -1) {
+                if(l_cookies.theme == "1") ss_text << "<link id=\"colour_theme\" href=\"dark_theme.css\" rel=\"stylesheet\" type=\"text/css\">";
+                else ss_text << "<link id=\"colour_theme\" href=\"light_theme.css\" rel=\"stylesheet\" type=\"text/css\">";
+            }
+            else if(page_type > 0 && line.find("<?thm_img") != -1) {
+                if(l_cookies.theme == "1") ss_text << "<img id=\"theme_switcher\" src=\"moon-stars.svg\" title=\"Switch to light theme\" draggable=\"false\"></img>";
+                else ss_text << "<img id=\"theme_switcher\" src=\"sun.svg\" title=\"Switch to dark theme\" draggable=\"false\"></img>";
+            }
+
             else ss_text << line << '\n';
         }
 
@@ -771,14 +780,16 @@ bool OcsServer::readCookie(const char* msg, Cookies& l_cookies) {
         l_cookies.text_id = "4";
         l_cookies.current_pageno = "1";
         l_cookies.subtitle_id = "1";
+        l_cookies.theme = "1";
         return false; //c_strFind() returns -1 if unsuccessful, but I've just added 9 to it so the number signalling no cookies is 8
     }
 
-    std::array<std::string*, 3> cookies_values = l_cookies.asArray();
+    std::array<std::string*, 4> cookies_values = l_cookies.asArray();
     for(size_t i = 0; i < std::size(l_cookies.keys); ++i) {
         int cookieName_start = c_strFind(msg+cookie_start, l_cookies.keys[i]);
         if(i == 0 && cookieName_start == -1) {
             *cookies_values[i] = "4";
+            *cookies_values[3] = "1";
             return false;
         }
         if(cookieName_start == -1) {

@@ -6,7 +6,8 @@
 
 <link href="words.css" rel="stylesheet" media="all and (min-width: 769px)" type="text/css">
 <link href="words_small_screens.css" rel="stylesheet" media="all and (max-width: 769px)" type="text/css">
-<link id="colour_theme" href="dark_theme.css" rel="stylesheet" type="text/css">
+<!-- <link id="colour_theme" href="dark_theme.css" rel="stylesheet" type="text/css"> -->
+ <?thm_lnk
 
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -24,7 +25,8 @@
   <a href="texts" class="toplinks-ahref"><div id="texts_link" class="toplink-buttons">Texts</div></a>
   <div id="words_link" class="toplink-buttons current">Words</div>
   <div id="topbar_placefiller"></div>
-  <img id="theme_switcher" src="moon-stars.svg" title="Switch to light theme" draggable="false"></img>
+  <!-- <img id="theme_switcher" src="moon-stars.svg" title="Switch to light theme" draggable="false"></img> -->
+   <?thm_img
 </div>
 
 <div id="main_words_box" style="display: none">
@@ -75,12 +77,5 @@
 <script src ="words.js"></script>
 </html>
 <script>
-  const theme_urls = [["dark_theme.css", "moon-stars.svg", "Switch to light theme"], ["light_theme.css", "sun.svg", "Switch to dark theme"]];
-  let theme_counter = 1;
-  document.getElementById("theme_switcher").addEventListener('click', (event) =>  {
-      document.getElementById("colour_theme").href = theme_urls[theme_counter % 2][0];
-      document.getElementById("theme_switcher").src = theme_urls[theme_counter % 2][1];
-      document.getElementById("theme_switcher").title = theme_urls[theme_counter % 2][2];
-      theme_counter++;
-  });
+
 </script>

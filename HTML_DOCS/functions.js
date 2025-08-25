@@ -58,7 +58,8 @@ const app_state = {
   dict_box_shown: false,
   dict_box_minimised: true,
   dict_html_entries: {1: "", 2: ""},
-  titles_info: []
+  titles_info: [],
+  theme: 0
 }
 
 function selectText() {
@@ -3295,3 +3296,16 @@ const removeGorazdSearchLoadSpinner = () => {
 };
 
 document.getElementById("p1").addEventListener('click', stealFromGorazdTOROT);
+
+
+app_state.theme = document.getElementById("theme_switcher").src.endsWith("moon-stars.svg") ? 1 : 0;
+const theme_urls = [["light_theme.css", "sun.svg", "Switch to dark theme"], ["dark_theme.css", "moon-stars.svg", "Switch to light theme"]];
+const switchTheme = (event) => {
+  app_state.theme = (app_state.theme + 1)%2;
+  document.getElementById("colour_theme").href = theme_urls[app_state.theme][0];
+  document.getElementById("theme_switcher").src = theme_urls[app_state.theme][1];
+  document.getElementById("theme_switcher").title = theme_urls[app_state.theme][2];
+
+  document.cookie = "theme=" + String(app_state.theme);
+};
+document.getElementById("theme_switcher").addEventListener('click', switchTheme);
