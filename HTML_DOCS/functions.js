@@ -2205,7 +2205,7 @@ const oldEnglishInput = (event) => {
 };
 
 
-const glag_map = new Map([
+const glag_map = new Array([
   ["а", "ⰰ"],
   ["б", "ⰱ"],
   ["ц", "ⱌ"],
@@ -2290,7 +2290,7 @@ const glag_map = new Map([
   ["Ꙙ", "Ⱕ"],
   ["й", "ⰻ"]
 ]);
-const cyr_glag_clean_map = new Map([
+const cyr_glag_clean_map = new Array([
   ["о҄у", "ѹ҄"],
   ["о͑у", "ѹ҅"],
   ["ꙑ", "ъі"],
@@ -2327,13 +2327,19 @@ const cyr_glag_clean_map = new Map([
 
 const original_cyr_forms = new Array();
 const cyrToGlag = (str) => {
-  const cyr_map_iter = cyr_glag_clean_map.entries();
-  for(const cyr_entry of cyr_map_iter) {
-    str = str.replaceAll(cyr_entry[0], cyr_entry[1]);
+  // const cyr_map_iter = cyr_glag_clean_map.entries();
+  // for(const cyr_entry of cyr_map_iter) {
+  //   str = str.replaceAll(cyr_entry[0], cyr_entry[1]);
+  // }
+  // const glag_map_iter = glag_map.entries();
+  // for(const glag_entry of glag_map_iter) {
+  //   str = str.replaceAll(glag_entry[0], glag_entry[1]);
+  // }
+  for(const pair of cyr_glag_clean_map) {
+    str = str.replaceAll(pair[0], pair[1]);
   }
-  const glag_map_iter = glag_map.entries();
-  for(const glag_entry of glag_map_iter) {
-    str = str.replaceAll(glag_entry[0], glag_entry[1]);
+  for(const pair of glag_map) {
+    str = str.replaceAll(pair[0], pair[1]);
   }
   return str;
 };
@@ -2343,7 +2349,7 @@ const convertToGlag = () => {
   document.querySelectorAll(".tooltip").forEach(tt => {
     const cyr_form = tt.firstChild.textContent
     original_cyr_forms.push(cyr_form);
-    tt.firstChild.textContent = cyrToGlag(cyr_form);
+    tt.childNodes.forEach(child_node => child_node.textContent = cyrToGlag(child_node.textContent));
   });
   ttPosition();
 };
