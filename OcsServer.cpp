@@ -1099,7 +1099,6 @@ void OcsServer::writeTextBody(std::ostringstream &html, sqlite3* DB, int tokno_s
 }
 
 bool OcsServer::retrieveText(std::string _POST[1], int clientSocket) {
-
     int sentences_per_page = m_sentences_per_page;
     std::ostringstream page_toknos_arr;
     page_toknos_arr << "[";
@@ -1120,10 +1119,19 @@ bool OcsServer::retrieveText(std::string _POST[1], int clientSocket) {
         sqlite3_bind_int(statement, 1, text_id);
         sqlite3_step(statement);
         int first_subtitle_id = sqlite3_column_int(statement, 0);
+        if(first_subtitle_id == 0) {
+            //if text_id given by the cookie was out of range, this will return NULL which comes out as 0 for sqlite_column_int, so we re-set it th text_id to 1
+            text_id = 1;
+            sqlite3_reset(statement);
+            sqlite3_clear_bindings(statement);
+            sqlite3_bind_int(statement, 1, 1);
+            sqlite3_step(statement);
+            first_subtitle_id = sqlite3_column_int(statement, 0);
+        }
         int first_tokno_start = sqlite3_column_int(statement, 1);
         int first_tokno_end = sqlite3_column_int(statement, 2);
         std::string subtitle_text = (const char*)sqlite3_column_text(statement, 3);
-
+        std::cout << "entered retrieveText()\n";
         std::ostringstream subtitle_toknos_json;
         subtitle_toknos_json<< "{\"" << first_subtitle_id << "\":[" << first_tokno_start << "," << first_tokno_end << ",\"" << escapeQuotes(subtitle_text) << "\"" << "],";
         while(sqlite3_step(statement) == SQLITE_ROW) {
