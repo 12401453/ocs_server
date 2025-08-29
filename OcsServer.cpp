@@ -11,6 +11,8 @@
 #include <iomanip>
 #include <unordered_set>
 
+#define HOMEPAGE "/texts"
+
 void OcsServer::onMessageReceived(int clientSocket, const char* msg, int length) {
 
 
@@ -52,18 +54,24 @@ void OcsServer::onMessageReceived(int clientSocket, const char* msg, int length)
         std::cout << "\n";
         msg_url[lb_pos - 13] = '\0';
 
-        short int page_type = 0;
-        if(!strcmp(msg_url, "/texts")) page_type = 1;
-        else if(!strcmp(msg_url, "/add_texts")) page_type = 2;
-        else if(!strcmp(msg_url, "/words")) page_type = 3;
+        const char* final_msg_url;
+        if(!strcmp(msg_url, "/")) {
+            final_msg_url = HOMEPAGE;
+        }
+        else {
+            final_msg_url = (const char*)msg_url;
+        }
 
-        //#include "docRoot.cpp"
+        short int page_type = 0;
+        if(!strcmp(final_msg_url, "/texts")) page_type = 1;
+        else if(!strcmp(final_msg_url, "/add_texts")) page_type = 2;
+        else if(!strcmp(final_msg_url, "/words")) page_type = 3;
    
-        int url_size = strlen("HTML_DOCS") + sizeof(msg_url); //sizeof() can be used for c-strings declared as an array of char's but strlen() must be used for char *pointers
+        int url_size = strlen("HTML_DOCS") + strlen(final_msg_url) + 1; //sizeof() can be used for c-strings declared as an array of char's but strlen() must be used for char *pointers
         char url_c_str[url_size];
     
         strcpy(url_c_str, "HTML_DOCS");
-        strcat(url_c_str, msg_url);
+        strcat(url_c_str, final_msg_url);
 
         std::cout << "page_type: " << page_type << "\n";
 

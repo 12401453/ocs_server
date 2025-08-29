@@ -618,6 +618,11 @@ void verb_Flect(Lemma &lemma_ref, short int int_morph_tag[10], std::string cyr_i
           {
             class_I_clean(participle_stem, false);
           }
+          //DELETE THIS BELOW IF IT FUCKS UP
+          if (row_no == 39 && pisano == true)
+          {
+            class_5_ablaut_clean(participle_stem);
+          }
           lemma_ref.lemma_form = participle_stem;
         }
         else
