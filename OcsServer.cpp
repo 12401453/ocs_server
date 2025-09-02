@@ -130,12 +130,27 @@ void OcsServer::onMessageReceived(int clientSocket, const char* msg, int length)
             content_type = "image/jpeg";
             sendBinaryFile(url_c_str, clientSocket, content_type);
             return;
-        } 
+        }
+        else if(!strcmp(fil_ext, "json")) {
+            content_type = "application/json";
+            sendBinaryFile(url_c_str, clientSocket, content_type);
+            return;
+        }
+        else if(!strcmp(fil_ext, ".ico")) {
+            content_type = "image/png";
+            sendBinaryFile(url_c_str, clientSocket, content_type);
+            return;
+        }  
 
-
+        // struct timespec ts, te;
+        // clock_gettime(CLOCK_MONOTONIC_RAW, &ts);
+        
         buildGETContent(page_type, url_c_str, content, cookies_present, l_cookies);       
 
-     
+        // clock_gettime(CLOCK_MONOTONIC_RAW, &te);  
+        // u_int64_t start_nanoseconds = ts.tv_sec*1000000000UL + ts.tv_nsec;
+        // u_int64_t end_nanoseconds = te.tv_sec*1000000000UL + te.tv_nsec;
+        // printf("Time taken in buildGETContent() for %s: %ld\n", url_c_str, end_nanoseconds - start_nanoseconds);
 
         std::ostringstream oss;
         oss << "HTTP/1.1 200 OK\r\n";
@@ -275,7 +290,7 @@ int OcsServer::checkHeaderEnd(const char* msg) {
     else return -1;
 }
 
- void OcsServer::buildGETContent(short int page_type, char* url_c_str, std::string &content, bool cookies_present, Cookies& l_cookies) {
+void OcsServer::buildGETContent(short int page_type, char* url_c_str, std::string &content, bool cookies_present, Cookies& l_cookies) {
     
     std::ifstream urlFile;
     urlFile.open(url_c_str);
@@ -308,6 +323,16 @@ int OcsServer::checkHeaderEnd(const char* msg) {
             else if(page_type > 0 && line.find("<?thm_lnk") != -1) {
                 if(l_cookies.theme == "1") ss_text << "<link id=\"colour_theme\" href=\"dark_theme.css\" rel=\"stylesheet\" type=\"text/css\">";
                 else ss_text << "<link id=\"colour_theme\" href=\"light_theme.css\" rel=\"stylesheet\" type=\"text/css\">";
+                ss_text << "<style>";
+                //should really replace this with some script-field in the texts-table
+                int text_id_int = safeStrToInt(l_cookies.text_id);
+                if(text_id_int == 1 || text_id_int == 6 || text_id_int == 7 || text_id_int == 8) {
+                    ss_text << cyr_text_style;
+                }
+                else {
+                    ss_text << glag_text_style;
+                }
+                ss_text << "</style>";
             }
             else if(page_type > 0 && line.find("<?thm_img") != -1) {
                 if(l_cookies.theme == "1") ss_text << "<img id=\"theme_switcher\" src=\"moon-stars.svg\" title=\"Switch to light theme\" draggable=\"false\"></img>";
@@ -1054,6 +1079,9 @@ bool OcsServer::lcsSearch(std::string _POST[3], int clientSocket) {
 }
 
 void OcsServer::writeTextBody(std::ostringstream &html, sqlite3* DB, int tokno_start, int tokno_end) {
+    // struct timespec ts, te;
+    // clock_gettime(CLOCK_MONOTONIC_RAW, &ts);
+
     const char* sql_text = "SELECT chu_word_torot, presentation_before, presentation_after, sentence_no, lemma_id, morph_tag, autoreconstructed_lcs, inflexion_class, tokno, auto_tagged, pv2_3_exists FROM corpus WHERE tokno >= ? AND tokno <= ?";
     sqlite3_stmt* statement;
     sqlite3_prepare_v2(DB, sql_text, -1, &statement, NULL);
@@ -1095,7 +1123,7 @@ void OcsServer::writeTextBody(std::ostringstream &html, sqlite3* DB, int tokno_s
 
         html << "<span class=\"chunk\">" << applySuperscripts(presentation_before) << "<span class=\"tooltip\" data-tokno=\"" << tokno << "\" data-sentence_no=\"" << sentence_no_current << "\" data-auto_tagged=\"" << auto_tagged << "\" data-pv3=\"" << pv2_3_exists << "\""; 
         if(lemma_id > 0) {
-            html << " data-lemma_id=\"" << lemma_id << "\"" " data-morph_tag=\"" << morph_tag << "\"";
+            html << " data-lemma_id=\"" << lemma_id << "\" data-morph_tag=\"" << morph_tag << "\"";
         }
         if(!autoreconstructed_lcs.empty()) {
             html << " data-lcs_recon=\"" << autoreconstructed_lcs << "\" data-inflexion=\"" << inflexion_class << "\"";
@@ -1106,6 +1134,11 @@ void OcsServer::writeTextBody(std::ostringstream &html, sqlite3* DB, int tokno_s
 
     };
     sqlite3_finalize(statement);
+
+    // clock_gettime(CLOCK_MONOTONIC_RAW, &te);  
+    // u_int64_t start_nanoseconds = ts.tv_sec*1000000000UL + ts.tv_nsec;
+    // u_int64_t end_nanoseconds = te.tv_sec*1000000000UL + te.tv_nsec;
+    // printf("Time taken in writeTextBody(): %ld\n", end_nanoseconds - start_nanoseconds);
 }
 
 bool OcsServer::retrieveText(std::string _POST[1], int clientSocket) {

@@ -50,7 +50,7 @@ const generateInflection = ([lemma_id, stem, noun_verb, conj_type, lcs_lemma, pv
       }
     }
     
-    writeTable(lcs_paradigm, conj_type, pv2_3_exists, noun_verb, lemma_id);
+    if(noun_verb ==  "1") writeVerbTable(lcs_paradigm, conj_type, pv2_3_exists, noun_verb, lemma_id);
     for(const obj of response) {
       //console.log(obj);
       for(const infl in obj) {
@@ -73,8 +73,8 @@ let convertFunction = convertToOCS;
 const writeTable = (lcs_paradigm, conj_type, pv2_3_exists, noun_verb, lemma_id) => {
 
   const writeCell = (idx) => {
-    cell_html += "<div class='grid-child' title='"+lcs_paradigm[0][idx]+"'>"+convertFunction(lcs_paradigm[0][idx], pv2_3_exists, lemma_id);
-    cell_html += "<div class='infl_variants'>";
+    table_html += "<div class='grid-child' title='"+lcs_paradigm[0][idx]+"'>"+convertFunction(lcs_paradigm[0][idx], pv2_3_exists, lemma_id);
+    table_html += "<div class='infl_variants'>";
     
     let variants_written = false;
     for(let i = 1; i < lcs_paradigm.length; i++) {
@@ -82,18 +82,15 @@ const writeTable = (lcs_paradigm, conj_type, pv2_3_exists, noun_verb, lemma_id) 
       //console.log(lcs_variant);
       let variant_type = i == 2 ? "variant" : "deviance";
       if(lcs_variant != "" && lcs_variant != undefined) {
-        cell_html += "<span class='"+variant_type+"' title='" + lcs_variant + "'>" + convertFunction(lcs_variant, pv2_3_exists, lemma_id) + "</span> ";
+        table_html += "<span class='"+variant_type+"' title='" + lcs_variant + "'>" + convertFunction(lcs_variant, pv2_3_exists, lemma_id) + "</span> ";
         variants_written = true;
       }
     }
-    if(variants_written) cell_html = cell_html.slice(0, -1);
+    if(variants_written) table_html = table_html.slice(0, -1);
 
-    cell_html += "</div>";
-    cell_html += "</div>";
+    table_html += "</div>";
+    table_html += "</div>";
   }
-
-
-
   const grids_container = document.getElementById("grids-container");
   grids_container.innerHTML = "";
 
@@ -132,6 +129,87 @@ const writeTable = (lcs_paradigm, conj_type, pv2_3_exists, noun_verb, lemma_id) 
   const flect_cell = document.createRange().createContextualFragment(cell_html);
   grid.append(flect_cell);
   grids_container.append(grid);
+};
+
+const writeVerbTable = (lcs_paradigm, conj_type, pv2_3_exists, noun_verb, lemma_id) => {  
+    const writeCell = (idx) => {
+        table_html += "<td";
+        if(idx > 27) {
+          table_html += " class='last-col'";
+        }
+        table_html += ">";
+
+        let lcs_form = "";
+        if(lcs_paradigm[0][idx] != undefined) {
+          lcs_form = lcs_paradigm[0][idx];
+        }
+        table_html += "<div class='grid-child' title='"+lcs_form+"'>"+convertFunction(lcs_form, pv2_3_exists, lemma_id);
+        table_html += "<div class='infl_variants'>";
+        
+        let variants_written = false;
+        for(let i = 1; i < lcs_paradigm.length; i++) {
+            const lcs_variant = lcs_paradigm[i][idx]; //this often returns undefineds and it really shouldn't
+            //console.log(lcs_variant);
+            let variant_type = i == 2 ? "variant" : "deviance";
+            if(lcs_variant != "" && lcs_variant != undefined) {
+                table_html += "<span class='"+variant_type+"' title='" + lcs_variant + "'>" + convertFunction(lcs_variant, pv2_3_exists, lemma_id) + "</span> ";
+                variants_written = true;
+            }
+        }
+        if(variants_written) table_html = table_html.slice(0, -1);
+        
+        table_html += "</div>";
+        table_html += "</div>";
+        table_html += "</td>"
+    }
+    
+    const grids_container = document.getElementById("grids-container");
+    grids_container.innerHTML = "";
+
+    // const finite_verb_table = document.createElement("table");
+    // finite_verb_table.className = "infl-grid";
+    // if(noun_verb == "2") finite_verb_table.classList.add("noun-grid");
+    // else finite_verb_table.classList.add("verb-grid");
+
+    let table_html = "<div class='infl_table_rounder'><table class='infl-grid'><tbody>";
+    
+    const verb_persons = ["1st sg.", "2nd sg.", "3rd sg.", "1st du.", "2nd du.", "3rd du.", "1st pl.", "2nd pl.", "3rd pl.",];
+    const verb_tenses = ["Present", "Aorist", "Imperfect", "Imperative", "Participles"];
+    const participle_forms = ["PRAP<sup>1</sup>", "PRAP<sup>2</sup>", "PAP", "L-Part", "PPP", "PrPP", "Infinitive", "Supine"];
+    
+    table_html += "<tr><th class='infl_titles' style='background-color: #040a16; border-top: 1px solid black; border-left: 1px solid black;'></th>";
+    for(let i = 0; i < 4; i++) {
+      table_html += "<th class='infl_titles verb_tenses'>"+verb_tenses[i]+"</th>";
+    }
+    table_html += "</tr>";
+
+    for(let i = 1; i < 10; i++) {
+      table_html += "<tr><th class='infl_titles verb_persons'>"+ verb_persons[i - 1]+"</th>";
+      for(let j = i; j < 37; j+=9) {
+        writeCell(j);
+      }
+      table_html += "</tr>";
+    }
+    table_html += "</tbody></table></div>";
+
+    
+    const finite_verb_table = document.createRange().createContextualFragment(table_html);
+
+    table_html = "<div class='infl_table_rounder'><table class='infl-grid'><tbody>";
+    table_html += "<tr><th class='infl_titles verb_tenses' colspan='2'>Participles</th></tr>";
+    for(let i = 0; i < participle_forms.length; i++) {
+      table_html += "<tr><th class='infl_titles'>"+ participle_forms[i]+"</th>";
+      console.log(37+i);
+      writeCell(37+i);
+      table_html += "</tr>";
+    }
+    table_html += "</tbody></table></div>";
+    const participles_table = document.createRange().createContextualFragment(table_html);
+    //console.log(participles_table);
+   
+    //finite_verb_table.innerHTML = table_html;
+    grids_container.append(finite_verb_table);
+    grids_container.append(participles_table);
 };
 
 const lemma_searchbox = document.getElementById("lcs_lemma_searchbox");
@@ -247,3 +325,139 @@ const switchTheme = (event) => {
   document.cookie = "theme=" + String(app_state.theme);
 };
 document.getElementById("theme_switcher").addEventListener('click', switchTheme);
+
+
+const glag_map = new Array(
+  ["а", "ⰰ"],
+  ["б", "ⰱ"],
+  ["ц", "ⱌ"],
+  ["г", "ⰳ"],
+  ["д", "ⰴ"],
+  ["е", "ⰵ"],
+  ["ж", "ⰶ"],
+  ["ѕ", "ⰷ"],
+  ["з", "ⰸ"],
+  ["і", "ⰹ"],
+  ["ꙇ", "ⰺ"],
+  ["и", "ⰻ"],
+  ["ꙉ", "ⰼ"],
+  ["к", "ⰽ"],
+  ["л", "ⰾ"],
+  ["м", "ⰿ"],
+  ["н", "ⱀ"],
+  ["о", "ⱁ"],
+  ["п", "ⱂ"],
+  ["р", "ⱃ"],
+  ["с", "ⱄ"],
+  ["т", "ⱅ"],
+  ["ѹ", "ⱆ"],
+  ["ф", "ⱇ"],
+  ["х", "ⱈ"],
+  ["ч", "ⱍ"],
+  ["ш", "ⱎ"],
+  ["ъ", "ⱏ"],
+  ["ь", "ⱐ"],
+  ["ѣ", "ⱑ"],
+  ["ю", "ⱓ"],
+  ["ѫ", "ⱘ"],
+  ["ѭ", "ⱙ"],
+  ["в", "ⰲ"],
+  ["щ", "ⱋ"],
+  ["ѵ", "ⱛ"],
+  ["ѡ", "ⱉ"],
+  ["ѳ", "ⱚ"],
+  ["ѧ", "ⱔ"],
+  ["ѩ", "ⱗ"],
+  ["ꙙ", "ⱕ"],
+  ["А", "Ⰰ"],
+  ["Б", "Ⰱ"],
+  ["Ц", "Ⱌ"],
+  ["Г", "Ⰳ"],
+  ["Д", "Ⰴ"],
+  ["Е", "Ⰵ"],
+  ["Ж", "Ⰶ"],
+  ["Ѕ", "Ⰷ"],
+  ["З", "Ⰸ"],
+  ["І", "Ⰹ"],
+  ["Ꙇ", "Ⰺ"],
+  ["И", "Ⰻ"],
+  ["Ꙉ", "Ⰼ"],
+  ["К", "Ⰽ"],
+  ["Л", "Ⰾ"],
+  ["М", "Ⰿ"],
+  ["Н", "Ⱀ"],
+  ["О", "Ⱁ"],
+  ["П", "Ⱂ"],
+  ["Р", "Ⱃ"],
+  ["С", "Ⱄ"],
+  ["Т", "Ⱅ"],
+  ["Ѹ", "Ⱆ"],
+  ["Ф", "Ⱇ"],
+  ["Х", "Ⱈ"],
+  ["Ч", "Ⱍ"],
+  ["Ш", "Ⱎ"],
+  ["Ъ", "Ⱏ"],
+  ["Ь", "Ⱐ"],
+  ["Ѣ", "Ⱑ"],
+  ["Ю", "Ⱓ"],
+  ["Ѫ", "Ⱘ"],
+  ["Ѭ", "Ⱙ"],
+  ["В", "Ⰲ"],
+  ["Щ", "Ⱋ"],
+  ["Ѵ", "Ⱛ"],
+  ["Ѡ", "Ⱉ"],
+  ["Ѳ", "Ⱚ"],
+  ["Ѧ", "Ⱔ"],
+  ["Ѩ", "Ⱗ"],
+  ["Ꙙ", "Ⱕ"],
+  ["й", "ⰻ"],
+  ["ꙗ", "ⱑ"],
+  ["Ꙗ", "Ⱑ"],
+  ["ѥ", "ⰵ"],
+  ["Ѥ", "Ⰵ"]
+);
+const cyr_glag_clean_map = new Array(
+  ["о҄у", "ѹ҄"],
+  ["о͑у", "ѹ҅"],
+  ["ꙑ", "ъі"],
+  ["Оу", "Ѹ"],
+  ["ОУ", "Ѹ"],
+  ["оу", "ѹ"],
+  ["о̑у", "ѹ̂"],
+  ["A", "А"],
+  ["O", "О"],
+  ["E", "Е"],
+  ["C", "С"],
+  ["a", "а"],
+  ["o", "о"],
+  ["e", "е"],
+  ["c", "с"],
+  ["ы", "ьі"],
+  ["У", "Ѵ"],
+  ["Ꙃ", "Ѕ"],
+  ["Ћ", "Ꙉ"],
+  ["у", "ѵ"],
+  ["ꙃ", "ѕ"],
+  ["ћ", "ꙉ"],
+  ["Ⱕ", "Ꙙ"],
+  ["Я", "Ꙗ"],
+  ["ⱕ", "ꙙ"],
+  ["я", "ꙗ"],
+  ["Ҍ", "Ѣ"],
+  ["ҍ", "ѣ"],
+  ["Ї", "Ꙇ"],
+  ["ї", "ꙇ"],
+  ["X", "Х"],
+  ["x", "х"]
+);
+
+const original_cyr_forms = new Array();
+const cyrToGlag = (str) => {
+  for(const pair of cyr_glag_clean_map) {
+    str = str.replaceAll(pair[0], pair[1]);
+  }
+  for(const pair of glag_map) {
+    str = str.replaceAll(pair[0], pair[1]);
+  }
+  return str;
+};

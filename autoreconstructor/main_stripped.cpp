@@ -47,6 +47,17 @@ void replaceAll(std::string &source, const std::string& yeeted, const std::strin
       yeeted_pos = source.find(yeeted, yeeted_pos + replacement_length);
   }
 }
+void replaceEnd(std::string &source, const std::string yeeted, const std::string replacement) {
+    
+  size_t yeeted_length = yeeted.length();
+  if(yeeted_length == 0) return;
+  size_t replacement_length = replacement.length();
+
+  size_t yeeted_pos = source.find(yeeted);
+  if(yeeted_pos + yeeted_length == source.length()) {
+      source.replace(yeeted_pos, yeeted_length, replacement); 
+  }
+}
 
 struct Lemma
 {
@@ -319,7 +330,9 @@ void Dejotate(std::string& jotated_form) {
   replaceAll(jotated_form, "stvj", "šћvĺ");
   replaceAll(jotated_form, "strj", "šћŕ");
   replaceAll(jotated_form, "stj", "šћ");
+  replaceAll(jotated_form, "skj", "šč");
   replaceAll(jotated_form, "zdj", "žђ");
+  replaceAll(jotated_form, "zgj", "žǯ");
   replaceAll(jotated_form, "slj", "šĺ");
   replaceAll(jotated_form, "zlj", "žĺ");
   replaceAll(jotated_form, "znj", "žń");

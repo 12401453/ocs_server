@@ -1,3 +1,5 @@
+//compile as a separate object-file with: g++ -std=c++20 -O3 -march=native -c LcsFlecter.cpp -o LcsFlecter.o
+
 #include "LcsFlecter.h"
 
 const std::unordered_map<int, inner_map> LcsFlecter::m_noun_endings = {
@@ -372,6 +374,17 @@ void replaceAll(std::string &source, const std::string yeeted, const std::string
         yeeted_pos = source.find(yeeted, yeeted_pos + replacement_length);
     }
 }
+void replaceEnd(std::string &source, const std::string yeeted, const std::string replacement) {
+    
+    size_t yeeted_length = yeeted.length();
+    if(yeeted_length == 0) return;
+    size_t replacement_length = replacement.length();
+
+    size_t yeeted_pos = source.find(yeeted);
+    if(yeeted_pos + yeeted_length == source.length()) {
+        source.replace(yeeted_pos, yeeted_length, replacement); 
+    }
+}
 
 bool LcsFlecter::c_strStartsWith(const char *str1, const char *str2) {
     int strcmp_count = 0;
@@ -425,6 +438,7 @@ void LcsFlecter::class1Clean(Inflection& inflection) {
     replaceAll(inflection.flected_form, "ogs", "ax");
     replaceAll(inflection.flected_form, "egs", "ěx");
     replaceAll(inflection.flected_form, "eds", "ěs");
+    replaceAll(inflection.flected_form, "ezs", "ěs");
     replaceAll(inflection.flected_form, "ess", "ěs");
     replaceAll(inflection.flected_form, "ęss", "ęs"); //class 11 sъtręs-ti when it adds S-aorist endings; a check for S-aorists needs adding to the autoreconstructor because Mar. Matt 28 сътрѧсѧ is wrongly reconstructed as the root-aorist *sъtręsǫ
     replaceAll(inflection.flected_form, "eps", "ěs");
@@ -484,9 +498,13 @@ void LcsFlecter::class1NasalClean(std::string& flecter_output) {
     replaceAll(flecter_output, "ьmt", "ęt");
     replaceAll(flecter_output, "ьnt", "ęt");
     replaceAll(flecter_output, "ъmt", "ǫt");
-    replaceAll(flecter_output, "ьm", "ę");
-    replaceAll(flecter_output, "ьn", "ę");
-    replaceAll(flecter_output, "ъm", "ǫ");
+    // replaceAll(flecter_output, "ьm", "ę");
+    // replaceAll(flecter_output, "ьn", "ę");
+    // replaceAll(flecter_output, "ъm", "ǫ");
+    replaceEnd(flecter_output, "ьm", "ę");
+    replaceEnd(flecter_output, "ьn", "ę");
+    replaceEnd(flecter_output, "ъm", "ǫ");
+
 }
 void LcsFlecter::itiClean(std::string& flecter_output) {
     replaceAll(flecter_output, "njь", "ni");
@@ -598,7 +616,9 @@ void LcsFlecter::Dejotate(std::string& jotated_form) {
     replaceAll(jotated_form, "stvj", "šћvĺ");
     replaceAll(jotated_form, "strj", "šћŕ");
     replaceAll(jotated_form, "stj", "šћ");
+    replaceAll(jotated_form, "skj", "šč");
     replaceAll(jotated_form, "zdj", "žђ");
+    replaceAll(jotated_form, "zgj", "žǯ");
     replaceAll(jotated_form, "slj", "šĺ");
     replaceAll(jotated_form, "zlj", "žĺ");
     replaceAll(jotated_form, "znj", "žń");

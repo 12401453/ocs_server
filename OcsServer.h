@@ -124,4 +124,7 @@ class OcsServer : public TcpListener {
         //std::string         m_page_toknos_arr {"[]"};
         //int                 m_pageno_count;
         int m_sentences_per_page {30};
+
+        static constexpr const char* cyr_text_style = ":root{\n--chunk-font-family: var(--cyr-font-family);\n--chunk-font-size: var(--cyr-font-size);\n--chunk-letter-spacing: var(--cyr-letter-spacing);\n}\n";
+        static constexpr const char* glag_text_style = ":root{\n--chunk-font-family: var(--glag-font-family);\n--chunk-font-size: var(--glag-font-size);\n--chunk-letter-spacing: var(--glag-letter-spacing);\n}\n";
 };

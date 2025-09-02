@@ -111,23 +111,33 @@ a {
 #grids-container {
   display: flex;
   flex-flow: row wrap;
-  column-gap : 10px;
+  margin-top: 10px;
+  width: 100%;
+  justify-content: space-around;
+}
+
+.infl_table_rounder {
+  border: 2px solid black;
+  border-radius: 6px;
+  display: flex;
 }
 
 .infl-grid {
-  display: grid;
-  grid-auto-flow: column;
+  /*display: grid;
+  grid-auto-flow: column;*/
   font-size: 23px;
   font-family: Bukyvede;
-  border-right: 1px solid;
+  /*border-right: 1px solid;
   border-top: 1px solid;
-  border-radius: 6px;
+  border-radius: 6px;*/
   color:#cbd9f4;
   background-color: #071022;
-
-  margin-top: 10px;
+  border-collapse: collapse;
+  border: 4px solid black;
+  flex: 1;
 }
 
+/*
 .verb-grid {
   grid-template-columns: repeat(3, 1fr);
   grid-template-rows: repeat(9, 1fr);
@@ -135,29 +145,79 @@ a {
 .noun-grid {
   grid-template-columns: repeat(3, 1fr);
   grid-template-rows: repeat(7, 1fr);
-}
+} */
 .grid-child {
   padding: 4px;
   /* padding-right: 2px; */
   text-align: center;
-  border-left: 1px solid;
-  border-bottom: 1px solid;
+  /*border-left: 1px solid;
+  border-bottom: 1px solid; */
   display: flex
 ;
   justify-content: center;
   flex-flow: column nowrap;
   align-items: center;
 }
-.grid-child:first-child {
+/*.grid-child:first-child {
   border-top-left-radius: 6px;
 }
 .grid-child:last-child {
   border-bottom-right-radius: 6px;
+} */
+
+th.infl_titles {
+  font-family: 'IBM_Plex_Sans';
+  font-size: 15px;
+  font-weight: normal;
+  background-color: #040a16;
+  border-right: 5px solid black;
+}
+th.infl_titles.verb_tenses {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+th.infl_titles.verb_tenses:last-child {
+  border-right: none;
 }
 
-
-.infl_variants {
+td {
+  border-right: 5px solid black;
+  padding: 4px;
 }
+td.last-col{
+  border-right: none;
+}
+
+tr {
+  border-top: 2px solid black;
+}
+tr:first-child {
+  border-top: none;
+}
+tr:nth-child(2) {
+  border-top: 5px solid black;
+}
+
+tr:nth-child(5) {
+  border-top: 5px solid black;
+}
+tr:nth-child(8) {
+  border-top: 5px solid black;
+}
+tr:last-child {
+  border-bottom-right-radius: 6px;
+}
+
+/* tr:nth-child(5) td {
+    background-color: #040a16;
+}
+tr:nth-child(6) td {
+    background-color: #040a16;
+}
+tr:nth-child(7) td {
+    background-color: #040a16;
+} */
+
 .deviance {
   opacity: 0.8;
   font-size: 15px;

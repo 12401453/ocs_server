@@ -329,6 +329,7 @@ void class_I_clean(std::string& flected_form, bool imperative) {
   replaceAll(flected_form, "ogs", "ax");
   replaceAll(flected_form, "egs", "ěx");
   replaceAll(flected_form, "eds", "ěs");
+  replaceAll(flected_form, "ezs", "ěs");
   replaceAll(flected_form, "ess", "ěs");
   replaceAll(flected_form, "ęss", "ęs"); //class 11 sъtręs-ti when it adds S-aorist endings; a check for S-aorists needs adding to the autoreconstructor because Mar. Matt 28 сътрѧсѧ is wrongly reconstructed as the root-aorist *sъtręsǫ
   replaceAll(flected_form, "eps", "ěs");
@@ -463,9 +464,9 @@ void class_I_nasal_clean(std::string& flecter_output) {
   replaceAll(flecter_output, "ьmt", "ęt");
   replaceAll(flecter_output, "ьnt", "ęt");
   replaceAll(flecter_output, "ъmt", "ǫt");
-  replaceAll(flecter_output, "ьm", "ę");
-  replaceAll(flecter_output, "ьn", "ę");
-  replaceAll(flecter_output, "ъm", "ǫ");
+  replaceEnd(flecter_output, "ьm", "ę");
+  replaceEnd(flecter_output, "ьn", "ę");
+  replaceEnd(flecter_output, "ъm", "ǫ");
 }
 
 /*void iti_clean(std::string &verb)
