@@ -51,6 +51,7 @@ const generateInflection = ([lemma_id, stem, noun_verb, conj_type, lcs_lemma, pv
     }
     
     if(noun_verb ==  "1") writeVerbTable(lcs_paradigm, conj_type, pv2_3_exists, noun_verb, lemma_id);
+    else writeNounTable(lcs_paradigm, conj_type, pv2_3_exists, noun_verb, lemma_id);
     for(const obj of response) {
       //console.log(obj);
       for(const infl in obj) {
@@ -94,12 +95,6 @@ const writeTable = (lcs_paradigm, conj_type, pv2_3_exists, noun_verb, lemma_id) 
   const grids_container = document.getElementById("grids-container");
   grids_container.innerHTML = "";
 
-  // const verb_grid = document.getElementById("verb-grid");
-  // const noun_grid = document.getElementById("noun-grid");
-  // verb_grid.innerHTML = "";
-  // noun_grid.innerHTML = "";
-  // verb_grid.style.display = "none";
-  // noun_grid.style.display = "none";
   const grid = document.createElement("div");
   grid.className = "infl-grid";
   if(noun_verb == "2") grid.classList.add("noun-grid");
@@ -175,16 +170,17 @@ const writeVerbTable = (lcs_paradigm, conj_type, pv2_3_exists, noun_verb, lemma_
     
     const verb_persons = ["1st sg.", "2nd sg.", "3rd sg.", "1st du.", "2nd du.", "3rd du.", "1st pl.", "2nd pl.", "3rd pl.",];
     const verb_tenses = ["Present", "Aorist", "Imperfect", "Imperative", "Participles"];
-    const participle_forms = ["PRAP<sup>1</sup>", "PRAP<sup>2</sup>", "PAP", "L-Part", "PPP", "PrPP", "Infinitive", "Supine"];
+    const participle_forms = ["PRAP<sup>1</sup>", "PRAP<sup>2</sup>", "PAP", "L-Part.", "PPP", "PrPP", "Infinitive", "Supine"];
+    const participle_titles = ["Present Active Participle (masc./nt. Nsg.)", "Present Active Participle", "Past Active Participle", "L-Participle", "Past Passive Participle", "Present Passive Participle", "Infinitive", "Supine"];
     
-    table_html += "<tr><th class='infl_titles' style='background-color: #040a16; border-top: 1px solid black; border-left: 1px solid black;'></th>";
+    table_html += "<tr class='verb_row'><th class='infl_titles' style='background-color: #040a16; border-top: 1px solid black; border-left: 1px solid black;'></th>";
     for(let i = 0; i < 4; i++) {
       table_html += "<th class='infl_titles verb_tenses'>"+verb_tenses[i]+"</th>";
     }
     table_html += "</tr>";
 
     for(let i = 1; i < 10; i++) {
-      table_html += "<tr><th class='infl_titles verb_persons'>"+ verb_persons[i - 1]+"</th>";
+      table_html += "<tr class='verb_row'><th class='infl_titles verb_persons'>"+ verb_persons[i - 1]+"</th>";
       for(let j = i; j < 37; j+=9) {
         writeCell(j);
       }
@@ -196,9 +192,9 @@ const writeVerbTable = (lcs_paradigm, conj_type, pv2_3_exists, noun_verb, lemma_
     const finite_verb_table = document.createRange().createContextualFragment(table_html);
 
     table_html = "<div class='infl_table_rounder'><table class='infl-grid'><tbody>";
-    table_html += "<tr><th class='infl_titles verb_tenses' colspan='2'>Participles</th></tr>";
+    table_html += "<tr class='verb_row'><th class='infl_titles verb_tenses' colspan='2'>Participles</th></tr>";
     for(let i = 0; i < participle_forms.length; i++) {
-      table_html += "<tr><th class='infl_titles'>"+ participle_forms[i]+"</th>";
+      table_html += "<tr class='verb_row'><th class='infl_titles' title='"+participle_titles[i]+"'>"+ participle_forms[i]+"</th>";
       console.log(37+i);
       writeCell(37+i);
       table_html += "</tr>";
@@ -210,6 +206,111 @@ const writeVerbTable = (lcs_paradigm, conj_type, pv2_3_exists, noun_verb, lemma_
     //finite_verb_table.innerHTML = table_html;
     grids_container.append(finite_verb_table);
     grids_container.append(participles_table);
+};
+
+const writeNounTable = (lcs_paradigm, conj_type, pv2_3_exists, noun_verb, lemma_id) => {  
+  const writeCell = (idx, gender) => {
+      table_html += "<td";
+      if(idx > gender*21+14) {
+        table_html += " class='last-col'";
+      }
+      table_html += ">";
+
+      let lcs_form = "";
+      if(lcs_paradigm[0][idx] != undefined) {
+        lcs_form = lcs_paradigm[0][idx];
+      }
+      table_html += "<div class='grid-child' title='"+lcs_form+"'>"+convertFunction(lcs_form, pv2_3_exists, lemma_id);
+      table_html += "<div class='infl_variants'>";
+      
+      let variants_written = false;
+      for(let i = 1; i < lcs_paradigm.length; i++) {
+          const lcs_variant = lcs_paradigm[i][idx]; //this often returns undefineds and it really shouldn't
+          //console.log(lcs_variant);
+          let variant_type = i == 2 ? "variant" : "deviance";
+          if(lcs_variant != "" && lcs_variant != undefined) {
+              table_html += "<span class='"+variant_type+"' title='" + lcs_variant + "'>" + convertFunction(lcs_variant, pv2_3_exists, lemma_id) + "</span> ";
+              variants_written = true;
+          }
+      }
+      if(variants_written) table_html = table_html.slice(0, -1);
+      
+      table_html += "</div>";
+      table_html += "</div>";
+      table_html += "</td>"
+  }
+  
+  const grids_container = document.getElementById("grids-container");
+  grids_container.innerHTML = "";  
+  
+  const noun_cases = ["Nom.", "Acc.", "Gen.", "Dat.", "Loc.", "Instr.", "Voc."];
+  const noun_numbers = ["Sing.", "Dual", "Plural"];
+  const noun_genders = ["Masc.", "Fem.", "Neuter"];
+  
+  let firstKey;
+  for(firstKey in lcs_paradigm[0]) {
+    break;
+  }
+  let gender_coefficient = Math.floor(Number(firstKey) / 21); //0 for masc, 1 for fem, 2 for nt. (or equivalent)
+
+  let table_html = "";
+  const makeNomTableHTML = (gender, adjectival=false) => {
+    table_html = "";
+    table_html += "<div class='infl_table_rounder'><table class='infl-grid'><tbody>";
+    table_html += "<tr><th class='infl_titles' style='background-color: #040a16; border-top: 1px solid black; border-left: 1px solid black;'>";
+    if(adjectival) table_html += noun_genders[gender];
+    table_html += "</th>";
+    for(let i = 0; i < 3; i++) {
+      table_html += "<th class='infl_titles verb_tenses'>"+noun_numbers[i]+"</th>";
+    }
+    table_html += "</tr>";
+
+    for(let i = 1; i < 8; i++) {
+      table_html += "<tr><th class='infl_titles verb_persons'>"+ noun_cases[i - 1]+"</th>";
+      for(let j = i + 21*gender; j < (gender + 1)*21 + 1; j+=7) {
+        writeCell(j, gender);
+      }
+      table_html += "</tr>";
+    }
+    table_html += "</tbody></table></div>";
+  };
+
+  /*
+  let table_html = "<div class='infl_table_rounder'><table class='infl-grid'><tbody>";
+  table_html += "<tr><th class='infl_titles' style='background-color: #040a16; border-top: 1px solid black; border-left: 1px solid black;'></th>";
+  for(let i = 0; i < 3; i++) {
+    table_html += "<th class='infl_titles verb_tenses'>"+noun_numbers[i]+"</th>";
+  }
+  table_html += "</tr>";
+
+  for(let i = 1; i < 8; i++) {
+    table_html += "<tr><th class='infl_titles verb_persons'>"+ noun_cases[i - 1]+"</th>";
+    for(let j = i + 21*gender_coefficient; j < (gender_coefficient + 1)*21 + 1; j+=7) {
+      writeCell(j);
+    }
+    table_html += "</tr>";
+  }
+  table_html += "</tbody></table></div>"; */
+  
+  const tables_arr = new Array();
+
+  if(gender_coefficient == 0 && Object.keys(lcs_paradigm[0]).length > 21) {
+    console.log("adjectival");
+    makeNomTableHTML(0, true)
+    tables_arr.push(document.createRange().createContextualFragment(table_html));
+    makeNomTableHTML(1, true);
+    tables_arr.push(document.createRange().createContextualFragment(table_html));
+    makeNomTableHTML(2, true);
+    tables_arr.push(document.createRange().createContextualFragment(table_html));
+  }
+  else {
+    makeNomTableHTML(gender_coefficient, false)
+    tables_arr.push(document.createRange().createContextualFragment(table_html));
+  }
+
+  for(const nom_table of tables_arr) {
+    grids_container.append(nom_table);
+  }
 };
 
 const lemma_searchbox = document.getElementById("lcs_lemma_searchbox");

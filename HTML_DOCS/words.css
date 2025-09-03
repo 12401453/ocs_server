@@ -113,7 +113,9 @@ a {
   flex-flow: row wrap;
   margin-top: 10px;
   width: 100%;
-  justify-content: space-around;
+  justify-content: flex-start;
+  row-gap: 15px;
+  column-gap: 15px;
 }
 
 .infl_table_rounder {
@@ -194,14 +196,14 @@ tr {
 tr:first-child {
   border-top: none;
 }
-tr:nth-child(2) {
+tr.verb_row:nth-child(2) {
   border-top: 5px solid black;
 }
 
-tr:nth-child(5) {
+tr.verb_row:nth-child(5) {
   border-top: 5px solid black;
 }
-tr:nth-child(8) {
+tr.verb_row:nth-child(8) {
   border-top: 5px solid black;
 }
 tr:last-child {

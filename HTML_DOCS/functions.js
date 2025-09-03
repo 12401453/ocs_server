@@ -59,7 +59,8 @@ const app_state = {
   dict_box_minimised: true,
   dict_html_entries: {1: "", 2: ""},
   titles_info: [],
-  theme: 0
+  theme: 0,
+  dictionary: "gorazd"
 }
 
 function selectText() {
@@ -3083,6 +3084,8 @@ const toggleFuzzySearch = (event) => {
 }
 document.getElementById("fuzzy_box").addEventListener('click', toggleFuzzySearch);
 
+/* DICT STUFF BELOW VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV */
+
 const stealFromGorazdTOROT = (event) => {
   //console.log("stealFromGorazdTOROT");
   if(window.innerWidth < 769) return;
@@ -3090,6 +3093,12 @@ const stealFromGorazdTOROT = (event) => {
   if(lemma_id == undefined) {
     return;
   }
+
+  document.getElementById("dict_logo").src = "gorazd_logo_yellow.png";
+  document.getElementById("dict_logo").title = "gorazd.org";
+  document.querySelectorAll(".dict_type").forEach(btn => btn.style.display = "");
+  app_state.dictionary = "gorazd";
+
   lookupGorazd(lemma_id, "");
 };
 
@@ -3263,17 +3272,58 @@ const toggleGorazd = () => {
 document.getElementById("gorazd_hidden_box").addEventListener('click', toggleGorazd);
 document.getElementById("gorazd_close").addEventListener('click', toggleGorazd);
 
+const lookup_HWB = (gorazd_query) => {
+  const hwb_results = hwb.filter(entry => entry[0].startsWith(gorazd_query) || entry[1].startsWith(gorazd_query));
+      const viewboxcontent = document.getElementById("viewboxcontent");
+      if(hwb_results.length == 0) {
+          document.getElementById("viewboxcontent").innerHTML = "<div id=\"gorazd_no_results\">Nothing found. Repent!</div>";
+          fullyOpenGorazd();
+          return;
+      }
+
+      viewboxcontent.innerHTML = "";
+      hwb_results.forEach((result, i) => {   
+        viewboxcontent.appendChild(document.createRange().createContextualFragment('<div class="dict_row"><div class="dict_cell dict_pos HWB_header">'+result[0] +' <span class="HWB_grammar">'+result[1]+'</span></div></div>'));
+        viewboxcontent.appendChild(document.createRange().createContextualFragment('<div class="dict_row"><div class="dict_cell Wk">'+result[2]+'</div></div>'));
+      });
+      fullyOpenGorazd();
+}
+
 document.getElementById("gorazd_searchbox").addEventListener('keydown', event => {
   if(event.key == "Enter") {
     event.preventDefault();
     let gorazd_query = document.getElementById("gorazd_searchbox").value.trim().toLowerCase().replaceAll("ы", "ꙑ").replaceAll("шт", "щ");
     //stealFromGorazd(gorazd_query);
-    if(gorazd_query != "") lookupGorazd(0, gorazd_query);
+    if(gorazd_query != "" && app_state.dictionary == "gorazd") {
+      lookupGorazd(0, gorazd_query);
+    }
+    else if(gorazd_query != "") {
+      // const hwb_results = hwb.filter(entry => entry[0].startsWith(gorazd_query) || entry[1].startsWith(gorazd_query));
+      // const viewboxcontent = document.getElementById("viewboxcontent");
+      // if(hwb_results.length == 0) {
+      //     document.getElementById("viewboxcontent").innerHTML = "<div id=\"gorazd_no_results\">Nothing found. Repent!</div>";
+      //     fullyOpenGorazd();
+      //     return;
+      // }
+
+      // viewboxcontent.innerHTML = "";
+      // hwb_results.forEach((result, i) => {   
+      //   viewboxcontent.appendChild(document.createRange().createContextualFragment('<div class="dict_row"><div class="dict_cell dict_pos HWB_header">'+result[0] +' <span class="HWB_grammar">'+result[1]+'</span></div></div>'));
+      //   viewboxcontent.appendChild(document.createRange().createContextualFragment('<div class="dict_row"><div class="dict_cell Wk">'+result[2]+'</div></div>'));
+      // });
+      // fullyOpenGorazd();
+      lookup_HWB(gorazd_query);
+    }
   }
 });
 document.getElementById("gorazd_search_button").addEventListener('click', event => {
   let gorazd_query = document.getElementById("gorazd_searchbox").value.trim().toLowerCase().replaceAll("ы", "ꙑ").replaceAll("шт", "щ");
-  if(gorazd_query != "") lookupGorazd(0, gorazd_query);
+  if(gorazd_query != "" && app_state.dictionary == "gorazd") {
+    lookupGorazd(0, gorazd_query);
+  }
+  else if(gorazd_query != "") {
+    lookup_HWB(gorazd_query);
+  }
 });
 const showGorazdSearchLoadSpinner = (minimised) => {
   document.getElementById("gorazd_searchbox").disabled = true;
@@ -3294,6 +3344,30 @@ const removeGorazdSearchLoadSpinner = () => {
 };
 
 document.getElementById("p1").addEventListener('click', stealFromGorazdTOROT);
+
+
+const dict_logo_srcs = ["gorazd_logo_yellow.png", "hwb.png"];
+const dict_titles = ["gorazd.org", "Handwörterbuch zu den altkirchenslavischen Texten"];
+const dict_names = ["gorazd", "hwb"];
+const toggleDict = (event) => {
+  const new_dict_idx = (dict_titles.indexOf(event.target.title) + 1) % dict_titles.length;
+  event.target.src = dict_logo_srcs[new_dict_idx];
+  event.target.title = dict_titles[new_dict_idx];
+  app_state.dictionary = dict_names[new_dict_idx];
+
+  if(app_state.dictionary == "hwb") {
+    document.querySelectorAll(".dict_type").forEach(btn => btn.style.display = "none");
+  }
+  else {
+    document.querySelectorAll(".dict_type").forEach(btn => btn.style.display = "");
+  }
+}
+document.getElementById("dict_logo").addEventListener('click', toggleDict);
+
+let hwb = new Array();
+fetch("handwoerterbuch.json").then(response => {return response.json();}).then(response => hwb = response);
+
+/* DICT STUFF ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ */
 
 
 app_state.theme = document.getElementById("theme_switcher").src.endsWith("moon-stars.svg") ? 1 : 0;

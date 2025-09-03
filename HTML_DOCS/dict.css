@@ -179,7 +179,7 @@
     width: 36.71px;
     border-radius: 5px;
     user-select: none;
-
+    cursor: pointer;
     opacity: 70%;
 }
 #dict_logo:hover {
@@ -295,6 +295,17 @@ em {
 .MR_grammar {
     font-size: 13px;
     font-weight: normal;
+}
+
+.dict_cell.dict_pos.HWB_header {
+    font-family: Bukyvede;
+    font-size: 20px;
+}
+
+.HWB_grammar {
+    font-size: 13px;
+    font-weight: normal;
+    font-family: 'IBM_Plex_Sans';
 }
 .MR_link {
     font-size: 13px;
