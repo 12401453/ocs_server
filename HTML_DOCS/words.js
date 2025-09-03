@@ -52,14 +52,6 @@ const generateInflection = ([lemma_id, stem, noun_verb, conj_type, lcs_lemma, pv
     
     if(noun_verb ==  "1") writeVerbTable(lcs_paradigm, conj_type, pv2_3_exists, noun_verb, lemma_id);
     else writeNounTable(lcs_paradigm, conj_type, pv2_3_exists, noun_verb, lemma_id);
-    for(const obj of response) {
-      //console.log(obj);
-      for(const infl in obj) {
-        //if(obj[infl] != "") console.log(convertToOCS(obj[infl]));
-        //if(obj[infl] != "") console.log(convertToORV(obj[infl]));
-      }
-      //console.log("_________________________");
-    }
   })
   .finally(() => {;});
 };
@@ -70,61 +62,6 @@ const switchConv = () => {
 }
 
 let convertFunction = convertToOCS;
-
-const writeTable = (lcs_paradigm, conj_type, pv2_3_exists, noun_verb, lemma_id) => {
-
-  const writeCell = (idx) => {
-    table_html += "<div class='grid-child' title='"+lcs_paradigm[0][idx]+"'>"+convertFunction(lcs_paradigm[0][idx], pv2_3_exists, lemma_id);
-    table_html += "<div class='infl_variants'>";
-    
-    let variants_written = false;
-    for(let i = 1; i < lcs_paradigm.length; i++) {
-      const lcs_variant = lcs_paradigm[i][idx]; //this often returns undefineds and it really shouldn't
-      //console.log(lcs_variant);
-      let variant_type = i == 2 ? "variant" : "deviance";
-      if(lcs_variant != "" && lcs_variant != undefined) {
-        table_html += "<span class='"+variant_type+"' title='" + lcs_variant + "'>" + convertFunction(lcs_variant, pv2_3_exists, lemma_id) + "</span> ";
-        variants_written = true;
-      }
-    }
-    if(variants_written) table_html = table_html.slice(0, -1);
-
-    table_html += "</div>";
-    table_html += "</div>";
-  }
-  const grids_container = document.getElementById("grids-container");
-  grids_container.innerHTML = "";
-
-  const grid = document.createElement("div");
-  grid.className = "infl-grid";
-  if(noun_verb == "2") grid.classList.add("noun-grid");
-  else grid.classList.add("verb-grid");
-
-  let cell_html = "";
-
-  if(conj_type.startsWith("adj") || conj_type.startsWith("pron")) {
-    for(let k = 0; k < 3; k++) {
-      const adj_grid = document.createElement("div");
-      adj_grid.className = "infl-grid";
-      adj_grid.classList.add("noun-grid");
-      for(let i = k*21 + 1; i < (k+1)*21 + 1; i++) {
-        writeCell(i);
-      }
-      const flect_cell = document.createRange().createContextualFragment(cell_html);
-      adj_grid.append(flect_cell);
-      grids_container.append(adj_grid);
-      cell_html = "";
-    }
-    return;
-  }
-
-  for(const idx in lcs_paradigm[0]) {
-    writeCell(idx); 
-  }
-  const flect_cell = document.createRange().createContextualFragment(cell_html);
-  grid.append(flect_cell);
-  grids_container.append(grid);
-};
 
 const writeVerbTable = (lcs_paradigm, conj_type, pv2_3_exists, noun_verb, lemma_id) => {  
     const writeCell = (idx) => {
@@ -274,23 +211,6 @@ const writeNounTable = (lcs_paradigm, conj_type, pv2_3_exists, noun_verb, lemma_
     }
     table_html += "</tbody></table></div>";
   };
-
-  /*
-  let table_html = "<div class='infl_table_rounder'><table class='infl-grid'><tbody>";
-  table_html += "<tr><th class='infl_titles' style='background-color: #040a16; border-top: 1px solid black; border-left: 1px solid black;'></th>";
-  for(let i = 0; i < 3; i++) {
-    table_html += "<th class='infl_titles verb_tenses'>"+noun_numbers[i]+"</th>";
-  }
-  table_html += "</tr>";
-
-  for(let i = 1; i < 8; i++) {
-    table_html += "<tr><th class='infl_titles verb_persons'>"+ noun_cases[i - 1]+"</th>";
-    for(let j = i + 21*gender_coefficient; j < (gender_coefficient + 1)*21 + 1; j+=7) {
-      writeCell(j);
-    }
-    table_html += "</tr>";
-  }
-  table_html += "</tbody></table></div>"; */
   
   const tables_arr = new Array();
 
@@ -414,6 +334,16 @@ lemma_searchbox.addEventListener('keydown', (event) => {
     arrowkeySelect(event.key);
   }
 }); //this is needed because 'input' events have no .key property (only inputType == "insertLineBreak"), and keydown events fire before the textarea's value updates
+
+const toggleInflTables = (event) => {
+
+  event.currentTarget.classList.toggle('active');
+  
+}
+document.getElementById("infl_table_switch").addEventListener('click', toggleInflTables);
+
+
+//
 //---------------------------------------------------------------------------------------------------------------------------------------------------------------------
 app_state.theme = document.getElementById("theme_switcher").src.endsWith("moon-stars.svg") ? 1 : 0;
 const theme_urls = [["light_theme.css", "sun.svg", "Switch to dark theme"], ["dark_theme.css", "moon-stars.svg", "Switch to light theme"]];

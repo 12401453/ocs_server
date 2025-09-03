@@ -29,44 +29,15 @@
    <?thm_img
 </div>
 
-<div id="main_words_box" style="display: none">
-
-    <div id="pos_selectors">
-      <span data-pos_code="1" class="pos_sel noun pos_selected">noun</span>
-      <span data-pos_code="2" class="pos_sel verb pos_selected">verb</span>
-      <span data-pos_code="3" class="pos_sel adj pos_selected">adject.</span>
-      <span data-pos_code="4" class="pos_sel adverb pos_selected">adverb</span>
-      <span data-pos_code="5" class="pos_sel prep pos_selected">prep.</span>
-      <span data-pos_code="6" class="pos_sel conj pos_selected">conj.</span>
-      <span data-pos_code="7" class="pos_sel part pos_selected">part.</span>
-      <span data-pos_code="8" class="pos_sel ques pos_selected">ques.</span>
-    </div>
-
-    <div id="mw_selectors">
-      <span data-mw_code="1" class="mw_sel mw_selected">lemmas</span>
-      <span data-mw_code="2" class="mw_sel mw_selected">multiwords</span>
-    </div>
-    
-    <div id="words_body" >
-      <div id="words_top">
-        <div id="left_top_header"><span id="left_top_upper"><textarea id="lemma_searchbox" autocomplete="off" placeholder="Search lemmas..."></textarea></span><span id="left_top_lower"><div id="left_top_title">Lemmas</div></span></div>
-        <div id="right_top_header"><span id="right_top_upper"><textarea id="meaning_searchbox" autocomplete="off" placeholder="Search meanings..."></textarea></span><span id="right_top_lower"><div id="right_top_title">Meanings</div></span></div>
-      </div>
-        <div id="words_results"></div>
-    </div>
-</div>
-
 <div id="main_words_box">
   <div id="search_container">  
     <textarea id="lcs_lemma_searchbox" autocomplete="off" placeholder="Search LCS lemmas..."></textarea>
     <div id="search_candidates_box">
-      <!-- <div class="search_candidate">решти</div>
-      <div class="search_candidate">решти</div>
-      <div class="search_candidate">решти</div> -->
     </div>
   </div>
-  <!-- <div class="infl-grid" id="verb-grid"></div>
-  <div class="infl-grid" id="noun-grid"></div> -->
+  <div class="switch_button" id="infl_table_switch">
+    <div class="switch_button_middle"></div>
+  </div>
   <div id="grids-container">
 </div>
 

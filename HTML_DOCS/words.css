@@ -44,6 +44,7 @@ a {
     min-height: 100px;
     border-bottom-left-radius: 5px;
     border-bottom-right-radius: 5px;
+    row-gap: 10px;
     
 }
 
@@ -108,10 +109,42 @@ a {
 
 /*------------------------------OCS SERVER STUFF----------------------------------------------------*/
 
+.switch_button {
+  background-color: #040a163d;
+  width: 45px;
+  height: 25px;
+  border-radius: 30px;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  flex-flow: row nowrap;
+  cursor: pointer;
+  border: 1px solid black;
+  box-sizing: border-box;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+.switch_button:hover .switch_button_middle{
+  background-color: #cbd9f4d4;
+}
+.switch_button.active {
+  justify-content: flex-end;
+  background-color: #040a16;
+}
+.switch_button_middle {
+  width: 19px;
+  height: 19px;
+  background-color: #cbd9f489;
+  border-radius: 50px;
+}
+.switch_button.active .switch_button_middle {
+  background-color: #cbd9f4;
+}
+
 #grids-container {
   display: flex;
   flex-flow: row wrap;
-  margin-top: 10px;
+  /* margin-top: 10px; */
   width: 100%;
   justify-content: flex-start;
   row-gap: 15px;

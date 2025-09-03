@@ -3312,6 +3312,7 @@ document.getElementById("gorazd_searchbox").addEventListener('keydown', event =>
       //   viewboxcontent.appendChild(document.createRange().createContextualFragment('<div class="dict_row"><div class="dict_cell Wk">'+result[2]+'</div></div>'));
       // });
       // fullyOpenGorazd();
+      gorazd_query = gorazd_query.replaceAll("ꙑ", "ы");
       lookup_HWB(gorazd_query);
     }
   }
@@ -3322,6 +3323,7 @@ document.getElementById("gorazd_search_button").addEventListener('click', event 
     lookupGorazd(0, gorazd_query);
   }
   else if(gorazd_query != "") {
+    gorazd_query = gorazd_query.replaceAll("ꙑ", "ы");
     lookup_HWB(gorazd_query);
   }
 });
