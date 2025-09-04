@@ -39,6 +39,7 @@ int main() {
 
       replaceAll(cyr_header, "z", "ѕ");
       replaceAll(cyr_header, "к’", "к҄");
+      replaceAll(cyr_header, "ꙙ", "ѧ");
 
       hwb_json_file << "\n  [\"" << cyr_header << "\",\"" << lat_header << "\",\"" << ger_definition << "\"],"; 
     }

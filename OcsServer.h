@@ -105,7 +105,11 @@ class OcsServer : public TcpListener {
         bool retrieveTextFromSearch(std::string _POST[1], int clientSocket);
         bool greekTooltips(std::string _POST[2], int clientSocket);
 
-        bool generateInflection(std::string _POST[3], int clientSocket); 
+        bool generateInflection(std::string _POST[3], int clientSocket);
+
+        int numerifyMorphTag(const std::string& morph_tag, int noun_verb);
+
+        bool getCorpusInflections(std::string _POST[2], int clientSocket);
 
         const char*         m_post_data;
         std::string         m_post_data_incomplete;

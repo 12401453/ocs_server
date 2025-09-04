@@ -247,7 +247,7 @@ void LcsFlecter::postProcess(std::array<std::vector<Inflection>, 3> &inflected_f
             }
         }
     }
-};
+}
 
 std::array<std::vector<Inflection>, 3> LcsFlecter::getFullParadigm() {
     const inner_map* desinences = &m_active_endings.at(m_outer_map_no); 
@@ -407,6 +407,396 @@ bool LcsFlecter::c_strStartsWith(const char *str1, const char *str2) {
     else
         return false;
 }
+
+int LcsFlecter::numerifyMorphTag(const std::string &morph_tag, int noun_verb) {
+
+    if(morph_tag.size() != 10) {
+        return 0;
+    }
+
+    const char* morph_tag_c_str = morph_tag.c_str();
+    short int int_morph_tag[10]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    for(size_t i = 0; i < 10; i++) {
+
+        switch(i) {
+            case 0:
+                switch(*morph_tag_c_str){
+                    case '-':
+                        int_morph_tag[0] = 0;
+                        break;
+                    case '1':
+                        int_morph_tag[0] = 1;
+                        break;
+                    case '2':
+                        int_morph_tag[0] = 2;
+                        break;
+                    case '3':
+                        int_morph_tag[0] = 3;
+                        break;
+                    case 'x':
+                        int_morph_tag[0] = 4;
+                        break;
+                    default:
+                        int_morph_tag[0] = 0;
+                }
+            case 1:
+                switch(*morph_tag_c_str){
+                    case '-':
+                        int_morph_tag[1] = 0;
+                        break;
+                    case 's':
+                        int_morph_tag[1] = 1;
+                        break;
+                    case 'd':
+                        int_morph_tag[1] = 2;
+                        break;
+                    case 'p':
+                        int_morph_tag[1] = 3;
+                        break;
+                    case 'x':
+                        int_morph_tag[1] = 4;
+                        break;
+                    default:
+                        int_morph_tag[1] = 0;
+                }
+            case 2:
+                switch(*morph_tag_c_str){
+                    case '-':
+                        int_morph_tag[2] = 0;
+                        break;
+                    case 'p':
+                        int_morph_tag[2] = 1;
+                        break;
+                    case 'a':
+                        int_morph_tag[2] = 2;
+                        break;
+                    case 'i':
+                        int_morph_tag[2] = 3;
+                        break;
+                    case 's':
+                        int_morph_tag[2] = 4;
+                        break;
+                    case 'r':
+                        int_morph_tag[2] = 5;
+                        break;
+                    case 'u':
+                        int_morph_tag[2] = 6;
+                        break;
+                    case 'l':
+                        int_morph_tag[2] = 7;
+                        break;
+                    case 'f':
+                        int_morph_tag[2] = 8;
+                        break;
+                    case 't':
+                        int_morph_tag[2] = 9;
+                        break;
+                    case 'x':
+                        int_morph_tag[2] = 10;
+                        break;
+                    default:
+                        int_morph_tag[2] = 0;
+                }
+            case 3:
+                switch(*morph_tag_c_str){
+                    case '-':
+                        int_morph_tag[3] = 0;
+                        break;
+                    case 'i':
+                        int_morph_tag[3] = 1;
+                        break;
+                    case 's':
+                        int_morph_tag[3] = 2;
+                        break;
+                    case 'm':
+                        int_morph_tag[3] = 3;
+                        break;
+                    case 'o':
+                        int_morph_tag[3] = 4;
+                        break;
+                    case 'n':
+                        int_morph_tag[3] = 5;
+                        break;
+                    case 'p':
+                        int_morph_tag[3] = 6;
+                        break;
+                    case 'd':
+                        int_morph_tag[3] = 7;
+                        break;
+                    case 'g':
+                        int_morph_tag[3] = 8;
+                        break;
+                    case 'u':
+                        int_morph_tag[3] = 9;
+                        break;
+                    case 'x':
+                        int_morph_tag[3] = 10;
+                        break;
+                    case 'y':
+                        int_morph_tag[3] = 11;
+                        break;
+                    case 'e':
+                        int_morph_tag[3] = 12;
+                        break;
+                    case 'f':
+                        int_morph_tag[3] = 13;
+                        break;
+                    case 'h':
+                        int_morph_tag[3] = 14;
+                        break;
+                    case 't':
+                        int_morph_tag[3] = 15;
+                        break;
+                    default:
+                        int_morph_tag[3] = 0;
+                }
+            case 4:
+                switch(*morph_tag_c_str){
+                    case '-':
+                        int_morph_tag[4] = 0;
+                        break;
+                    case 'a':
+                        int_morph_tag[4] = 1;
+                        break;
+                    case 'm':
+                        int_morph_tag[4] = 2;
+                        break;
+                    case 'p':
+                        int_morph_tag[4] = 3;
+                        break;
+                    case 'e':
+                        int_morph_tag[4] = 4;
+                        break;
+                    case 'x':
+                        int_morph_tag[4] = 5;
+                        break;
+                    default:
+                        int_morph_tag[4] = 0;
+                }
+            case 5:
+                switch(*morph_tag_c_str){
+                    case '-':
+                        int_morph_tag[5] = 0;
+                        break;
+                    case 'm':
+                        int_morph_tag[5] = 1;
+                        break;
+                    case 'f':
+                        int_morph_tag[5] = 2;
+                        break;
+                    case 'n':
+                        int_morph_tag[5] = 3;
+                        break;
+                    case 'p':
+                        int_morph_tag[5] = 1;
+                        break;
+                    case 'o':
+                        int_morph_tag[5] = 1;
+                        break;
+                    case 'r':
+                        int_morph_tag[5] = 2;
+                        break;
+                    case 'q':
+                        int_morph_tag[5] = 1;
+                        break;
+                    case 'x':
+                        int_morph_tag[5] = 8;
+                        break;
+                    default:
+                        int_morph_tag[5] = 0;
+                }
+            case 6:
+                switch(*morph_tag_c_str){
+                    case '-':
+                        int_morph_tag[6] = 0;
+                        break;
+                    case 'n':
+                        int_morph_tag[6] = 1;
+                        break;
+                    case 'a':
+                        int_morph_tag[6] = 2;
+                        break;
+                    case 'g':
+                        int_morph_tag[6] = 3;
+                        break;
+                    case 'c':
+                        int_morph_tag[6] = 3;
+                        break;
+                    case 'd':
+                        int_morph_tag[6] = 4;
+                        break;
+                    case 'l':
+                        int_morph_tag[6] = 5;
+                        break;
+                    case 'i':
+                        int_morph_tag[6] = 6;
+                        break;
+                    case 'v':
+                        int_morph_tag[6] = 7;
+                        break;
+                    case 'o':
+                        int_morph_tag[6] = 9;
+                        break;
+                    case 'e':
+                        int_morph_tag[6] = 10;
+                        break;
+                    case 'b':
+                        int_morph_tag[6] = 11;
+                        break;
+                    case 'x':
+                        int_morph_tag[6] = 12;
+                        break;
+                    case 'z':
+                        int_morph_tag[6] = 13;
+                        break;
+                    default:
+                        int_morph_tag[6] = 0;
+                }
+            case 7:
+                switch(*morph_tag_c_str){
+                    case '-':
+                        int_morph_tag[7] = 0;
+                        break;
+                    case 'p':
+                        int_morph_tag[7] = 1;
+                        break;
+                    case 'c':
+                        int_morph_tag[7] = 2;
+                        break;
+                    case 's':
+                        int_morph_tag[7] = 3;
+                        break;
+                    case 'x':
+                        int_morph_tag[7] = 4;
+                        break;
+                    case 'z':
+                        int_morph_tag[7] = 5;
+                        break;
+                    default:
+                        int_morph_tag[7] = 0;
+                }
+            case 8:
+                switch(*morph_tag_c_str){
+                    case '-':
+                        int_morph_tag[8] = 0;
+                        break;
+                    case 'w':
+                        int_morph_tag[8] = 1;
+                        break;
+                    case 's':
+                        int_morph_tag[8] = 2;
+                        break;
+                    case 't':
+                        int_morph_tag[8] = 2;
+                        break;
+                    default:
+                        int_morph_tag[8] = 0;
+                }
+            case 9:
+                switch(*morph_tag_c_str){
+                    case '-':
+                        int_morph_tag[9] = 0;
+                        break;
+                    case 'n':
+                        int_morph_tag[9] = 1;
+                        break;
+                    case 'i':
+                        int_morph_tag[9] = 2;
+                        break;
+                    default:
+                        int_morph_tag[9] = 0;
+                }
+    
+        }
+        ++morph_tag_c_str;
+    }
+
+    int row_no = 0;
+    if(noun_verb == 1) {
+        short int num{int_morph_tag[1]}, pers{int_morph_tag[0]}, tense{int_morph_tag[2]}, mood{int_morph_tag[3]};
+        if (mood != 2 && tense != 8) {
+            if (mood != 6) {
+                if (mood == 1)
+                {
+                    row_no = (9 * (tense - 1) + 3 * (num - 1) + pers);
+                } // number of the unordered_map for normal finite verb forms (present, imperfect, or aorist)
+                else if (mood == 3)
+                {
+                    row_no = (9 * 3 + 3 * (num - 1) + pers);
+                } // number of the unordered_map for imperatives (which are all present tense)
+                else if (mood == 5)
+                {
+                    row_no = 43;
+                }
+                else if (mood == 9)
+                {
+                    row_no = 44;
+                }
+                else
+                {
+                    return 0;
+                }
+            }
+            else if (mood == 6) {
+                short int gender{int_morph_tag[5]}, gr_case{int_morph_tag[6]}, voice{int_morph_tag[4]}, strength{int_morph_tag[8]};
+
+                int nom_map_row = 21 * gender + 7 * num + gr_case - 28;
+
+                if (tense == 1) {
+                    if (voice == 1 && (nom_map_row == 1 || nom_map_row == 7 || nom_map_row == 43 || nom_map_row == 49)){ // if NVsg nt or masc PRAP
+                        row_no = 37;
+                    } // if active voice present participle non NVsg nt or masc
+                    else if (voice == 1) {
+                        row_no = 38;
+                    }
+                    else {
+                        row_no = 42;
+                    } // if passive voice present participle
+                }
+                else if (tense == 6) {
+                    if (voice == 1) {
+                        row_no = 39;
+                    }
+                    else {
+                        row_no = 41;
+                    }
+                }
+                else if (tense == 4) {
+                    row_no = 40;
+                }
+                else {
+                    return 0;
+                }
+            
+            }
+            else {
+                return 0;
+            }
+        }
+        else {
+            if (tense == 8) {
+                row_no = 3 * num + pers - 3;
+            }
+            else {
+                row_no = 3 * num + pers + 6;
+            }
+        }
+    }
+    else {
+        short int num{int_morph_tag[1]}, pers{int_morph_tag[0]}, gr_case{int_morph_tag[6]}, gender{int_morph_tag[5]}, strength{int_morph_tag[8]}, degree{int_morph_tag[7]};
+
+        /* used to shift masculines into the a-endings; hopefully not necessary since absolute numbers shouldn't matter for table-drawing
+        if (lemma_ref.lemma_id == compileTimeHashString("Nbѫжика")) {
+            gender = 2;
+        }
+        if (conj_type == "masc_ji" || conj_type == "masc_a" || conj_type == "masc_a_PV3" || conj_type == "masc_ja") {
+            row_no += 21;
+        }*/
+        
+        row_no = 21 * gender + 7 * num + gr_case - 28;
+    }
+    return row_no;
+};
 
 void LcsFlecter::class1Clean(Inflection& inflection) {
     replaceAll(inflection.flected_form, "pn", "n"); //class 2.1 -nǫti verbs  

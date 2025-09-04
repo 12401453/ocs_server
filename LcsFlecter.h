@@ -53,7 +53,7 @@ class LcsFlecter {
 
     void postProcess(std::array<std::vector<Inflection>, 3> &inflected_forms);
 
-
+    int numerifyMorphTag(const std::string& morph_tag, int noun_verb);
 
     void class1Clean(Inflection& inflection);
     void class1NasalClean(std::string& flecter_output);

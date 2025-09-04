@@ -3,7 +3,9 @@
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 const app_state = {
-  theme: 0
+  theme: 0,
+  corpus_forms: false,
+  displayed_lemma: [0, "", "", "", "", ""]
 }
 
 let lemmas_json = Object.create(null);
@@ -52,8 +54,27 @@ const generateInflection = ([lemma_id, stem, noun_verb, conj_type, lcs_lemma, pv
     
     if(noun_verb ==  "1") writeVerbTable(lcs_paradigm, conj_type, pv2_3_exists, noun_verb, lemma_id);
     else writeNounTable(lcs_paradigm, conj_type, pv2_3_exists, noun_verb, lemma_id);
+
+    app_state.displayed_lemma = [lemma_id, stem, noun_verb, conj_type, lcs_lemma, pv2_3_exists];
   })
   .finally(() => {;});
+};
+
+let corpus_forms = Object.create(null);
+const getCorpusInflections = (lemma_id=app_state.displayed_lemma[0], noun_verb=app_state.displayed_lemma[2]) => {
+  let send_data = "lemma_id="+String(lemma_id)+"&noun_verb="+noun_verb;
+  const myheaders = new Headers();
+  myheaders.append('Content-Type', 'application/x-www-form-urlencoded');
+  myheaders.append('Cache-Control', 'no-cache');
+  const options = {method: "POST", headers: myheaders, cache: "no-store", body: send_data};
+
+  fetch("get_corpus_inflections.php", options)
+  .then(response => {
+    return response.json();
+  })
+  .then(response => {
+    corpus_forms = response;
+  });
 };
 
 const switchConv = () => {
@@ -132,7 +153,6 @@ const writeVerbTable = (lcs_paradigm, conj_type, pv2_3_exists, noun_verb, lemma_
     table_html += "<tr class='verb_row'><th class='infl_titles verb_tenses' colspan='2'>Participles</th></tr>";
     for(let i = 0; i < participle_forms.length; i++) {
       table_html += "<tr class='verb_row'><th class='infl_titles' title='"+participle_titles[i]+"'>"+ participle_forms[i]+"</th>";
-      console.log(37+i);
       writeCell(37+i);
       table_html += "</tr>";
     }
@@ -337,7 +357,8 @@ lemma_searchbox.addEventListener('keydown', (event) => {
 
 const toggleInflTables = (event) => {
 
-  event.currentTarget.classList.toggle('active');
+  event.currentTarget.parentElement.classList.toggle('active');
+  app_state.corpus_forms = app_state.corpus_forms ? false : true;
   
 }
 document.getElementById("infl_table_switch").addEventListener('click', toggleInflTables);

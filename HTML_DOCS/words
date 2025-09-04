@@ -35,8 +35,11 @@
     <div id="search_candidates_box">
     </div>
   </div>
-  <div class="switch_button" id="infl_table_switch">
-    <div class="switch_button_middle"></div>
+  <div id="infl_toggle_box" title="Show forms from the texts rather than generated normalised forms">
+    <div class="switch_button" id="infl_table_switch">
+      <div class="switch_button_middle"></div>
+    </div>
+    <div class="switch_label">Corpus forms</div>
   </div>
   <div id="grids-container">
 </div>
