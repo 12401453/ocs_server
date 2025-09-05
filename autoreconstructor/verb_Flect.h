@@ -21,10 +21,19 @@ void verb_Flect(Lemma &lemma_ref, short int int_morph_tag[10], std::string cyr_i
   }
 
   short int num{int_morph_tag[1]}, pers{int_morph_tag[0]}, tense{int_morph_tag[2]}, mood{int_morph_tag[3]};
-  if (mood != 2 && tense != 8)
+
+  //byti future bǫd- forms
+  if(tense == 8 && lemma_ref.lemma_id == compileTimeHashString("V-бꙑти")) {
+    //just switch to the pref_byti table and revert the tense to "present", since that will take care of future participle bǫdǫћ- as well
+    outer_map_no = 5001;
+    tense = 1;
+  }
+
+  if (mood != 2 /*&& tense != 8*/) //subjunctive forms of byti still need their own handling, but futures are dealt with by switching to the pref_byti endings^^
   {
     if (mood != 6)
-    {
+    {  
+
       if (mood == 1)
       {
         row_no = (9 * (tense - 1) + 3 * (num - 1) + pers);
@@ -74,7 +83,7 @@ void verb_Flect(Lemma &lemma_ref, short int int_morph_tag[10], std::string cyr_i
       }
       if ((conj_type == "dati" || conj_type == "eat" || conj_type == "pref_eat" || conj_type == "byti" || conj_type == "pref_byti") && (row_no == 11 || row_no == 12))
       {
-        if (Sniff(cyr_id, "ст", 3) || Sniff(cyr_id, "ⷭ҇", 20))
+        if (Sniff(cyr_id, "ст", 3) || Sniff(cyr_id, "ⷭ҇", 20) || Sniff(cyr_id, "с", 1))
           outer_map_no++;
       } // add byti
       if ((conj_type == "eat" || conj_type == "pref_eat") && (row_no == 10 || row_no == 13 || row_no == 16))
@@ -110,10 +119,10 @@ void verb_Flect(Lemma &lemma_ref, short int int_morph_tag[10], std::string cyr_i
             outer_map_no = outer_map_no * 100 + 1;
         }
       }
-      if (conj_type == "pref_byti" && row_no < 10)
-      {
-        outer_map_no = outer_map_no * 100 + 1;
-      }
+      // if (conj_type == "pref_byti" && row_no < 10)
+      // {
+      //   outer_map_no = outer_map_no * 100 + 1; //should've been taken care of by switching to separate pref_byti table
+      // }
       if (conj_type == "dovleti" && row_no == 9)
       {
         if (Sniff(cyr_id, "ѧт", 3))
@@ -494,6 +503,7 @@ void verb_Flect(Lemma &lemma_ref, short int int_morph_tag[10], std::string cyr_i
         else
           lemma_ref.long_adj = 3;
       }
+
       // working out the participle row numbers in this way is retarded; the only thing that needs to be done here is distinguishing between 37 and 38 (because this is determined by nominal grammar); it really should all be moved to before the finite/participle split at the top of the function
       if (tense == 1)
       {
@@ -728,14 +738,14 @@ void verb_Flect(Lemma &lemma_ref, short int int_morph_tag[10], std::string cyr_i
   {
 
     outer_map_no = outer_map_no * 100 + 1;
-    if (tense == 8)
+   /* if (tense == 8)
     {
-      row_no = 3 * num + pers - 3;
+      row_no = 3 * num + pers - 3; tense == 8 means future, and those are dealt with by switching byti to the pref_byti endings
     }
     else
-    {
+    { */
       row_no = 3 * num + pers + 6;
-    }
+   // }
 
     if (row_no == 18)
     {

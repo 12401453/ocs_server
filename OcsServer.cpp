@@ -3008,10 +3008,11 @@ bool OcsServer::getCorpusInflections(std::string _POST[2], int clientSocket) {
         int lemma_id = safeStrToInt(_POST[0], 0);
         int noun_verb = safeStrToInt(_POST[1]);
 
-        std::map<int, std::vector<std::string>> corpus_forms_map;
+        std::vector<std::vector<std::string>> corpus_forms_vec(64);
+        corpus_forms_vec.reserve(64);
 
         std::ostringstream corpus_forms_json;
-        corpus_forms_json << "[";
+        corpus_forms_json << "{";
       
         
         const char* select_forms_sql = "SELECT DISTINCT chu_word_torot, morph_tag FROM corpus WHERE lemma_id = ?";
@@ -3022,15 +3023,28 @@ bool OcsServer::getCorpusInflections(std::string _POST[2], int clientSocket) {
         std::string morph_tag;
         while(sqlite3_step(select_forms_stmt) == SQLITE_ROW) {
 
-            chu_word_torot = (const char*)sqlite3_column_text(select_forms_stmt, 0);
+            //chu_word_torot = (const char*)sqlite3_column_text(select_forms_stmt, 0);
             morph_tag = (const char*)sqlite3_column_text(select_forms_stmt, 1);
             int row_no = numerifyMorphTag(morph_tag, noun_verb);
 
-            corpus_forms_json << "[" << row_no << ",\"" << escapeQuotes(chu_word_torot) << "\"],";
+            //corpus_forms_json << "[" << row_no << ",\"" << escapeQuotes(chu_word_torot) << "\"],";
+            corpus_forms_vec[row_no].emplace_back((const char*)sqlite3_column_text(select_forms_stmt, 0));
         }
         sqlite3_finalize(select_forms_stmt);
+
+        for(size_t i = 0; i < 64; ++i) {
+            if(corpus_forms_vec[i].size() > 0) {
+                corpus_forms_json << "\"" << i << "\":[";
+                for(const auto& corpus_form : corpus_forms_vec[i]) {
+                    corpus_forms_json << "\"" << escapeQuotes(corpus_form) << "\",";
+                }
+                corpus_forms_json.seekp(-1, std::ios_base::cur);
+                corpus_forms_json << "],";
+            }
+            
+        }
         if(corpus_forms_json.str().size() > 1) corpus_forms_json.seekp(-1, std::ios_base::cur);
-        corpus_forms_json << "]";
+        corpus_forms_json << "}";
     
     
         int content_length = corpus_forms_json.str().size();

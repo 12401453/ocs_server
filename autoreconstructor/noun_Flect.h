@@ -187,9 +187,10 @@ void noun_Flect(Lemma &lemma_ref, short int int_morph_tag[10], std::string cyr_i
   //     outer_map_no++;
   // }
 
+  //i-stem jo-stem desinences
   if(outer_map_no == 141) {
     if(row_no == 3 && (Sniff(cyr_id, "а", 1) || Sniff(cyr_id, "ѣ", 1))){
-      outer_map_no++;
+      outer_map_no++; //jotation of /nrl/-ending gen.sg's is done by the Dejotate(), this needs a better solution
     }
     if(row_no == 4 && (Sniff(cyr_id, "оу", 2) || Sniff(cyr_id, "ю", 1))){
       outer_map_no++;

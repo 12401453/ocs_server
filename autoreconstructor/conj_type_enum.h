@@ -67,7 +67,7 @@ int conj_type_enum(std::string_view conj_type) {
 
       //VERBS
       case compileTimeHashString("byti"): return 11;
-      case compileTimeHashString("pref_byti"): return 11;
+      case compileTimeHashString("pref_byti"): return 5001;
       case compileTimeHashString("nebyti"): return 101;
       case compileTimeHashString("have"): return 21;
       case compileTimeHashString("dati"): return 31;

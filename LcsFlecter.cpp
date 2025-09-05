@@ -159,6 +159,10 @@ void LcsFlecter::postProcess(std::array<std::vector<Inflection>, 3> &inflected_f
                 inflected_forms[2].emplace_back(infl_pair.first + 44, infl_pair.second);
             }
 
+            //add future participle
+            inflected_forms[0].emplace_back(72, m_active_endings.at(m_conj_type_map.at("pref_byti")).at(37));
+            inflected_forms[0].emplace_back(73, m_active_endings.at(m_conj_type_map.at("pref_byti")).at(38));
+
         }
 
         //probably should check the ablaut-grades of kviti-verbs
@@ -270,8 +274,13 @@ std::array<std::vector<Inflection>, 3> LcsFlecter::getFullParadigm() {
     }
 
     //need to add jo-stem endings for i-stems that end on /nlr/, but also need to jotate the stem by explicitly adding /j/ (which should get yeeted by the Dejotation step)
-    if((m_stem.ends_with("r") || m_stem.ends_with("n") || m_stem.ends_with("l")) && m_conj_type == "masc_i") {
-        deviances_iter = m_active_endings.find(1401); //1401 holds jo-stem endings except with prepended /j/
+    if(m_conj_type == "masc_i") {
+        if(m_stem.ends_with("r") || m_stem.ends_with("n") || m_stem.ends_with("l") || m_stem.ends_with("č")) {
+            deviances_iter = m_active_endings.find(1401); //1401 holds jo-stem endings except with prepended /j/
+        }
+        else {
+            deviances_iter = m_active_endings.end();
+        }
     }
 
     auto alternatives_iter = m_active_endings.find(alternative_map_no);
