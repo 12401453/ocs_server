@@ -388,6 +388,7 @@ inner_map N_adj_soft_c0 = {
 inner_map N_adj_soft_c1 = {
 {7, "ь"},
 {15, "ьje"},
+{17, "evъ"},
 {20, "ьmi"},
 {28, "Ǣ"},
 };

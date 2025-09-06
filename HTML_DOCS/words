@@ -30,10 +30,13 @@
 </div>
 
 <div id="main_words_box">
-  <div id="search_container">  
-    <textarea id="lcs_lemma_searchbox" autocomplete="off" placeholder="Search LCS lemmas..."></textarea>
-    <div id="search_candidates_box">
+  <div id="search_top_row">
+    <div id="search_container">  
+      <textarea id="lcs_lemma_searchbox" autocomplete="off" placeholder="Search LCS lemmas..."></textarea>
+      <div id="search_candidates_box">
+      </div>
     </div>
+    <div id="random_lemma_btn">Random</div>
   </div>
   <div id="infl_toggle_box" title="Show forms from the texts rather than generated normalised forms">
     <div class="switch_button" id="infl_table_switch">

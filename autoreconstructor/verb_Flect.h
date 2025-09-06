@@ -559,6 +559,11 @@ void verb_Flect(Lemma &lemma_ref, short int int_morph_tag[10], std::string cyr_i
         class_11_infix_clean(stem);
       }
 
+      //-ьren- PPP endings in "rti" verbs
+      if(row_no == 41 && outer_map_no == 261 && Sniff(cyr_id, "рен", 6)) {
+        outer_map_no++;
+      }
+
       if ((conj_type == "have") && (row_no == 37 || row_no == 38))
       {
         if (Sniff(cyr_id, "ѣ", 20))
@@ -665,6 +670,7 @@ void verb_Flect(Lemma &lemma_ref, short int int_morph_tag[10], std::string cyr_i
       }
       if (row_no == 40 || row_no == 41 || row_no == 42)
       {
+        //need to move the cleaning before the article-adding-on and also find a way to store non-deviant forms where the outer_map_no has been incremented 
 
         if (strength == 1)
         {

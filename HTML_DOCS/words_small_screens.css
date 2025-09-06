@@ -3,6 +3,8 @@
 @font-face {font-family: PT_Serif; src: local('PT Serif'), url('PTSerif-Regular.ttf'); }
 @font-face {font-family: IBM_Plex_Sans; src: local('IBM Plex Sans'), url('IBMPlexSans-Regular.ttf'); }
 @font-face {font-family: Calibri; src: local('Calibri'), url('calibri.ttf'); }
+@font-face {font-family: Bukyvede; src: local('Bukyvede') ,url('BukyVede-Regular.ttf'); }
+@font-face {font-family: Monomakh; src: local('Monomakh') ,url('MonomakhUnicode.ttf'); }
 
 html {
   overflow-y: scroll; /* makes sure vertical scrollbar is always present to prevent horizontal movement*/
@@ -37,6 +39,7 @@ body {
     min-height: 100px;
     border-bottom-left-radius: 5px;
     border-bottom-right-radius: 5px;
+    row-gap: 10px;
     
 }
 
@@ -97,7 +100,288 @@ body {
   opacity: 100%;
 }
 
+/*------------------------------OCS SERVER STUFF----------------------------------------------------*/
+#infl_toggle_box {
+  display:flex;
+  flex-flow: row nowrap;
+  justify-content: flex-start;
+  column-gap: 5px;
+  margin-top: 5px;
+}
+.switch_label {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family:"IBM_Plex_Sans";
+  color: #cbd9f4;
+  opacity: 0.5;
+  transition: opacity 0.3s;
+  font-size: 11.2px;
+}
 
+.switch_button {
+  /* background-color: #040a163d; */
+  background-color: #040a16;
+  width: 31.5px;
+  height: 17.5px;
+  border-radius: 30px;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  flex-flow: row nowrap;
+  cursor: pointer;
+  border: 1px solid black;
+  box-sizing: border-box;
+  padding-left: 3px;
+  padding-right: 3px;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.switch_button_middle {
+  width: 13.3px;
+  height: 13px;
+  background-color: #cbd9f489;
+  border-radius: 50px;
+  transition: transform 0.3s, background-color 0.3s;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+#infl_toggle_box.active .switch_button .switch_button_middle {
+  background-color: #cbd9f4;
+  transform: translateX(11.55px);
+}
+#infl_toggle_box.active .switch_button {
+  /* justify-content: flex-end; */
+}
+#infl_toggle_box.active .switch_label {
+  opacity: 1;
+}
+
+#grids-container {
+  display: flex;
+  flex-flow: row wrap;
+  /* margin-top: 10px; */
+  width: 100%;
+  justify-content: flex-start;
+  row-gap: 10px;
+  column-gap: 10px;
+  align-items: start;
+}
+
+.infl_table_rounder {
+  border: 2px solid black;
+  border-radius: 6px;
+  display: flex;
+}
+
+.infl-grid {
+  /*display: grid;
+  grid-auto-flow: column;*/
+  font-size: 16px;
+  font-family: Bukyvede;
+  /*border-right: 1px solid;
+  border-top: 1px solid;
+  border-radius: 6px;*/
+  color:#cbd9f4;
+  background-color: #071022;
+  border-collapse: collapse;
+  border: 4px solid black;
+  flex: 1;
+}
+
+/*
+.verb-grid {
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(9, 1fr);
+}
+.noun-grid {
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(7, 1fr);
+} */
+.grid-child {
+  padding: 2px;
+  /* padding-right: 2px; */
+  text-align: center;
+  /*border-left: 1px solid;
+  border-bottom: 1px solid; */
+  display: flex
+;
+  justify-content: center;
+  flex-flow: column nowrap;
+  align-items: center;
+}
+.corpus-grid-child {
+  padding:2px;
+  /* padding-right: 2px; */
+  text-align: center;
+  /*border-left: 1px solid;
+  border-bottom: 1px solid; */
+  /* display: flex;
+  justify-content: center;
+  flex-flow: column nowrap;
+  align-items: center; */
+}
+/*.grid-child:first-child {
+  border-top-left-radius: 6px;
+}
+.grid-child:last-child {
+  border-bottom-right-radius: 6px;
+} */
+
+th.infl_titles {
+  font-family: 'IBM_Plex_Sans';
+  font-size: 10.5px;
+  font-weight: normal;
+  background-color: #040a16;
+  border-right: 4px solid black;
+}
+th.infl_titles.top_headers {
+  padding-top: 2px;
+  padding-bottom: 2px;
+}
+th.infl_titles.top_headers:last-child {
+  border-right: none;
+}
+
+td {
+  border-right: 4px solid black;
+  padding: 2px;
+  min-width: 40px;
+}
+td.last-col{
+  border-right: none;
+}
+
+tr {
+  border-top: 2px solid black;
+}
+tr:first-child {
+  border-top: none;
+}
+tr.verb_row:nth-child(2) {
+  border-top: 4px solid black;
+}
+
+tr.verb_row:nth-child(5) {
+  border-top: 4px solid black;
+}
+tr.verb_row:nth-child(8) {
+  border-top: 4px solid black;
+}
+tr:last-child {
+  border-bottom-right-radius: 6px;
+}
+
+/* tr:nth-child(5) td {
+    background-color: #040a16;
+}
+tr:nth-child(6) td {
+    background-color: #040a16;
+}
+tr:nth-child(7) td {
+    background-color: #040a16;
+} */
+
+.deviance {
+  opacity: 0.8;
+  font-size: 10.5px;
+}
+.variant {
+  opacity: 1;
+  font-size: 16.1px;
+}
+
+#search_top_row {
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: flex-start;
+  align-items: center;
+  column-gap: 7px;
+}
+#random_lemma_btn{
+  margin-left: 14px;
+  border: 2px solid black;
+  color: #cbd9f4;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 7px;
+  padding-right: 7px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 30px;
+  background-color: #071022;
+  cursor: pointer;
+  user-select: none;
+  font-size: 10.5px;
+  font-family: "IBM_Plex_Sans";
+  -webkit-tap-highlight-color: transparent;
+}
+#random_lemma_btn:hover {
+  background-color: #040a16;
+}
+
+#lcs_lemma_searchbox {
+  display: block;
+  background-color: #040a16;
+  color: #cbd9f4;
+  padding: 4px;
+  border: 2px solid black;
+  border-radius: 4px;
+  resize: none;
+  width: 122.5px;
+  height: 19px;
+  font-size: 11.9px;
+  font-family: IBM_Plex_Sans;
+  outline: none;
+}
+#search_candidates_box {
+  display: none;
+  flex-flow: column nowrap;
+  justify-content: start;
+  align-items: stretch;
+  height: fit-content;
+
+  background-color: #071022;
+  border-left: 2px solid black;
+  border-right: 2px solid black;
+  border-bottom: 2px solid black;
+  border-bottom-left-radius: 4px;
+  border-bottom-right-radius: 4px;
+  z-index: 1;
+  opacity: 0.95;
+  position: absolute;
+  top: 100%;
+}
+.search_candidate {
+  width: 122.5px;
+  padding: 4px;
+  height: 14px;
+  font-size: 11.9px;
+  font-family: Bukyvede;
+  color: #cbd9f4;
+  border-bottom: 1px solid black;
+  cursor: pointer;
+}
+.search_candidate:last-child {
+  width: 122.5px;
+  padding: 4px;
+  height: 14px;
+  font-size: 11.9px;
+  font-family: Bukyvede;
+  color: #cbd9f4;
+  border-bottom: none;
+}
+.search_candidate:hover {
+  background-color: black;
+}
+.search_candidate.keyboard_selected{
+  background-color: black;
+}
+#search_container {
+  position: relative;
+}
 
 
 

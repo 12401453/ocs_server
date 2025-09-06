@@ -544,15 +544,17 @@ void noun_Flect(Lemma &lemma_ref, short int int_morph_tag[10], std::string cyr_i
   }
 
   // masc_i-stem endings of jo-stems
-  if (conj_type == "masc_jo" && row_no == 15)
+  if (conj_type == "masc_jo")
   {
-    if (Sniff(cyr_id, "іе", 2) || Sniff(cyr_id, "ье", 2) || Sniff(cyr_id, "ъе", 2))
+    if (row_no == 15 && (Sniff(cyr_id, "іе", 2) || Sniff(cyr_id, "ье", 2) || Sniff(cyr_id, "ъе", 2))) {
       outer_map_no++;
-  }
-  if (conj_type == "masc_jo" && row_no == 20)
-  {
-    if (Sniff(cyr_id, "мі", 2))
+    }
+    if(row_no == 17 && Sniff(cyr_id, "ев", 3)) {
       outer_map_no++;
+    }
+    if(row_no == 20 && Sniff(cyr_id, "мі", 2)) {
+      outer_map_no++;
+    }
   }
 
   // o-, a-stem vocatives

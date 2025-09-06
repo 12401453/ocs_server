@@ -2420,7 +2420,7 @@ bool OcsServer::cyrFuzzySearch(std::string _POST[3], int clientSocket) {
         std::string query = URIDecode(_POST[0]);
         int tokno_start = safeStrToInt(_POST[1]);
         int tokno_end = safeStrToInt(_POST[2]);     
-        trigramSearch(DB, "chu_normalised_trigrams", "chu_word_torot", query, tokno_start, tokno_end, clientSocket);
+        trigramSearch(DB, "chu_normalised_trigrams", "autoreconstructed_lcs", query, tokno_start, tokno_end, clientSocket);
         sqlite3_close(DB);
         
         return true;
@@ -2437,7 +2437,7 @@ bool OcsServer::cyrSearch(std::string _POST[3], int clientSocket) {
         std::string query = URIDecode(_POST[0]);
         int tokno_start = safeStrToInt(_POST[1]);
         int tokno_end = safeStrToInt(_POST[2]);     
-        trigramSearch(DB, "chu_word_clean_trigrams", "chu_word_torot", query, tokno_start, tokno_end, clientSocket);
+        trigramSearch(DB, "chu_word_clean_trigrams", "autoreconstructed_lcs", query, tokno_start, tokno_end, clientSocket);
         sqlite3_close(DB);
         
         return true;
@@ -2918,11 +2918,14 @@ int OcsServer::numerifyMorphTag(const std::string &morph_tag, int noun_verb) {
         //Byti needs to be dealt with, but isn't on the tables-side yet anyway
 
         short int num{int_morph_tag[1]}, pers{int_morph_tag[0]}, tense{int_morph_tag[2]}, mood{int_morph_tag[3]};
-        if (mood != 2 && tense != 8) {
+        if (mood != 2 /*&& tense != 8 */) {
             if (mood != 6) {
                 if (mood == 1)
                 {
                     row_no = (9 * (tense - 1) + 3 * (num - 1) + pers);
+                    if(tense == 8) {
+                        row_no += 44 - 63; //byti futures
+                    }
                 } // number of the unordered_map for normal finite verb forms (present, imperfect, or aorist)
                 else if (mood == 3)
                 {
@@ -2946,12 +2949,20 @@ int OcsServer::numerifyMorphTag(const std::string &morph_tag, int noun_verb) {
 
                 int nom_map_row = 21 * gender + 7 * num + gr_case - 28;
 
-                if (tense == 1) {
+                if (tense == 1 || tense == 8) {
                     if (voice == 1 && (nom_map_row == 1 || nom_map_row == 7 || nom_map_row == 43 || nom_map_row == 49)){ // if NVsg nt or masc PRAP
                         row_no = 37;
+
+                        if(tense == 8) {
+                            row_no += 35; //byti future participle
+                        }
+
                     } // if active voice present participle non NVsg nt or masc
                     else if (voice == 1) {
                         row_no = 38;
+                        if(tense == 8) {
+                            row_no += 35; //byti future participle
+                        }
                     }
                     else {
                         row_no = 42;
@@ -2978,12 +2989,13 @@ int OcsServer::numerifyMorphTag(const std::string &morph_tag, int noun_verb) {
             }
         }
         else {
-            if (tense == 8) {
-                row_no = 3 * num + pers - 3;
-            }
-            else {
-                row_no = 3 * num + pers + 6;
-            }
+            // if (tense == 8) {
+            //     row_no = 3 * num + pers - 3;
+            // }
+  
+            //row_no = 3 * num + pers + 6;
+            row_no = 3 * num + pers + 6 + 44; //shift the number of the subjunctives of byti up to match those assigned by LcsFlecter.cpp
+
         }
     }
     else {
@@ -2999,6 +3011,10 @@ int OcsServer::numerifyMorphTag(const std::string &morph_tag, int noun_verb) {
         
         row_no = 21 * gender + 7 * num + gr_case - 28;
     }
+
+    if(row_no < 0) {
+        return 0;
+    }
     return row_no;
 };
 
@@ -3008,14 +3024,14 @@ bool OcsServer::getCorpusInflections(std::string _POST[2], int clientSocket) {
         int lemma_id = safeStrToInt(_POST[0], 0);
         int noun_verb = safeStrToInt(_POST[1]);
 
-        std::vector<std::vector<std::string>> corpus_forms_vec(64);
-        corpus_forms_vec.reserve(64);
+        std::vector<std::vector<std::string>> corpus_forms_vec(75);
+        corpus_forms_vec.reserve(75);
 
         std::ostringstream corpus_forms_json;
         corpus_forms_json << "{";
       
         
-        const char* select_forms_sql = "SELECT DISTINCT chu_word_torot, morph_tag FROM corpus WHERE lemma_id = ?";
+        const char* select_forms_sql = "SELECT DISTINCT chu_word_torot, morph_tag FROM corpus WHERE lemma_id = ? AND auto_tagged IS NULL";
         sqlite3_stmt* select_forms_stmt;
         sqlite3_prepare_v2(DB, select_forms_sql, -1, &select_forms_stmt, nullptr);
         sqlite3_bind_int(select_forms_stmt, 1, lemma_id);
@@ -3027,12 +3043,14 @@ bool OcsServer::getCorpusInflections(std::string _POST[2], int clientSocket) {
             morph_tag = (const char*)sqlite3_column_text(select_forms_stmt, 1);
             int row_no = numerifyMorphTag(morph_tag, noun_verb);
 
+            std::cout << row_no << "\n";
+
             //corpus_forms_json << "[" << row_no << ",\"" << escapeQuotes(chu_word_torot) << "\"],";
             corpus_forms_vec[row_no].emplace_back((const char*)sqlite3_column_text(select_forms_stmt, 0));
         }
         sqlite3_finalize(select_forms_stmt);
 
-        for(size_t i = 0; i < 64; ++i) {
+        for(size_t i = 0; i < 75; ++i) {
             if(corpus_forms_vec[i].size() > 0) {
                 corpus_forms_json << "\"" << i << "\":[";
                 for(const auto& corpus_form : corpus_forms_vec[i]) {

@@ -123,6 +123,7 @@ a {
   color: #cbd9f4;
   opacity: 0.5;
   transition: opacity 0.3s;
+  font-size: 16px;
 }
 
 .switch_button {
@@ -140,6 +141,7 @@ a {
   box-sizing: border-box;
   padding-left: 4px;
   padding-right: 4px;
+  user-select: none;
 }
 
 .switch_button_middle {
@@ -148,6 +150,7 @@ a {
   background-color: #cbd9f489;
   border-radius: 50px;
   transition: transform 0.3s, background-color 0.3s;
+  user-select: none;
 }
 #infl_toggle_box.active .switch_button .switch_button_middle {
   background-color: #cbd9f4;
@@ -168,6 +171,7 @@ a {
   justify-content: flex-start;
   row-gap: 15px;
   column-gap: 15px;
+  align-items: start;
 }
 
 .infl_table_rounder {
@@ -212,6 +216,17 @@ a {
   flex-flow: column nowrap;
   align-items: center;
 }
+.corpus-grid-child {
+  padding: 4px;
+  /* padding-right: 2px; */
+  text-align: center;
+  /*border-left: 1px solid;
+  border-bottom: 1px solid; */
+  /* display: flex;
+  justify-content: center;
+  flex-flow: column nowrap;
+  align-items: center; */
+}
 /*.grid-child:first-child {
   border-top-left-radius: 6px;
 }
@@ -226,17 +241,18 @@ th.infl_titles {
   background-color: #040a16;
   border-right: 5px solid black;
 }
-th.infl_titles.verb_tenses {
+th.infl_titles.top_headers {
   padding-top: 4px;
   padding-bottom: 4px;
 }
-th.infl_titles.verb_tenses:last-child {
+th.infl_titles.top_headers:last-child {
   border-right: none;
 }
 
 td {
   border-right: 5px solid black;
   padding: 4px;
+  min-width: 70px;
 }
 td.last-col{
   border-right: none;
@@ -279,6 +295,35 @@ tr:nth-child(7) td {
 .variant {
   opacity: 1;
   font-size: 23px;
+}
+
+#search_top_row {
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: flex-start;
+  align-items: center;
+  column-gap: 10px;
+}
+#random_lemma_btn{
+  margin-left: 20px;
+  border: 2px solid black;
+  color: #cbd9f4;
+  padding-top: 6px;
+  padding-bottom: 6px;
+  padding-left: 10px;
+  padding-right: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 30px;
+  background-color: #071022;
+  cursor: pointer;
+  user-select: none;
+  font-size: 15.5px;
+  font-family: "IBM_Plex_Sans";
+}
+#random_lemma_btn:hover {
+  background-color: #040a16;
 }
 
 #lcs_lemma_searchbox {

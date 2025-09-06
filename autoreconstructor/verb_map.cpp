@@ -1287,6 +1287,7 @@ inner_map v_26_c1 = {
 {15, "ŕ̥sta"},
 {24, "ьrěašeta"},
 {37, "ьrǫtj"},
+{41, "ьren"},
 };
 
 inner_map v_26_c2 = {
