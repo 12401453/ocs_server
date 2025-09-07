@@ -172,12 +172,20 @@ void verb_Flect(Lemma &lemma_ref, short int int_morph_tag[10], std::string cyr_i
       {
         if (row_no == 10 || row_no == 13 || row_no == 16)
         {
-          if (Sniff(cyr_id, "ѣх", 5))
+          if(Sniff(cyr_id, "ѣх", 5)) {
             outer_map_no += 2;
-        } // these two if statements exist entirely due to решти
+          }
+          //1sg. съмѧсъ as opposed to съмѧтъ etc.
+          else if(row_no == 10 && Sniff(cyr_id, "ѧс", 3)) {
+            outer_map_no += 2;
+          }
+          else if(row_no < 18 && row_no > 12 && Sniff(cyr_id, "ѧс", 5)) {
+            outer_map_no += 2;
+          }
+        }
         if (row_no == 18)
         {
-          if (Sniff(cyr_id, "ѣш", 5) || Sniff(cyr_id, "ѧш", 5) /*second one is for nalęk-ti*/)
+          if (Sniff(cyr_id, "ѣш", 3) || Sniff(cyr_id, "ѧш", 3) || Sniff(cyr_id, "ѧсѧ", 3)) /*second one is for nalęk-ti, third one is for sъtręs-ti, sъtręsę*/
             outer_map_no += 2;
         }
         if (outer_map_no % 10 == 1)

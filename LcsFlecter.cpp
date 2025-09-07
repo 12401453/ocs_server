@@ -831,12 +831,14 @@ void LcsFlecter::class1Clean(Inflection& inflection) {
     replaceAll(inflection.flected_form, "ogsę", "ašę");
     replaceAll(inflection.flected_form, "oksę", "ašę");
     replaceAll(inflection.flected_form, "egst", "ěst");
+    replaceAll(inflection.flected_form, "ogst", "ast");
     replaceAll(inflection.flected_form, "ebs", "ěbs");
     replaceAll(inflection.flected_form, "eks", "ěx");
     replaceAll(inflection.flected_form, "ods", "as");
     replaceAll(inflection.flected_form, "ogs", "ax");
     replaceAll(inflection.flected_form, "egs", "ěx");
     replaceAll(inflection.flected_form, "eds", "ěs");
+    replaceAll(inflection.flected_form, "ets", "ěs");
     replaceAll(inflection.flected_form, "ezs", "ěs");
     replaceAll(inflection.flected_form, "ess", "ěs");
     replaceAll(inflection.flected_form, "ęss", "ęs"); //class 11 sъtręs-ti when it adds S-aorist endings; a check for S-aorists needs adding to the autoreconstructor because Mar. Matt 28 сътрѧсѧ is wrongly reconstructed as the root-aorist *sъtręsǫ

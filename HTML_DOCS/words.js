@@ -80,7 +80,7 @@ const getCorpusInflections = (lemma_id=app_state.displayed_lemma[0], noun_verb=a
   })
   .then(response => {
     app_state.corpus_paradigm = response;
-    console.log(app_state.corpus_paradigm);
+    //console.log(app_state.corpus_paradigm);
 
     app_state.displayed_lemma = lemmas_json.find(arr => arr[0] == lemma_id);
 
@@ -450,6 +450,8 @@ const writeNounTableCorpus = () => {
 const lemma_searchbox = document.getElementById("lcs_lemma_searchbox");
 const search_candidates = document.getElementById("search_candidates_box");
 
+search_candidates.addEventListener('mousedown', (event) => event.preventDefault()); //this is to prevent the textarea from losing focus and causing the search-candidates to disappear before the 'click' event fires, since I need the 'click' event to fire to trigger the paradigm-retrieval
+
 const removeSearchCandidates = () => {
   lemma_searchbox.style.borderBottomLeftRadius = "";
   lemma_searchbox.style.borderBottomRightRadius = "";
@@ -555,13 +557,15 @@ lemma_searchbox.addEventListener('keydown', (event) => {
   }
 }); //this is needed because 'input' events have no .key property (only inputType == "insertLineBreak"), and keydown events fire before the textarea's value updates
 lemma_searchbox.addEventListener('focus', filterLemmas);
+lemma_searchbox.addEventListener('blur', removeSearchCandidates);
 
 const toggleInflTables = (event) => {
 
   event.currentTarget.parentElement.classList.toggle('active');
   app_state.show_corpus_forms = app_state.show_corpus_forms ? false : true;
 
-  if(Object.keys(app_state.raw_lcs_paradigm).length == 0 && Object.keys(app_state.corpus_paradigm).length == 0) {
+  //if(Object.keys(app_state.raw_lcs_paradigm).length == 0 && Object.keys(app_state.corpus_paradigm).length == 0) {
+  if(app_state.displayed_lemma[0] == 0){
     return;
   }
 

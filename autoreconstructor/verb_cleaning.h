@@ -323,12 +323,14 @@ void class_I_clean(std::string& flected_form, bool imperative) {
   replaceAll(flected_form, "ogsę", "ašę");
   replaceAll(flected_form, "oksę", "ašę");
   replaceAll(flected_form, "egst", "ěst");
+  replaceAll(flected_form, "ogst", "ast");
   replaceAll(flected_form, "ebs", "ěbs");
   replaceAll(flected_form, "eks", "ěx");
   replaceAll(flected_form, "ods", "as");
   replaceAll(flected_form, "ogs", "ax");
   replaceAll(flected_form, "egs", "ěx");
   replaceAll(flected_form, "eds", "ěs");
+  replaceAll(flected_form, "ets", "ěs");
   replaceAll(flected_form, "ezs", "ěs");
   replaceAll(flected_form, "ess", "ěs");
   replaceAll(flected_form, "ęss", "ęs"); //class 11 sъtręs-ti when it adds S-aorist endings; a check for S-aorists needs adding to the autoreconstructor because Mar. Matt 28 сътрѧсѧ is wrongly reconstructed as the root-aorist *sъtręsǫ
