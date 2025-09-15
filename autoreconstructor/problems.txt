@@ -1,1 +1,2 @@
 the long-adj ending yjeję̌ might be wrong because it only seems to ever be spelt ꙑѩ, which would suggest the article is *ję̌  and not the full pronoun *jeję̌. The pronoun *ję̌ however is the masc. Akk. and fem.Nom/Akk. plural, not the fem. Gsg., so it would be a contraction / innovation in specifically the long-adjectival endings
+блисцати блисцание aren't getting PV3'd correctly, due to the intervening /s/; this /s/ is a nightmare because on the other hand it messes up skvŕ̥nъ

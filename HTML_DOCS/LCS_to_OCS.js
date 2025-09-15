@@ -1,7 +1,7 @@
 const dl_tl_regex = /[dt][ĺl][^̥]/;
 const ORT_regex = /[eo][rl](?:[tŕrpsšdfgћђklĺzžxčvbnńmǯ\+]|$)/
 const PV2_regex = /[kgx]v?(?:[ěęeiь]|ŕ̥|ĺ̥)/;
-const PV3_regex = /[ьię][kgx][auǫ]/;
+const PV3_regex = /(?:[ьię]|ŕ̥|ĺ̥)[kgx][auǫ]/;
 const tense_jer_regex = /[ьъ]j[Ǣeiьęǫuě]/; //I know that /ě/ cannot follow /j/ etymologically but my current analysis (probably wrong) of dealing with glagoĺěte etc. imperatives after palatal consonants is to assume analogy with the hard-stems, so the alternative 2pl. imperative of покръіти has a theoretical deviant form *pokrъjěte that needs to have its tense back-jer lengthened in accordance with my orthographic policy for normalised OCS
 
 const PV2_map = new Map();
@@ -18,11 +18,23 @@ const yeetTlDl = (lcs_form) => {
   return lcs_form;
 }
 
+// const applyPV3 = (lcs_form) => {
+//   let PV3_pos = lcs_form.search(PV3_regex);
+//   while(PV3_pos != -1) {
+//     const velar = lcs_form.at(PV3_pos + 1);
+//     lcs_form = lcs_form.slice(0, PV3_pos + 1) + PV2_map.get(velar) + lcs_form.slice(PV3_pos + 2);
+//     PV3_pos = lcs_form.search(PV3_regex);
+//   }
+//   return lcs_form;
+// };
+//old version didn't work with syllabic liquids e.g. protŕ̥ʒati
 const applyPV3 = (lcs_form) => {
   let PV3_pos = lcs_form.search(PV3_regex);
   while(PV3_pos != -1) {
-    const velar = lcs_form.at(PV3_pos + 1);
-    lcs_form = lcs_form.slice(0, PV3_pos + 1) + PV2_map.get(velar) + lcs_form.slice(PV3_pos + 2);
+    const pre_velar_unicode_char = lcs_form.slice(lcs_form.search(PV3_regex)).slice(0, 1);
+    const velar_offset = (pre_velar_unicode_char == "ŕ" || pre_velar_unicode_char == "ĺ") ? 2 : 1;
+    const velar = lcs_form.at(PV3_pos + velar_offset);
+    lcs_form = lcs_form.slice(0, PV3_pos + velar_offset) + PV2_map.get(velar) + lcs_form.slice(PV3_pos + 1 + velar_offset);
     PV3_pos = lcs_form.search(PV3_regex);
   }
   return lcs_form;

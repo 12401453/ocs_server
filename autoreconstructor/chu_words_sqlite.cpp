@@ -74,7 +74,7 @@ int conj_type_Trunc(std::string conj_type) {
   if (conj_type == "jaxati")
     return 4;
   if (conj_type == "32")
-    return 3;
+    return 2;
   if (conj_type == "40")
     return 3;
   if (conj_type == "51")

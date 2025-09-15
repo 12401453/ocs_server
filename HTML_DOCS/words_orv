@@ -1,0 +1,58 @@
+<!DOCTYPE html> 
+<html>
+
+<head>
+  
+
+<link href="words.css" rel="stylesheet" media="all and (min-width: 769px)" type="text/css">
+<link href="words_small_screens.css" rel="stylesheet" media="all and (max-width: 769px)" type="text/css">
+<!-- <link id="colour_theme" href="dark_theme.css" rel="stylesheet" type="text/css"> -->
+ <?thm_lnk
+
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+</head>
+
+<body>
+  <br>
+<div id="main_box">
+<div id="toplinks-flexbox"> 
+  <!--<a href="texts" class="toplinks-ahref"><div id="texts_link" class="toplink-buttons">Texts</div></a>
+  <a href="words" class="toplinks-ahref"><div id="words_link" class="toplink-buttons current">Words</div></a>-->
+  
+  <a href="texts" class="toplinks-ahref"><div id="texts_link" class="toplink-buttons">Texts</div></a>
+  <div id="words_link" class="toplink-buttons current">Words</div>
+  <div id="topbar_placefiller"></div>
+  <!-- <img id="theme_switcher" src="moon-stars.svg" title="Switch to light theme" draggable="false"></img> -->
+   <?thm_img
+</div>
+
+<div id="main_words_box">
+  <div id="search_top_row">
+    <div id="search_container">  
+      <textarea id="lcs_lemma_searchbox" autocomplete="off" placeholder="Search LCS lemmas..."></textarea>
+      <div id="search_candidates_box">
+      </div>
+    </div>
+    <div id="random_lemma_btn">Random</div>
+  </div>
+  <div id="infl_toggle_box" title="Show forms from the texts rather than generated normalised forms">
+    <div class="switch_button" id="infl_table_switch">
+      <div class="switch_button_middle"></div>
+    </div>
+    <div class="switch_label">Corpus forms</div>
+  </div>
+  <div id="grids-container">
+</div>
+
+<span id="spoofspan" style="display: inline;"></span>
+<span id="spoofspan2"><span id="hidden_searchbox"></span></span>
+</body>
+<script src ="LCS_to_OCS.js"></script>
+<script src ="words_orv.js"></script>
+</html>
+<script>
+
+</script>

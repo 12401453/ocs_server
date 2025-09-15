@@ -74,7 +74,7 @@ int conj_type_Trunc(std::string conj_type) {
   if (conj_type == "jaxati")
     return 4;
   if (conj_type == "32")
-    return 3;
+    return 2;
   if (conj_type == "40")
     return 3;
   if (conj_type == "51")
@@ -626,6 +626,7 @@ void buildDataStructures(std::string lemma_filename, std::string words_filename,
     std::string autoreconstructed_morph_replace = "";
     if(all_lemmas_map.contains(pos_lemma_combo)) {
       lemma_id = all_lemmas_map.at(pos_lemma_combo).lemma_id;
+      //std::cout << word_torot << "\n";
       std::array<std::string, 2> autoreconstructed_array = ReconstructMorphReplace(word_normalised, morph_tag, lemma_id);
       autoreconstructed_lcs = autoreconstructed_array[0];
       autoreconstructed_morph_replace = autoreconstructed_array[1];

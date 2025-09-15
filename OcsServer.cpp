@@ -68,6 +68,7 @@ void OcsServer::onMessageReceived(int clientSocket, const char* msg, int length)
         if(!strcmp(final_msg_url, "/texts")) page_type = 1;
         else if(!strcmp(final_msg_url, "/add_texts")) page_type = 2;
         else if(!strcmp(final_msg_url, "/words")) page_type = 3;
+        else if(!strcmp(final_msg_url, "/words_orv")) page_type = 3;
    
         int url_size = strlen("HTML_DOCS") + strlen(final_msg_url) + 1; //sizeof() can be used for c-strings declared as an array of char's but strlen() must be used for char *pointers
         char url_c_str[url_size];
@@ -2019,7 +2020,12 @@ void OcsServer::writeSearchResults(const std::vector<int> &result_toknos_vec, sq
         sqlite3_bind_int(statement1, 1, result_tokno);
         sqlite3_step(statement1);
         const unsigned char* raw_lcs = sqlite3_column_text(statement1, 0);
-        if(raw_lcs != nullptr) lcs_result = (const char*)raw_lcs;
+        if(raw_lcs != nullptr) {
+            lcs_result = (const char*)raw_lcs;
+        }
+        else {
+            lcs_result.clear();
+        }
         int sentence_no = sqlite3_column_int(statement1, 1);
 
         // std::cout << "lcs_result: " << lcs_result << "\n";
