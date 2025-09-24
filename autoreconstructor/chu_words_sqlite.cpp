@@ -7,6 +7,7 @@
 #include <unordered_map>
 #include <unicode/unistr.h>
 #include <vector>
+#include <algorithm>
 
 #include "main_stripped.cpp"
 
@@ -399,6 +400,8 @@ struct LemmaDBInfo {
   std::string inflexion_class;
   std::string pv2_3_lemma;
   short int noun_verb;
+
+  int32_t unicode_char_count;
 };
 struct CorpusDBInfo {    
   bool auto_tagged;
@@ -525,6 +528,8 @@ void buildDataStructures(std::string lemma_filename, std::string words_filename,
 
     std::string stem_lcs = "";
     icu::UnicodeString unicode_lemma_lcs;
+    unicode_lemma_lcs = unicode_lemma_lcs.fromUTF8(lcs_lemma);
+    int32_t unicode_char_count = unicode_lemma_lcs.countChar32();
 
     if(inflexion_class == "11" || inflexion_class == "12" || inflexion_class == "15" || inflexion_class == "16" || inflexion_class == "infix_11" || inflexion_class == "infix_12") {
                 stem_lcs = root_2;
@@ -534,7 +539,7 @@ void buildDataStructures(std::string lemma_filename, std::string words_filename,
     }
     else if(pre_jot == "") {
         stem_lcs = "";
-        unicode_lemma_lcs = unicode_lemma_lcs.fromUTF8(lcs_lemma);
+        //unicode_lemma_lcs = unicode_lemma_lcs.fromUTF8(lcs_lemma);
         unicode_lemma_lcs.truncate(unicode_lemma_lcs.length() - conj_type_Trunc(inflexion_class));
         unicode_lemma_lcs.toUTF8String(stem_lcs);
     }
@@ -550,7 +555,7 @@ void buildDataStructures(std::string lemma_filename, std::string words_filename,
 
     lemma_list.emplace(lemma_id_count, Lemma{runTimeHashString(pos_lemma_combo), stem_lcs, morph_replace, poss_doublet, loan_place, 0, pre_jot, inflexion_class, noun_verb});
     
-    all_lemmas_map.emplace(pos_lemma_combo, LemmaDBInfo{lemma_id_count, lcs_lemma, stem_lcs, inflexion_class, pv2_3_lemma, noun_verb});
+    all_lemmas_map.emplace(pos_lemma_combo, LemmaDBInfo{lemma_id_count, lcs_lemma, stem_lcs, inflexion_class, pv2_3_lemma, noun_verb, unicode_char_count});
     if(!inflexion_class.empty() && inflexion_class != "non_infl" && !inflexion_class_map.contains(inflexion_class)) {
       inflexion_class_map.emplace(inflexion_class, inflexion_class_id);
       inflexion_class_id++;
@@ -777,8 +782,8 @@ int main () {
         sqlite3_stmt* stmt_update_corpus;
         sqlite3_prepare_v2(DB, "UPDATE corpus SET inflexion_class_id = ?, inflexion_class = ? WHERE lemma_id = ?", -1, &stmt_update_corpus, nullptr);
 
-        std::ofstream lemmas_json_file("../HTML_DOCS/chu_lemmas_json.json");
-        lemmas_json_file << "[";
+        std::vector<const LemmaDBInfo*> lemmas_json_vec;
+        lemmas_json_vec.reserve(all_lemmas_map.size());
         for(const auto& lemma_row : all_lemmas_map) {
 
           sqlite3_bind_int(lemma_stmt, 1, lemma_row.second.lemma_id);
@@ -803,7 +808,9 @@ int main () {
             sqlite3_clear_bindings(stmt_update_corpus);
 
             if(lemma_row.second.noun_verb != 0) {
-              lemmas_json_file << "\n  [" << lemma_row.second.lemma_id << ", \"" << lemma_row.second.stem_lcs << "\",\"" << lemma_row.second.noun_verb << "\",\"" << lemma_row.second.inflexion_class << "\",\"" << lemma_row.second.lemma_lcs << "\",\"" << lemma_row.second.pv2_3_lemma << "\"],";
+              // lemmas_json_file << "\n  [" << lemma_row.second.lemma_id << ", \"" << lemma_row.second.stem_lcs << "\",\"" << lemma_row.second.noun_verb << "\",\"" << lemma_row.second.inflexion_class << "\",\"" << lemma_row.second.lemma_lcs << "\",\"" << lemma_row.second.pv2_3_lemma << "\"],";
+
+              lemmas_json_vec.push_back(&lemma_row.second);
             }
           }
 
@@ -816,11 +823,31 @@ int main () {
           sqlite3_reset(lemma_stmt);
           sqlite3_clear_bindings(lemma_stmt);
         }
+        sqlite3_finalize(stmt_update_corpus);
+        sqlite3_finalize(lemma_stmt);
+
+        std::cout << "Sorting and writing lemmas JSON file...\n";
+
+        struct {
+          bool operator()(const LemmaDBInfo* lemma_row_1, const LemmaDBInfo* lemma_row_2) {
+            return (lemma_row_1->unicode_char_count < lemma_row_2->unicode_char_count);
+          }
+        }lemmasJSONCustomLess;
+
+        std::sort(lemmas_json_vec.begin(), lemmas_json_vec.end(), lemmasJSONCustomLess);
+
+        std::ofstream lemmas_json_file("../HTML_DOCS/chu_lemmas_json.json");
+        lemmas_json_file << "[";
+
+        for(const auto json_lemma : lemmas_json_vec) {
+          lemmas_json_file << "\n  [" << json_lemma->lemma_id << ", \"" << json_lemma->stem_lcs << "\",\"" << json_lemma->noun_verb << "\",\"" << json_lemma->inflexion_class << "\",\"" << json_lemma->lemma_lcs << "\",\"" << json_lemma->pv2_3_lemma << "\"],";
+        }
+
         lemmas_json_file.seekp(-1, std::ios_base::cur);
         lemmas_json_file << "\n]";
         lemmas_json_file.close();
-        sqlite3_finalize(stmt_update_corpus);
-        sqlite3_finalize(lemma_stmt);
+        
+        std::cout << "Writing inflexion_classes table...\n";
 
         sqlite3_stmt* inflexion_class_stmt;
         sql_text = "INSERT INTO inflexion_classes (inflexion_class_id, inflexion_class_name) VALUES (?, ?)";

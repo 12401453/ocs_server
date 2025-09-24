@@ -819,7 +819,7 @@ void LcsFlecter::class1Clean(Inflection& inflection) {
         replaceAll(inflection.flected_form, "exě", "ьxě");
         replaceAll(inflection.flected_form, "skj", "šč");
 
-        //Old Russian has present-participle forms of решти with zero-grade рькуштий etc., but unsure whether this is Russian-specific (or caused by Bytovaja Orfografija etc.)
+        //Old Russian has present-participle forms of решти with zero-grade рькуштий etc., but unsure whether this is Russian-specific
         return;
     }
 

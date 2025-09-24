@@ -144,12 +144,13 @@ void verb_Flect(Lemma &lemma_ref, short int int_morph_tag[10], std::string cyr_i
         if (Sniff(cyr_id, "ош", 3)) outer_map_no++;
       }
       if ((conj_type != "11" && conj_type != "jьti" && conj_type != "14" && conj_type != "15" && conj_type != "rěsti" && conj_type != "infix_11" && conj_type != "jaxati") && (row_no == 6 || row_no == 15 || row_no == 24))
-      {
+      {// sniffs for 3rd dual replaced by 2nd dual ending (all tenses)
         if (Sniff(cyr_id, "та", 2))
           outer_map_no++;
-      } // sniffs for 3rd dual replaced by 2nd dual ending (all tenses)
-      if ((row_no > 31 && row_no < 36) && (outer_map_no == 521 || conj_type == "53" || conj_type == "54" || conj_type == "16" || conj_type == "17" || conj_type == "18" || conj_type == "rěsti" || conj_type == "19"))
+      }
+      if ((row_no > 31 && row_no < 36) && (outer_map_no == 521 || outer_map_no == 701 || conj_type == "53" || conj_type == "54" || conj_type == "16" || conj_type == "17" || conj_type == "18" || conj_type == "rěsti" || conj_type == "19"))
       {
+        //*ěte imperatives on soft-stems
         if (Sniff(cyr_id, "ѣ", 3) || Sniff(cyr_id, "ат", 3) || Sniff(cyr_id, "ам", 3))
         {
           outer_map_no++;
