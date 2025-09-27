@@ -402,6 +402,7 @@ struct LemmaDBInfo {
   short int noun_verb;
 
   int32_t unicode_char_count;
+  std::string torot_lemma;
 };
 struct CorpusDBInfo {    
   bool auto_tagged;
@@ -555,7 +556,7 @@ void buildDataStructures(std::string lemma_filename, std::string words_filename,
 
     lemma_list.emplace(lemma_id_count, Lemma{runTimeHashString(pos_lemma_combo), stem_lcs, morph_replace, poss_doublet, loan_place, 0, pre_jot, inflexion_class, noun_verb});
     
-    all_lemmas_map.emplace(pos_lemma_combo, LemmaDBInfo{lemma_id_count, lcs_lemma, stem_lcs, inflexion_class, pv2_3_lemma, noun_verb, unicode_char_count});
+    all_lemmas_map.emplace(pos_lemma_combo, LemmaDBInfo{lemma_id_count, lcs_lemma, stem_lcs, inflexion_class, pv2_3_lemma, noun_verb, unicode_char_count, chu_lemma});
     if(!inflexion_class.empty() && inflexion_class != "non_infl" && !inflexion_class_map.contains(inflexion_class)) {
       inflexion_class_map.emplace(inflexion_class, inflexion_class_id);
       inflexion_class_id++;
@@ -840,7 +841,7 @@ int main () {
         lemmas_json_file << "[";
 
         for(const auto json_lemma : lemmas_json_vec) {
-          lemmas_json_file << "\n  [" << json_lemma->lemma_id << ", \"" << json_lemma->stem_lcs << "\",\"" << json_lemma->noun_verb << "\",\"" << json_lemma->inflexion_class << "\",\"" << json_lemma->lemma_lcs << "\",\"" << json_lemma->pv2_3_lemma << "\"],";
+          lemmas_json_file << "\n  [" << json_lemma->lemma_id << ", \"" << json_lemma->stem_lcs << "\",\"" << json_lemma->noun_verb << "\",\"" << json_lemma->inflexion_class << "\",\"" << json_lemma->lemma_lcs << "\",\"" << json_lemma->pv2_3_lemma << "\",\"" << json_lemma->torot_lemma << "\"],";
         }
 
         lemmas_json_file.seekp(-1, std::ios_base::cur);

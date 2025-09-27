@@ -468,7 +468,14 @@ const filterLemmas = (event) => {
     return;
   }
 
-  const filtered_lemmas = lemmas_json.filter(lemma_arr => lemma_arr[4].startsWith(search_word) || lemma_arr[1].startsWith(search_word));
+  let filter_predicate = x => (x[4].startsWith(search_word) || x[1].startsWith(search_word));
+
+  if(search_word.startsWith("*")) {
+    filter_predicate = x => (x[4].includes(search_word.slice(1)) || x[1].includes(search_word.slice(1)))
+  }
+
+  //const filtered_lemmas = lemmas_json.filter(lemma_arr => lemma_arr[4].startsWith(search_word) || lemma_arr[1].startsWith(search_word));
+  const filtered_lemmas = lemmas_json.filter(filter_predicate);
 
   if(filtered_lemmas.length > 0) {
     lemma_searchbox.style.borderBottomLeftRadius = "0px";
