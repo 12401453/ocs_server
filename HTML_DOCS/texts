@@ -197,11 +197,10 @@ subtitleselector.addEventListener('cookie_selection', textselect_resize);
 subtitleselector.addEventListener('change', selectSubtitle);
 
 
-
-window.onload = () => {
+window.addEventListener('load', () => {
   textselector.dispatchEvent(new Event('cookie_selection'));
   subtitleselector.dispatchEvent(new Event('cookie_selection'));
-};
+});
 
 // window.onload = () => {
 //     if(cookie_textselect) {

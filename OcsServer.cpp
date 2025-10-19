@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <iomanip>
 #include <unordered_set>
+#include <charconv>
 
 #include<time.h>
 
@@ -43,6 +44,7 @@ void OcsServer::onMessageReceived(int clientSocket, const char* msg, int length)
     else if (get_or_post == GET)
     {
         std::cout << "This is a GET request" << std::endl;
+        
 
         std::cout << "lb_pos: " << lb_pos << std::endl;
         char msg_url[lb_pos - 12];
@@ -57,12 +59,27 @@ void OcsServer::onMessageReceived(int clientSocket, const char* msg, int length)
         msg_url[lb_pos - 13] = '\0';
 
         const char* final_msg_url;
+        std::string url_parameter;
         if(!strcmp(msg_url, "/")) {
             final_msg_url = HOMEPAGE;
+            url_parameter = "";
         }
         else {
-            final_msg_url = (const char*)msg_url;
+            int question_mark_pos = c_strFind(msg_url, "?");
+            if(question_mark_pos != -1) {
+                msg_url[question_mark_pos] = '\0';
+                final_msg_url = (const char*)msg_url;
+                url_parameter = (const char*)(msg_url + question_mark_pos + 1);
+            }
+            else {
+                final_msg_url = (const char*)msg_url;
+                url_parameter = "";
+            }
+            
         }
+
+        std::cout << "Final url: " << final_msg_url << "\n";
+        std::cout << "Colon parameter: " << url_parameter << "\n";
 
         short int page_type = 0;
         if(!strcmp(final_msg_url, "/texts")) page_type = 1;
@@ -79,8 +96,15 @@ void OcsServer::onMessageReceived(int clientSocket, const char* msg, int length)
         std::cout << "page_type: " << page_type << "\n";
 
         bool cookies_present = false;
+        bool valid_url_parameter_present = false;
         Cookies l_cookies;
-        if(page_type > 0) cookies_present = readCookie(msg, l_cookies); //want to avoid reading cookies when serving auxilliary files like stylesheets
+        if(page_type > 0) {
+            if(url_parameter.size() > 0) {
+                valid_url_parameter_present = urlParameterReadCookies(url_parameter, l_cookies);
+                if(valid_url_parameter_present == false)  cookies_present = readCookie(msg, l_cookies);
+            }
+            else cookies_present = readCookie(msg, l_cookies); //want to avoid reading cookies when serving auxilliary files like stylesheets
+        }
         std::cout << "Cookies present? " << cookies_present << "\n";
         if(cookies_present) {
             std::cout << "text_id cookie: " << l_cookies.text_id << "; current_pageno cookie: " << l_cookies.current_pageno << "; subtitle_id cookie: " << l_cookies.subtitle_id  << "\n";
@@ -146,7 +170,7 @@ void OcsServer::onMessageReceived(int clientSocket, const char* msg, int length)
         // struct timespec ts, te;
         // clock_gettime(CLOCK_MONOTONIC_RAW, &ts);
         
-        buildGETContent(page_type, url_c_str, content, cookies_present, l_cookies);       
+        buildGETContent(page_type, url_c_str, content, valid_url_parameter_present, l_cookies, url_parameter);       
 
         // clock_gettime(CLOCK_MONOTONIC_RAW, &te);  
         // u_int64_t start_nanoseconds = ts.tv_sec*1000000000UL + ts.tv_nsec;
@@ -291,13 +315,12 @@ int OcsServer::checkHeaderEnd(const char* msg) {
     else return -1;
 }
 
-void OcsServer::buildGETContent(short int page_type, char* url_c_str, std::string &content, bool cookies_present, Cookies& l_cookies) {
+void OcsServer::buildGETContent(short int page_type, char* url_c_str, std::string &content, bool valid_url_parameter_present, Cookies& l_cookies, const std::string& url_param) {
     
     std::ifstream urlFile;
     urlFile.open(url_c_str);
     
-    if (urlFile.good())
-    {
+    if (urlFile.good()) {
         std::cout << "This file exists and was opened successfully." << std::endl;
 
         std::ostringstream ss_text;
@@ -305,8 +328,7 @@ void OcsServer::buildGETContent(short int page_type, char* url_c_str, std::strin
 
         std::string l_page_toknos_arr;
 
-        while (std::getline(urlFile, line))
-        {   
+        while (std::getline(urlFile, line)) {   
             if(page_type > 0 && line.find("<?php") != -1) insertTextSelect(ss_text, l_cookies);
             else if(page_type == 1 && line.find("<?cky") != -1) void_retrieveText(ss_text, l_page_toknos_arr, l_cookies); 
             //else if(page_type == 1 && line.find("<?cky") != -1) ss_text << "<br><br><div id=\"textbody\"></div>\n";
@@ -318,6 +340,10 @@ void OcsServer::buildGETContent(short int page_type, char* url_c_str, std::strin
                 ss_text << "if(page_toknos_arr.length > 1) {document.getElementById('pagenos').addEventListener('click', selectText_splitup);\ndocument.getElementById('pagenos').addEventListener('keydown', selectText_splitup);}\n";
                 //ss_text << "dt_end = " << m_dt_end << ";\n";
                 ss_text << "current_pageno = " << /* m_cookies[1] */ l_cookies.current_pageno << ";\n";
+
+                if(valid_url_parameter_present) {
+                    ss_text << "window.addEventListener('load', () => {\n  const url_param_word = document.querySelector(\"[data-tokno='" << url_param << "']\");\n  url_param_word.classList.add(\"pulsate\");\n  url_param_word.scrollIntoView()\n});\n";
+                }
             }
             else if(page_type == 1 && line.find("<?js") != -1) ss_text << "let cookie_textselect = 0;\n";
 
@@ -853,6 +879,76 @@ bool OcsServer::readCookie(const char* msg, Cookies& l_cookies) {
     return true;
 }
 
+bool OcsServer::urlParameterReadCookies(std::string url_parameter, Cookies& l_cookies) {
+    int result_tokno = safeStrToInt(url_parameter, 0);
+    if(result_tokno == 0) {
+        std::cout << "Invalid url_parameter was appended. Repent!\n";
+        return false; //falls back to readCookie which reads the actual Cookies header
+    }
+    else {
+        sqlite3* DB;
+        sqlite3_stmt* statement;
+
+        if(!sqlite3_open(m_DB_path, &DB)) {
+            const char* sql_text = "SELECT tokno_start, tokno_end, subtitle_id, text_id FROM subtitles WHERE tokno_start <= ? AND tokno_end >= ?";
+            sqlite3_prepare_v2(DB, sql_text, -1, &statement, NULL);
+            sqlite3_bind_int(statement, 1, result_tokno);
+            sqlite3_bind_int(statement, 2, result_tokno);
+            if(sqlite3_step(statement) == SQLITE_DONE) {
+                sqlite3_finalize(statement);
+                sqlite3_close(DB);
+                std::cout << "Out-of-range url_parameter was appended. Repent!\n";
+                return false;
+            }
+            int tokno_start = sqlite3_column_int(statement, 0);
+            int tokno_end = sqlite3_column_int(statement, 1);
+            int subtitle_id = sqlite3_column_int(statement, 2);
+            int text_id = sqlite3_column_int(statement, 3);
+            sqlite3_finalize(statement);
+
+            sql_text = "SELECT sentence_no, tokno FROM corpus WHERE rowid >= ? AND rowid <= ? GROUP BY sentence_no ORDER BY tokno";
+            sqlite3_prepare_v2(DB, sql_text, -1, &statement, NULL);
+            sqlite3_bind_int(statement, 1, tokno_start);
+            sqlite3_bind_int(statement, 2, tokno_end);
+            // std::vector<int> page_toknos_vec;
+            // page_toknos_vec.reserve(16);
+            // page_toknos_vec.push_back(tokno_start);
+            int sentence_count = 0;
+            int result_pageno = 1;
+            while(sqlite3_step(statement) == SQLITE_ROW) {
+                int sentence_start_tokno = sqlite3_column_int(statement, 1);
+                if(result_tokno < sentence_start_tokno) break;
+                if(sentence_count > 0 && sentence_count % m_sentences_per_page == 0) {
+                    result_pageno++;
+                }
+                sentence_count++;
+
+            }
+            sqlite3_finalize(statement);
+            std::cout << "result_page_no as determined by urlParameterReadCookies(): " << result_pageno << "\n";
+
+            sqlite3_close(DB);
+
+            l_cookies.text_id = intToString(text_id);
+            l_cookies.current_pageno = intToString(result_pageno);
+            l_cookies.subtitle_id = intToString(subtitle_id);
+            l_cookies.theme = "1";
+            
+            return true;
+        }
+        else {
+            std::cout << "Database connection failed on urlParameterReadCookies()<br><br>\n";
+            return false;
+        }
+    }
+}
+
+std::string OcsServer::intToString(int number) {
+    char buffer[32];
+    auto [ptr, ec] = std::to_chars(buffer, buffer + sizeof(buffer), number);
+    std::string result(buffer, ptr);
+    return result;
+}
 int OcsServer::safeStrToInt(const std::string &string_number, int default_result) {
     int converted_int = default_result;
     try {

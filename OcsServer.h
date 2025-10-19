@@ -61,7 +61,7 @@ class OcsServer : public TcpListener {
         int safeStrToInt(const std::string &string_number, int default_result=1);
         sqlite_int64 safeStrToInt64(const std::string &string_number, sqlite3_int64 default_result=1);
 
-        void buildGETContent(short int page_type, char* url_c_str, std::string &content, bool cookies_present, Cookies& l_cookies);
+        void buildGETContent(short int page_type, char* url_c_str, std::string &content, bool valid_url_parameter_present, Cookies& l_cookies, const std::string& url_param);
         void insertTextSelect(std::ostringstream &html, Cookies& l_cookies);
         void sendBinaryFile(char* url_c_str, int clientSocket, const std::string &content_type);
         
@@ -71,6 +71,8 @@ class OcsServer : public TcpListener {
         int getPostFields(const char* url);
         void handlePOSTedData(const char* post_data, int clientSocket);
         bool readCookie(const char* msg, Cookies& l_cookies);
+        bool urlParameterReadCookies(std::string url_parameter, Cookies& l_cookies);
+        std::string intToString(int number);
         void setCookies(std::ostringstream &http_response_ss, Cookies& l_cookies);
 
         bool lemmaTooltips(std::string _POST[1], int clientSocket);
