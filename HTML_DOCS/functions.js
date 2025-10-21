@@ -115,6 +115,7 @@ function selectText() {
           removeLoadingButton();
 
           applyTooltips();
+          history.replaceState(null, '', window.location.href.split("?")[0]);
         }
      
       }
@@ -187,8 +188,7 @@ const selectSubtitle = (event) => {
           removeLoadingButton();
 
           applyTooltips();
-          
-
+          history.replaceState(null, '', window.location.href.split("?")[0]);
         }
      
       }
@@ -365,6 +365,7 @@ const selectText_splitup = (event) => {
           document.cookie = "current_pageno="+current_pageno+";max-age=157680000";
 
           applyTooltips();
+          history.replaceState(null, '', window.location.href.split("?")[0]);
         }
      
       }
@@ -2880,6 +2881,7 @@ const retrieveTextFromSearch = (tokno) => {
 
         minimiseSearchbox();
         applyTooltips();
+        history.replaceState(null, '', window.location.href.split("?")[0]);
       }
 
     }
