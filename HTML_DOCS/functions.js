@@ -2871,6 +2871,7 @@ const retrieveTextFromSearch = (tokno) => {
         removeLoadingButton();
         
         console.log(tokno);
+        console.log("https://ocstexts.co.uk/texts?"+String(tokno));
         const result_word = document.querySelector("[data-tokno=\""+tokno+"\"]");
         result_word.classList.add("pulsate");
         result_word.scrollIntoView();
