@@ -202,7 +202,7 @@ const convertToOCS = (lcs_word, pv2_3_exists, lemma_id) => {
     else if(lcs_word == "gospodu") return "господю";
   }
 
-  lcs_word = lcs_word.replaceAll("ę̌", "ę").replaceAll("y̨", "y").replaceAll("Q", "ъ");
+  lcs_word = lcs_word.replaceAll("ę̌", "ę").replaceAll("y̨", "y").replaceAll("Q", "ъ").replaceAll("O", "o").replaceAll("E", "e");
 
   lcs_word = lcs_word.replace(/^ak/, "jǢk"); //not really justified other than by the extreme rarity of ак- spellings in OCS
 
@@ -436,7 +436,7 @@ const orv_mappings = {
 
 const convertToORV = (lcs_word, pv2_3_exists, lemma_id) => {
 
-  lcs_word = lcs_word.replaceAll("ę̌", "ě").replaceAll("y̨", "a").replaceAll("Q", "ь");
+  lcs_word = lcs_word.replaceAll("ę̌", "ě").replaceAll("y̨", "a").replaceAll("Q", "ь").replaceAll("O", "ъ").replaceAll("E", "ь");
   lcs_word = lcs_word.replaceAll("ĺ̥", "l̥");
 
   lcs_word = lcs_word.replace(/^ak/, "jǢk").replace(/^av/, "jǢv");

@@ -468,8 +468,8 @@ inner_map v_12_c0 = {
 inner_map v_12_c1 = {
 {6, "eta"},
 {10, "xъ"},
-{11, "stъ"},
-{12, "stъ"},
+{11, "tQ"},
+{12, "tQ"},
 {13, "xově"},
 {15, "sta"},
 {16, "xomъ"},
@@ -585,8 +585,8 @@ inner_map v_13_c0 = {
 
 inner_map v_13_c1 = {
 {6, "ьreta"},
-{11, "ertъ"},
-{12, "ertъ"},
+{11, "ertQ"},
+{12, "ertQ"},
 {15, "ersta"},
 {19, "ьrěaxъ"}, //19-27 is imperfects based on the present-stem rather than the unmetathesised aorist stem (Supr. мь҆рѣꙿхѫ) but it's unclear where the (weak and fallen) jer in such forms is actually from the present-stem or just an orthographic contamination of the metathesised aorist-stem; see Diels p.236 for discussion
 {20, "ьrěaše"},
@@ -719,8 +719,8 @@ inner_map v_17_c0 = {
 
 inner_map v_17_c1 = {
 {6, "ьjeta"},
-{11, "itъ"},
-{12, "itъ"},
+{11, "itQ"},
+{12, "itQ"},
 {15, "ista"},
 {24, "ьjǢašeta"},
 {31, "ьjěvě"},
@@ -1467,8 +1467,8 @@ inner_map v_3_c0 = {
 
 inner_map v_3_c1 = {
 {6, "dasta"},
-{11, "dastъ"},
-{12, "dastъ"},
+{11, "dastQ"},
+{12, "dastQ"},
 {15, "dasta"},
 {24, "daděašeta"},
 {37, "dadǫtj"},
@@ -1523,8 +1523,8 @@ inner_map v_4_c0 = {
 inner_map v_4_c1 = {
 {6, "jǢsta"},
 {10, "jǢxъ"},
-{11, "jǢstъ"},
-{12, "jǢstъ"},
+{11, "jǢstQ"},
+{12, "jǢstQ"},
 {13, "jǢxově"},
 {15, "jǢsta"},
 {16, "jǢxomъ"},
@@ -1582,8 +1582,8 @@ inner_map v_5_c0 = {
 inner_map v_5_c1 = {
 {6, "ěsta"},
 {10, "ěxъ"},
-{11, "ěstъ"},
-{12, "ěstъ"},
+{11, "ěstQ"},
+{12, "ěstQ"},
 {13, "ěxově"},
 {15, "ěsta"},
 {16, "ěxomъ"},
@@ -1698,8 +1698,8 @@ inner_map v_1_c0 = {
 
 inner_map v_1_c1 = {
 {6, "jesta"},
-{11, "bystъ"},
-{12, "bystъ"},
+{11, "bystQ"},
+{12, "bystQ"},
 {15, "bysta"},
 {24, "běašeta"},
 {37, "sǫtj"},
@@ -2222,8 +2222,8 @@ inner_map v_19_c0 = {
 
 inner_map v_19_c1 = {
 {6, "ojeta"},
-{11, "ětъ"},
-{12, "ětъ"},
+{11, "ětQ"},
+{12, "ětQ"},
 {15, "ěsta"},
 {19, "ěaxъ"},
 {20, "ěaše"},

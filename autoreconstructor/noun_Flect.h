@@ -18,6 +18,16 @@ void noun_Flect(Lemma &lemma_ref, short int int_morph_tag[10], std::string cyr_i
   }
   row_no = 21 * gender + 7 * num + gr_case - 28;
 
+
+   // check for *jedьn-
+  if (lemma_ref.lemma_id == compileTimeHashString("Pxѥдинъ") || lemma_ref.lemma_id == compileTimeHashString("Maѥдинъ"))
+  {
+    if (Sniff(cyr_id, "дін", 20) == false)
+    {
+      stem = "jedьn";
+    }
+  }
+
   // definitise ordinal numbers and "которъі" and "universe/population" which TOROT wrongly marks as strong or both
   if (conj_type == "adj_hard_ord" || conj_type == "adj_soft_ord" || lemma_ref.lemma_id == compileTimeHashString("Piкоторꙑи") || lemma_ref.lemma_id == compileTimeHashString("Pxникоторꙑиже"))
   {
