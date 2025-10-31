@@ -42,6 +42,7 @@
 4|Matthew 26
 4|Matthew 27
 4|Matthew 28
+4|Mark Incipit
 4|Mark 1
 4|Mark 2
 4|Mark 3
@@ -58,6 +59,7 @@
 4|Mark 14
 4|Mark 15
 4|Mark 16
+4|Luke Incipit
 4|Luke 1
 4|Luke 2
 4|Luke 3
@@ -82,6 +84,7 @@
 4|Luke 22
 4|Luke 23
 4|Luke 24
+4|John Incipit
 4|John 1
 4|John 2
 4|John 3
@@ -317,6 +320,7 @@
 7|13
 7|14
 7|15
+7|16
 7|17
 7|18
 8|0
@@ -490,8 +494,6 @@
 10|John 5
 10|John 6
 10|John 7
-10|John 8
-10|John 9
 10|John 8
 10|John 9
 10|John 10

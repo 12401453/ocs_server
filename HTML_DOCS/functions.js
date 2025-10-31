@@ -3148,7 +3148,9 @@ const lookupGorazd = (lemma_id, query) => {
                 const dict_no = dict_entry.recordData.Dictionary;
                 const dict_html = dict_entry.recordData.SourceD;
 
-                app_state.dict_html_entries[dict_no] = app_state.dict_html_entries[dict_no].concat(dict_html);
+                if(dict_no == 1 || dict_no == 2) {
+                  app_state.dict_html_entries[dict_no] = app_state.dict_html_entries[dict_no].concat(dict_html);
+                }
               });
             }
             else console.log("No results, repent");               

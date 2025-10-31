@@ -575,6 +575,7 @@ void buildDataStructures(std::string lemma_filename, std::string words_filename,
     std::string word_torot = csv_reader.getField("torot_word");
     std::string word_normalised = csv_reader.getField("deep_cleaned");
     std::string morph_tag = csv_reader.getField("morph_tag");
+    //if(morph_tag == "") morph_tag = "--------n";
     int sentence_no = std::stoi(csv_reader.getField("sentence_no"));
     std::string presentation_before = csv_reader.getField("pres_before");
     std::string presentation_after = csv_reader.getField("pres_after");
@@ -583,7 +584,9 @@ void buildDataStructures(std::string lemma_filename, std::string words_filename,
     bool auto_tagged = (bool)std::stoi(csv_reader.getField("autotagged"));
 
     std::string chu_lemma = csv_reader.getField("lemma");
+    //if(chu_lemma == "") chu_lemma = "FIXME";
     std::string torot_pos = csv_reader.getField("pos");
+    //if(torot_pos == "") torot_pos = "X-";
     std::string pos_lemma_combo = torot_pos + chu_lemma;
 
     if(!chu_lemma.empty() && !all_lemmas_map.contains(pos_lemma_combo)){
@@ -761,7 +764,6 @@ int main () {
         sqlite3_bind_int(statement_subtitles, 3, subtitle_tokno_start);
         sqlite3_bind_int(statement_subtitles, 4, subtitle_tokno_end);
         sqlite3_step(statement_subtitles);
-
         sqlite3_bind_text(statement_texts, 1, text_id_map.at(current_main_title_id).c_str(), -1, SQLITE_TRANSIENT);
         sqlite3_bind_int(statement_texts, 2, main_tokno_start);
         sqlite3_bind_int(statement_texts, 3, main_tokno_end);
@@ -788,6 +790,7 @@ int main () {
         for(const auto& lemma_row : all_lemmas_map) {
 
           sqlite3_bind_int(lemma_stmt, 1, lemma_row.second.lemma_id);
+          std::cout << lemma_row.first << "\n";
           sqlite3_bind_int(lemma_stmt, 2, pos_map.at(lemma_row.first.substr(0, 2))); //torot part-of-speech code as defined by the map at the top of the file
           sqlite3_bind_text(lemma_stmt, 3, lemma_row.second.lemma_lcs.c_str(), -1, SQLITE_TRANSIENT);
           sqlite3_bind_text(lemma_stmt, 4, lemma_row.first.substr(2).c_str(), -1, SQLITE_TRANSIENT); //torot lemma-form extracted from pos_lemma_combo string
