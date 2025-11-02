@@ -618,6 +618,7 @@ void buildDataStructures(std::string lemma_filename, std::string words_filename,
     bool auto_tagged = (bool)std::stoi(csv_reader.getField("autotagged"));
 
     std::string orv_lemma = csv_reader.getField("lemma");
+    if(orv_lemma == "FIXME") orv_lemma = "";
     std::string torot_pos = csv_reader.getField("pos");
     std::string pos_lemma_combo = torot_pos + orv_lemma;
 

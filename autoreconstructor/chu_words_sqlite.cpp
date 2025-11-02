@@ -584,7 +584,7 @@ void buildDataStructures(std::string lemma_filename, std::string words_filename,
     bool auto_tagged = (bool)std::stoi(csv_reader.getField("autotagged"));
 
     std::string chu_lemma = csv_reader.getField("lemma");
-    //if(chu_lemma == "") chu_lemma = "FIXME";
+    if(chu_lemma == "FIXME") chu_lemma = "";
     std::string torot_pos = csv_reader.getField("pos");
     //if(torot_pos == "") torot_pos = "X-";
     std::string pos_lemma_combo = torot_pos + chu_lemma;
@@ -790,7 +790,6 @@ int main () {
         for(const auto& lemma_row : all_lemmas_map) {
 
           sqlite3_bind_int(lemma_stmt, 1, lemma_row.second.lemma_id);
-          std::cout << lemma_row.first << "\n";
           sqlite3_bind_int(lemma_stmt, 2, pos_map.at(lemma_row.first.substr(0, 2))); //torot part-of-speech code as defined by the map at the top of the file
           sqlite3_bind_text(lemma_stmt, 3, lemma_row.second.lemma_lcs.c_str(), -1, SQLITE_TRANSIENT);
           sqlite3_bind_text(lemma_stmt, 4, lemma_row.first.substr(2).c_str(), -1, SQLITE_TRANSIENT); //torot lemma-form extracted from pos_lemma_combo string
