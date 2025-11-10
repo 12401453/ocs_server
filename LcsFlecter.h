@@ -55,6 +55,8 @@ class LcsFlecter {
 
     int numerifyMorphTag(const std::string& morph_tag, int noun_verb);
 
+    static void replaceAll(std::string &source, const std::string yeeted, const std::string replacement);
+
     void class1Clean(Inflection& inflection);
     void class1NasalClean(std::string& flecter_output);
     void itiClean(std::string& flecter_output);
