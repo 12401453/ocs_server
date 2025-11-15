@@ -91,6 +91,8 @@ void class_I_nasal_clean(std::string& flecter_output) {
   replaceAll(flecter_output, "ьmt", "ęt");
   replaceAll(flecter_output, "ьnt", "ęt");
   replaceAll(flecter_output, "ъmt", "ǫt");
+  replaceAll(flecter_output, "ьnv", "ęv");
+  replaceAll(flecter_output, "ьmv", "ęv");
   replaceEnd(flecter_output, "ьm", "ę");
   replaceEnd(flecter_output, "ьn", "ę");
   replaceEnd(flecter_output, "ъm", "ǫ");

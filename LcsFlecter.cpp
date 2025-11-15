@@ -221,6 +221,7 @@ void LcsFlecter::postProcess(std::array<std::vector<Inflection>, 3> &inflected_f
                 for(int j = 9; j < 18; j++) {
                     class1NasalClean(inflected_forms[i][j].flected_form);
                 }
+                class1NasalClean(inflected_forms[i][38].flected_form);
                 class1NasalClean(inflected_forms[i][39].flected_form);
                 class1NasalClean(inflected_forms[i][40].flected_form);
                 class1NasalClean(inflected_forms[i][42].flected_form);
@@ -909,6 +910,8 @@ void LcsFlecter::class1NasalClean(std::string& flecter_output) {
     replaceAll(flecter_output, "ьmt", "ęt");
     replaceAll(flecter_output, "ьnt", "ęt");
     replaceAll(flecter_output, "ъmt", "ǫt");
+    replaceAll(flecter_output, "ьnv", "ęv");
+    replaceAll(flecter_output, "ьmv", "ęv");
     // replaceAll(flecter_output, "ьm", "ę");
     // replaceAll(flecter_output, "ьn", "ę");
     // replaceAll(flecter_output, "ъm", "ǫ");
