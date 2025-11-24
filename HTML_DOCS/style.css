@@ -17,6 +17,8 @@
     --glag-font-size: 28px;
     --glag-letter-spacing: 2px;
 
+    --greek_tt_fontsize: 17px;
+
     --chunk-font-family: var(--cyr-font-family);
     --chunk-font-size: var(--cyr-font-size);
     --chunk-letter-spacing: var(--cyr-letter-spacing);
@@ -551,12 +553,14 @@ border-bottom: 2px solid rgb(23, 33, 54, 0);
 
   box-sizing: border-box;
 
-  font-size: 18px;
-  font-family: Menaion;
+  font-size: 19px;
   line-height: 100%;
 
-  letter-spacing: var(--chunk-letter-spacing);
-  font-family: var(--chunk-font-family);
+  /* letter-spacing: var(--chunk-letter-spacing);
+  font-family: var(--chunk-font-family); */
+
+  letter-spacing: 2px;
+  font-family: Bukyvede;
 
   border-bottom-right-radius: 6px;
   border-top-left-radius: 5px;

@@ -19,6 +19,8 @@
   --glag-font-size: 20px;
   --glag-letter-spacing: 2px;
 
+  --greek_tt_fontsize: 13px;
+
   --chunk-font-family: var(--cyr-font-family);
   --chunk-font-size: var(--cyr-font-size);
   --chunk-letter-spacing: var(--cyr-letter-spacing);
@@ -556,9 +558,11 @@ a {
   
     box-sizing: border-box;
   
-    font-size: 13px;
-    font-family: Menaion;
+    font-size: 14px;
     line-height: 100%;
+
+    letter-spacing: 2px;
+    font-family: Bukyvede;
   
     border-bottom-right-radius: 6px;
     border-top-left-radius: 5px;

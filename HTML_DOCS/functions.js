@@ -3025,12 +3025,12 @@ const greekTooltips = function (show_load_spinner) {
           const ocs_word = document.querySelector(`[data-tokno="${alligned_tokno}"]`);
           const greek_data_row = greek_data[alligned_tokno];
           
-          let tt_box_string = '<span class="lemma_tt" onclick="event.stopPropagation()"><span id="tt_top"><div id="lemma_tag_tt" style="font-family: Bukyvede;font-weight: bold;">';
+          let tt_box_string = '<span class="lemma_tt" onclick="event.stopPropagation()"><span id="tt_top"><div id="lemma_tag_tt" style="font-family: Bookerly;font-weight: bold;letter-spacing: 1px;font-size: var(--greek_tt_fontsize);">';
           tt_box_string += greek_data_row[0] + '</div><span id="pos_tag_box_tt">';
           tt_box_string += tt_pos_arr[proiel_pos_map[greek_data_row[3] - 1][0]] + '</span></span><span id="tt_mid"><div id="tt_meaning">';
           
   
-          const finished_string = tt_box_string + "<span class=\"greek_form\" style=\"font-family: Bukyvede;font-weight: bold;\">" + greek_data_row[1] + "<br></span>" + convertMorphTag(greek_data_row[2]) + '</div></span><span id="tt_bottom"></span></span>'; 
+          const finished_string = tt_box_string + "<span class=\"greek_form\" style=\"font-family: Bookerly;font-weight: bold;letter-spacing: 1px;\">" + greek_data_row[1] + "<br></span>" + convertMorphTag(greek_data_row[2]) + '</div></span><span id="tt_bottom"></span></span>'; 
           const tt_fragment = document.createRange().createContextualFragment(finished_string);
           tt_fragment.getElementById("pos_tag_box_tt").firstChild.title = proiel_pos_map[greek_data_row[3] - 1][1];
           ocs_word.append(tt_fragment);
