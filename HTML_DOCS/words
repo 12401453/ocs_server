@@ -5,7 +5,7 @@
   
 <title>OCS Inflection Tables</title>
 <link href="words.css" rel="stylesheet" media="all and (min-width: 769px)" type="text/css">
-<link href="words_small_screens.css" rel="stylesheet" media="all and (max-width: 769px)" type="text/css">
+<link href="words_small_screens.css" rel="stylesheet" media="all and (max-width: 768.99px)" type="text/css">
 <!-- <link id="colour_theme" href="dark_theme.css" rel="stylesheet" type="text/css"> -->
  <?thm_lnk
 
@@ -32,7 +32,7 @@
 <div id="main_words_box">
   <div id="search_top_row">
     <div id="search_container">  
-      <textarea id="lcs_lemma_searchbox" autocomplete="off" placeholder="Search LCS lemmas..."></textarea>
+      <textarea id="lcs_lemma_searchbox" autocomplete="off" placeholder="LCS or OCS lemma..."></textarea>
       <div id="search_candidates_box">
       </div>
     </div>

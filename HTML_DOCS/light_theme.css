@@ -155,36 +155,6 @@ color: #670202;
   background-color: #ac7000;
 } 
   
-  
-/* .tooltip .lemma_tt, .tooltip_selected .lemma_tt, .tooltip .mw_tt, .tooltip_selected .mw_tt {
-    background-color: #f0c36d;
-    color: black;
-  }
-
-#lemma_tag_tt {
-  color: black;
-  background-color: #ffdfa3;
-}
-
-#tt_meaning {
-  background-color: white;
-  color: black;
-} */
-.tooltip .lemma_tt, .tooltip_selected .lemma_tt, .tooltip .mw_tt, .tooltip_selected .mw_tt {
-  background-color: #071022;
-  color: #cbd9f4;
-}
-
-#lemma_tag_tt {
-color: #cbd9f4;
-background-color: #040a16;
-}
-
-#tt_meaning {
-background-color: #040a16;
-color: #cbd9f4;
-}
-
 #toplinks-flexbox {
   background-color: #f0c36dbd;
   color: #cbd9f4a6;
@@ -381,4 +351,115 @@ span[aip-type="odkaz"]:hover{
 }
 #gorazd_search_button:hover {
   fill: white;
+}
+
+#lcs_lemma_searchbox {
+  background-color: #f0c36dbd;
+  color: black;
+}
+#random_lemma_btn{
+  color: black;
+  background-color: #f0c36dbd;
+}
+#random_lemma_btn:hover {
+  background-color: #f1ad2e;
+  background-color: #f0c36d;
+}
+.switch_button {
+  background-color: #f0c36d;
+}
+.switch_button_middle {
+  background-color: #00000089;
+}
+#infl_toggle_box.active .switch_button .switch_button_middle {
+  background-color: black;
+}
+.switch_label {
+  color: black;
+}
+#search_candidates_box {
+  color: black;
+  background-color: #f0c36d;
+}
+.search_candidate:hover {
+  background-color: #f1ad2e;
+}
+.search_candidate.keyboard_selected{
+  background-color: #f1ad2e;
+}
+.infl-grid {
+  color: black;
+  background-color: white;
+}
+th.infl_titles {
+  background-color: #f0c36d;
+}
+
+#pagenos {
+  background-color: #f0c36dbd;
+}
+#pageno_box {
+  color: black;
+  background-color: transparent;
+}
+#pageno_box:focus {
+  background-color: #f1ad2e;
+}
+.pageno_text {
+  color: #000000a6;
+  /* background-color: #f0c36d; */
+}
+.nav_arrow {
+  color: black;
+  background-color:#f0c36d;
+}
+.nav_arrow:hover {
+  background-color:#f1ad2e;
+  color: black;
+}
+
+/*main page tooltips*/
+
+.tooltip .lemma_tt, .tooltip_selected .lemma_tt, .tooltip .mw_tt, .tooltip_selected .mw_tt {
+  background-color: #f1ad2e;
+  color: black;
+}
+
+#lemma_tag_tt {
+  background-color: wheat;
+}
+
+#tt_meaning {
+  background-color: wheat;
+}
+
+#pos_tag_verb_tt {
+  background-color: #66ff00;
+}
+
+#pos_tag_adj_tt {
+  background-color: #fc7f03;
+}
+
+#pos_tag_noun_tt {
+  background-color: #e5ff00;
+}
+
+#pos_tag_adverb_tt {
+  background-color: #ff1900;
+}
+
+#pos_tag_prep_tt {
+  background-color: #00e5ff;
+}
+
+#pos_tag_conj_tt {
+  background-color: #00ff88;
+}
+
+#pos_tag_part_tt {
+  background-color: #ff00e6;
+}
+#pos_tag_ques_tt {
+  background-color: hsl(345, 100%, 70%);
 }

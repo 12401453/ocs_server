@@ -149,7 +149,7 @@ const writeVerbTable = (pv2_3_exists, lemma_id) => {
     const participle_forms = ["PRAP<sup>1</sup>", "PRAP<sup>2</sup>", "PAP", "L-Part.", "PPP", "PrPP", "Infinitive", "Supine"];
     const participle_titles = ["Present Active Participle (masc./nt. Nsg.)", "Present Active Participle", "Past Active Participle", "L-Participle", "Past Passive Participle", "Present Passive Participle", "Infinitive", "Supine"];
     
-    table_html += "<tr class='verb_row'><th class='infl_titles' style='background-color: #040a16; border-top: 1px solid black; border-left: 1px solid black;'></th>";
+    table_html += "<tr class='verb_row'><th class='infl_titles' style='border-top: 1px solid black; border-left: 1px solid black;'></th>";
     for(let i = 0; i < 4; i++) {
       table_html += "<th class='infl_titles top_headers'>"+verb_tenses[i]+"</th>";
     }
@@ -227,7 +227,7 @@ const writeVerbTableCorpus = () => {
   const participle_forms = ["PRAP<sup>1</sup>", "PRAP<sup>2</sup>", "PAP", "L-Part.", "PPP", "PrPP", "Infinitive", "Supine"];
   const participle_titles = ["Present Active Participle (masc./nt. Nsg.)", "Present Active Participle", "Past Active Participle", "L-Participle", "Past Passive Participle", "Present Passive Participle", "Infinitive", "Supine"];
   
-  table_html += "<tr class='verb_row'><th class='infl_titles' style='background-color: #040a16; border-top: 1px solid black; border-left: 1px solid black;'></th>";
+  table_html += "<tr class='verb_row'><th class='infl_titles' style='border-top: 1px solid black; border-left: 1px solid black;'></th>";
   for(let i = 0; i < 4; i++) {
     table_html += "<th class='infl_titles top_headers'>"+verb_tenses[i]+"</th>";
   }
@@ -310,7 +310,7 @@ const writeNounTable = (pv2_3_exists, lemma_id) => {
   const makeNomTableHTML = (gender, adjectival=false) => {
     table_html = "";
     table_html += "<div class='infl_table_rounder'><table class='infl-grid'><tbody>";
-    table_html += "<tr><th class='infl_titles' style='background-color: #040a16; border-top: 1px solid black; border-left: 1px solid black;'>";
+    table_html += "<tr><th class='infl_titles' style='border-top: 1px solid black; border-left: 1px solid black;'>";
     if(adjectival) table_html += "<b>"+noun_genders[gender]+"</b>";
     table_html += "</th>";
     for(let i = 0; i < 3; i++) {
@@ -386,7 +386,7 @@ const writeNounTableCorpus = () => {
   const makeNomTableHTML = (gender) => {
     table_html = "";
     table_html += "<div class='infl_table_rounder'><table class='infl-grid'><tbody>";
-    table_html += "<tr><th class='infl_titles' style='background-color: #040a16; border-top: 1px solid black; border-left: 1px solid black;'>";
+    table_html += "<tr><th class='infl_titles' style='border-top: 1px solid black; border-left: 1px solid black;'>";
     table_html += "<b>"+noun_genders[gender]+"</b>";
     table_html += "</th>";
     for(let i = 0; i < 3; i++) {
@@ -461,17 +461,16 @@ const removeSearchCandidates = () => {
 
 const filterLemmas = (event) => {
  
-  const search_word = lemma_searchbox.value.trim();
-
+  const search_word = lemma_searchbox.value.trim().replaceAll("Ǣ", "a").toLowerCase();
   if(search_word == "") {
     removeSearchCandidates();
     return;
   }
 
-  let filter_predicate = x => (x[4].startsWith(search_word) || x[1].startsWith(search_word));
+  let filter_predicate = x => (x[4].replaceAll("Ǣ", "a").startsWith(search_word) || x[6].startsWith(search_word));
 
   if(search_word.startsWith("*")) {
-    filter_predicate = x => (x[4].includes(search_word.slice(1)) || x[1].includes(search_word.slice(1)))
+    filter_predicate = x => (x[4].replaceAll("Ǣ", "a").includes(search_word.slice(1)) || x[6].includes(search_word.slice(1)))
   }
 
   //const filtered_lemmas = lemmas_json.filter(lemma_arr => lemma_arr[4].startsWith(search_word) || lemma_arr[1].startsWith(search_word));

@@ -325,8 +325,8 @@ a {
   /* min-width: 155px; */
   border-top-left-radius: 6px;
   border-top-right-radius: 6px;
-  background-color: #040a16;
-  border: 1px solid black;
+  /* background-color: #040a16; */
+  border: 2px solid black;
   border-bottom: none;
 }
 
@@ -349,13 +349,12 @@ a {
   overflow: hidden;
   text-align: center;
   resize: none;
-  border: 1px solid #040a16;
-  border-bottom: none;
+  border-left: 2px solid black;
   box-sizing: border-box;
-  color: #cbd9f4a6;
+  /* color: #cbd9f4a6; */
   font-family: Bookerly;
   font-size: 16px;
-  background-color: #071022;
+  /* background-color: #071022; */
   user-select: none;
 }
 #pageno_box {
@@ -366,21 +365,20 @@ a {
   outline: none;
   overflow: hidden;
   resize: none;
-  border: 1px solid #040a16;
-  border-bottom: none;
+  border: none;
   box-sizing: border-box;
 
-  color: #cbd9f4;
+  /* color: #cbd9f4; */
   font-family: Bookerly;
   font-size: 16px;
-  background-color:#071022;
+  /* background-color:#071022; */
 }
 #pageno_box:focus {
-  border: 1px solid black;
-  background-color: black;
+  /* border: 1px solid black; */
+  /* background-color: black; */
 }
 #pageno_leftarrow {
-  border-right: 1px solid black;
+  border-right: 2px solid black;
   width: 26px;
 
   border-top-left-radius: 5px; /* 1px less than the parent box because of the border */
@@ -392,7 +390,7 @@ a {
   font-weight: 900;
 }
 #pageno_rightarrow {
-  border-left: 1px solid black;
+  border-left: 2px solid black;
   width: 26px;
 
   border-top-right-radius: 5px; /* 1px less than the parent box because of the border */
@@ -405,14 +403,14 @@ a {
 }
 .nav_arrow {
   cursor: default;
-  color: grey;
+  /* color: grey; */
   font-family: LiberationSerif;
   user-select: none;
 }
-.nav_arrow:hover {
+/* .nav_arrow:hover {
   background-color:#172136;
   color: white;
-}
+} */
 
 .nav_arrow_deactiv {
   cursor: default;
@@ -508,13 +506,15 @@ a {
   
   
   .tooltip .lemma_tt, .tooltip_selected .lemma_tt, .tooltip .mw_tt, .tooltip_selected .mw_tt {
+
+    box-sizing: border-box;
   
     visibility: hidden;
     min-width: 125px;
     max-width: 140px;
     height: fit-content;
-    background-color: #071022;
-    color: #cbd9f4;
+    /* background-color: #071022;
+    color: #cbd9f4; */
     text-align: center;
     border-radius: 6px;
     border: solid 1px black;
@@ -584,7 +584,7 @@ a {
   }
   
   #tt_meaning {
-    background-color: #040a16;
+    /* background-color: #040a16; */
   
     padding: 3px;
     flex: 1;
@@ -655,7 +655,7 @@ a {
   
   
   
-  #pos_tag_verb_tt {
+  /* #pos_tag_verb_tt {
     background-color: #4dac0d;
   }
   
@@ -684,7 +684,7 @@ a {
   }
   #pos_tag_ques_tt {
     background-color: hsl(345, 100%, 70%);
-  }
+  } */
   #pos_tag_multiword {
     background-color: #cbd9f4;
   }

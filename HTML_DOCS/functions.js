@@ -2005,7 +2005,7 @@ const ttPosition = function () {
   tooltips.forEach(tooltip => {
 
     tooltip.style.transform = "none";
-    tooltip.style.border = "none";
+    tooltip.style.border = "none"; //for some reason unless you take off the border the shifting leaves a scrollbar on the page, fucked if I know why
     
     let rectRight = tooltip.getBoundingClientRect().right;
     let right_overflow = rectRight - viewport_width;
@@ -2014,6 +2014,7 @@ const ttPosition = function () {
 
 
     //console.log("right overflow: "+right_overflow);
+    
     if(right_overflow > 0) {
     tooltip.style.transform = `translateX(${-1*right_overflow - 1}px)`;
     //tooltip.style.border = "1px solid red";
@@ -2021,6 +2022,8 @@ const ttPosition = function () {
     else if(left_overflow > 0) {
       tooltip.style.transform = `translateX(${left_overflow + 1}px)`;
     }
+    tooltip.style.border = "1px solid black";
+    
 
       /* console.log(tooltip);
       console.log(rectRight);
