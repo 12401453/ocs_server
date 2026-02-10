@@ -246,6 +246,7 @@ color: #670202;
 }
 #viewboxcontent {
   color: black;
+  scrollbar-color: #f0c36d white;
 }
 .sjs span[aip-type="la_preklad"],
 .sjs span[aip-type="el_preklad"],
@@ -359,11 +360,11 @@ span[aip-type="odkaz"]:hover{
 }
 #random_lemma_btn{
   color: black;
-  background-color: #f0c36dbd;
+  background-color: #f0c36d;
 }
 #random_lemma_btn:hover {
   background-color: #f1ad2e;
-  background-color: #f0c36d;
+  /* background-color: #f0c36d; */
 }
 .switch_button {
   background-color: #f0c36d;
@@ -462,4 +463,106 @@ th.infl_titles {
 }
 #pos_tag_ques_tt {
   background-color: hsl(345, 100%, 70%);
+}
+
+/*********************MAIN PAGE SEARCH**********************/
+
+#dict_topbar {
+  background-color: #f1ad2e;
+}
+
+#dict_minimise, #dict_close {
+  background-color: #f0c36d;
+}
+#dict_minimise:hover, #dict_close:hover {
+  background-color: #f1ad2e;
+}
+
+.search_type {
+  background-color: wheat;
+  color: #0000009e;
+}
+.search_type.active {
+  background-color: #f0c36d;
+  color: black;
+}
+.search_type:hover {
+  background-color: #f0c36d;
+}
+
+.scope_heading {
+  background-color: wheat;
+  color: #0000009e;
+}
+.scope_heading.active {
+  background-color: #f0c36d;
+  color: black;
+}
+.scope_heading:hover {
+  color: black;
+}
+
+#dict_body {
+  scrollbar-color: #f0c36d white;
+}
+#dict_body::-webkit-scrollbar-thumb {
+  background-color: #f0c36d;
+}
+#dict_body::-webkit-scrollbar-track {
+  background-color: white;
+}
+.dict_row {
+  background-color: white;
+  color: black;
+}
+.dict_row:nth-child(even) {
+  background-color: wheat;
+}
+.dict_row.header {
+  background-color: #f0c36d;
+}
+.result_word {
+  color: #a20000;
+}
+.dict_cell.empty_results {
+  color: black;
+}
+.search_link:hover {
+  color: black;
+}
+
+#dict_bottombar {
+  background-color: #f1ad2e;
+}
+.letter_button_box {
+  scrollbar-color: #f0c36d white;
+  background-color: #f1ad2e;
+  border: 1px solid #f1ad2e;
+}
+.letter_button {
+  background-color: white;
+  color: black;
+}
+.letter_button:hover {
+  background-color: #f1ad2e;
+}
+.quicksearch_option_box_label {
+  color: black;
+}
+.quicksearch_option_checkbox {
+  opacity: 1;
+}
+#dict_searchbox {
+  color: black;
+  background-color: white;
+  border: 2px solid #0000009e;
+}
+#dict_searchbox:focus {
+  border: 2px solid black;
+}
+.search_button {
+  fill: #0000009e;
+}
+.search_button:hover {
+  fill: black;
 }

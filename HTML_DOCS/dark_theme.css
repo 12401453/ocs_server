@@ -445,3 +445,106 @@ th.infl_titles {
 #pos_tag_ques_tt {
   background-color: hsl(345, 100%, 70%);
 }
+
+/*********************MAIN PAGE SEARCH**********************/
+
+#dict_topbar {
+  background-color: #040a16;
+}
+
+#dict_minimise, #dict_close {
+  background-color: inherit;
+}
+#dict_minimise:hover, #dict_close:hover {
+  background-color: #172136;
+}
+
+.search_type {
+  background-color: #172136;
+  color: #cbd9f47c;
+}
+.search_type.active {
+  color: #cbd9f4;
+  background-color: #071022;
+}
+.search_type:hover {
+  background-color: #071022;
+}
+
+.scope_heading {
+  background-color: #172136;
+  color: #cbd9f47c;
+}
+.scope_heading.active {
+  background-color: #071022;
+  color: #cbd9fd;
+}
+.scope_heading:hover {
+  color: #cbd9f4;
+}
+
+#dict_body {
+  scrollbar-color: #040a16 #172136;
+}
+#dict_body::-webkit-scrollbar-thumb {
+  background-color: #040a16;
+}
+#dict_body::-webkit-scrollbar-track {
+  background-color: #172136;
+}
+.dict_row {
+  background-color: #071022;
+  color: #cbd9f4;
+}
+.dict_row:nth-child(even) {
+  background-color: #040a16;
+}
+.dict_row.header {
+  background-color: #040a16;
+}
+.result_word {
+  color: #ffc100;
+}
+.dict_cell.empty_results {
+  color: #cbd9f47c;
+}
+.search_link:hover {
+  color: white;
+}
+
+#dict_bottombar {
+  background-color: #040a16;
+}
+.letter_button_box {
+  scrollbar-color: #040a16 #071022;
+  background-color: #040a16;
+  border: 1px solid black;
+}
+.letter_button {
+  background-color:#071022;
+  color: #cbd9f4a6;
+}
+.letter_button:hover {
+  border: 1px solid #cbd9f4;
+  color: #cbd9f4;
+}
+.quicksearch_option_box_label {
+  color: #cbd9f4;
+}
+.quicksearch_option_checkbox {
+  opacity: 0.8;
+}
+#dict_searchbox {
+  color: #cbd9f4;
+  background-color:#071022;
+  border: 2px solid #040a16;
+}
+#dict_searchbox:focus {
+  border: 2px solid black;
+}
+.search_button {
+  fill: #cbd9f487;
+}
+.search_button:hover {
+  fill: #cbd9f4;
+}

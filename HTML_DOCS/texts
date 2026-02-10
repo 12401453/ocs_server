@@ -54,8 +54,8 @@
   </div>
   <div id="annotation_mode_box">
     <div id="torot_mode" class="annotation_mode" title="Lemmatisation and morphology-tagging data from Hanne Eckhoff's TOROT corpus">TOROT</div>
-+   <div id="lcs_mode" class="annotation_mode" title="Autoreconstructed Late Common Slavonic ancestor and normalised OCS">LCS</div>
-+   <div id="greek_mode" class="annotation_mode" title="Greek New Testament (Zogr., Mar.) or Septuagint (Psal. Sin.) word-level alignment data">Greek</div>
+    <div id="lcs_mode" class="annotation_mode" title="Autoreconstructed Late Common Slavonic ancestor and normalised OCS">LCS</div>
+    <div id="greek_mode" class="annotation_mode" title="Greek New Testament (Zogr., Mar.) or Septuagint (Psal. Sin.) word-level alignment data">Greek</div>
   </div>
   <div id="p1">
 <?cky ?>

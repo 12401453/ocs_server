@@ -5,7 +5,7 @@
 const app_state = {
   theme: 0,
   show_corpus_forms: false,
-  displayed_lemma: [0, "", "", "", "", ""],
+  displayed_lemma: [0, "", "", "", "", "", ""],
   corpus_paradigm: {},
   raw_lcs_paradigm: []
 }
@@ -29,7 +29,7 @@ const randomLemma = () => {
 };
 
 
-const generateInflection = ([lemma_id, stem, noun_verb, conj_type, lcs_lemma, pv2_3_exists]) => {
+const generateInflection = ([lemma_id, stem, noun_verb, conj_type, lcs_lemma, pv2_3_exists, torot_ocs_lemma]) => {
   console.log(lemma_id, stem, noun_verb, conj_type);
   let send_data = "stem="+stem+"&conj_type="+conj_type+"&noun_verb="+noun_verb;
   const myheaders = new Headers();
@@ -58,7 +58,10 @@ const generateInflection = ([lemma_id, stem, noun_verb, conj_type, lcs_lemma, pv
     if(noun_verb ==  "1") writeVerbTable(pv2_3_exists, lemma_id);
     else if(noun_verb ==  "2") writeNounTable(pv2_3_exists, lemma_id);
 
-    app_state.displayed_lemma = [lemma_id, stem, noun_verb, conj_type, lcs_lemma, pv2_3_exists];
+    app_state.displayed_lemma = [lemma_id, stem, noun_verb, conj_type, lcs_lemma, pv2_3_exists, torot_ocs_lemma];
+    lemma_searchbox.value = torot_ocs_lemma;
+    // lemma_searchbox.se
+
 
     app_state.corpus_paradigm = {};
   })
@@ -92,6 +95,7 @@ const getCorpusInflections = (lemma_id=app_state.displayed_lemma[0], noun_verb=a
         writeNounTableCorpus();
         break;
     }
+    lemma_searchbox.value = app_state.displayed_lemma[6];
   });
 };
 
