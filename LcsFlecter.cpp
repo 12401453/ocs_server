@@ -66,7 +66,7 @@ void LcsFlecter::postProcess(std::array<std::vector<Inflection>, 3> &inflected_f
     if(m_noun_verb == NOUN) {
         if(m_conj_type == "masc_o_PV3") {
             //the second index is not identical to the row-number in the autoreconstructor; we should be applying PV1 here only to masculine vocative singulars (which in the autoreconstructor are rowno == 7), but this is doing it for all genders because I am only taking the gender-specific subsection of the inflection-maps into the inflected_forms std::array
-            firstVelarClean(inflected_forms[0][6].flected_form);
+            firstVelarVocativeClean(inflected_forms[0][6].flected_form);
         }
         else if(m_conj_type == "oko") {
             for(auto& inflections_vec : inflected_forms) {
@@ -77,8 +77,8 @@ void LcsFlecter::postProcess(std::array<std::vector<Inflection>, 3> &inflected_f
         }
         else if((m_stem.ends_with('k') || m_stem.ends_with('g') || m_stem.ends_with('x') || m_stem.ends_with("xv")) && (m_conj_type.starts_with("masc") || m_conj_type == "adj_hard")) {
             
-            if(m_conj_type == "masc_o" || m_conj_type == "adj_hard") firstVelarClean(inflected_forms[0][6].flected_form);
-            else if(m_conj_type == "masc_u") firstVelarClean(inflected_forms[1][6].flected_form);
+            if(m_conj_type == "masc_o" || m_conj_type == "adj_hard") firstVelarVocativeClean(inflected_forms[0][6].flected_form);
+            else if(m_conj_type == "masc_u") firstVelarVocativeClean(inflected_forms[1][6].flected_form);
             //need to add the cleaning of masc_u stem o-stem alternative vocative-endings (vŕ̥xe currently => врьсе)
         }
 
@@ -1019,6 +1019,19 @@ void LcsFlecter::firstVelarClean(std::string& flecter_output) {
     replaceAll(flecter_output, "gь", "žь");
     replaceAll(flecter_output, "kь", "čь");
     replaceAll(flecter_output, "xь", "šь");
+}
+void LcsFlecter::firstVelarVocativeClean(std::string& flecter_output) {
+    replaceEnd(flecter_output, "ske", "šče");
+    replaceEnd(flecter_output, "xve", "šve");
+    replaceEnd(flecter_output, "ge", "že");
+    replaceEnd(flecter_output, "ke", "če");
+    replaceEnd(flecter_output, "xe", "še");
+    replaceEnd(flecter_output, "gi", "ži");
+    replaceEnd(flecter_output, "ki", "či");
+    replaceEnd(flecter_output, "xi", "ši");
+    replaceEnd(flecter_output, "gь", "žь");
+    replaceEnd(flecter_output, "kь", "čь");
+    replaceEnd(flecter_output, "xь", "šь");
 }
 void LcsFlecter::pv1LongE(std::string& flecter_output) {
     //this seems to be used in the Autoreconstructor only for -ěj comparatives of adjectives which I haven't added yet

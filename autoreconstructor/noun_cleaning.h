@@ -81,6 +81,20 @@ void first_velar_clean(std::string& flecter_output) {
   replaceAll(flecter_output, "xь", "šь");
 }
 
+void first_velar_vocative_clean(std::string& flecter_output) {
+  replaceEnd(flecter_output, "ske", "šče");
+  replaceEnd(flecter_output, "xve", "šve");
+  replaceEnd(flecter_output, "ge", "že");
+  replaceEnd(flecter_output, "ke", "če");
+  replaceEnd(flecter_output, "xe", "še");
+  replaceEnd(flecter_output, "gi", "ži");
+  replaceEnd(flecter_output, "ki", "či");
+  replaceEnd(flecter_output, "xi", "ši");
+  replaceEnd(flecter_output, "gь", "žь");
+  replaceEnd(flecter_output, "kь", "čь");
+  replaceEnd(flecter_output, "xь", "šь");
+}
+
 /*void PV1_long_e(std::string &noun)
 {
 

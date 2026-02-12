@@ -687,7 +687,7 @@ void noun_Flect(Lemma &lemma_ref, short int int_morph_tag[10], std::string cyr_i
     flected_word = stem + Nom_[outer_map_no][row_no];
     if (row_no == 7)
     {
-      first_velar_clean(flected_word);
+      first_velar_vocative_clean(flected_word);
     }
     lemma_ref.lemma_form = flected_word;
     if (row_no != 3 && row_no != 4 && row_no != 7 && row_no != 8 &&
@@ -805,8 +805,11 @@ void noun_Flect(Lemma &lemma_ref, short int int_morph_tag[10], std::string cyr_i
     flected_word = stem + Nom_[outer_map_no][row_no];
 
   // checks for PV1 vocatives отьче etc.
-  if (((conj_type == "masc_o" || conj_type == "masc_o_PV3" || conj_type == "adj_hard" || outer_map_no == 242/* masc u-stems voc. sg. alternative o-stem -e ending*/) && row_no == 7 && (Sniff(flected_word, /* was "3" in original version, possibly for a reason*/ "k", 4) == true || Sniff(flected_word, "g", 3) == true || Sniff(flected_word, "x", 4) == true)) || conj_type == "oko")
+  if (((conj_type == "masc_o" || conj_type == "masc_o_PV3" || conj_type == "adj_hard" || outer_map_no == 242/* masc u-stems voc. sg. alternative o-stem -e ending*/) && row_no == 7 && (Sniff(flected_word, /* was "3" in original version, possibly for a reason*/ "k", 4) == true || Sniff(flected_word, "g", 3) == true || Sniff(flected_word, "x", 4) == true)))
   {
+    first_velar_vocative_clean(flected_word);
+  }  
+  else if(conj_type == "oko") {
     first_velar_clean(flected_word);
   }
   
@@ -845,10 +848,14 @@ void noun_Flect(Lemma &lemma_ref, short int int_morph_tag[10], std::string cyr_i
     else
       morph_replace_word = stem + Nom_[outer_map_no - 1][row_no];
     
-    if (((conj_type == "masc_o" || conj_type == "masc_o_PV3" || conj_type == "adj_hard") && row_no == 7 && (Sniff(flected_word, "k", 3) == true || Sniff(flected_word, "g", 3) == true || Sniff(flected_word, "x", 3) == true)) || conj_type == "oko")
+    if (((conj_type == "masc_o" || conj_type == "masc_o_PV3" || conj_type == "adj_hard") && row_no == 7 && (Sniff(flected_word, "k", 3) == true || Sniff(flected_word, "g", 3) == true || Sniff(flected_word, "x", 3) == true)))
     {
+      first_velar_vocative_clean(morph_replace_word);
+    }
+    else if(conj_type == "oko"){
       first_velar_clean(morph_replace_word);
     }
+
     lemma_ref.morph_replace = morph_replace_word;
     return;
   }

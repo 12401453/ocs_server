@@ -71,6 +71,7 @@ class LcsFlecter {
     void imperfSheta(std::string& flecter_output);
 
     void firstVelarClean(std::string& flecter_output);
+    void firstVelarVocativeClean(std::string& flecter_output);
     void pv1LongE(std::string& flecter_output);
 
     void Dejotate(std::string& jotated_form);
