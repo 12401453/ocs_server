@@ -451,6 +451,17 @@ figcaption .dict_3{
     overflow-y: auto;
     scrollbar-width: thin;
     padding: 4px;
+    border-right: 2px solid black;
+}
+
+#viewboxcontent::-webkit-scrollbar {
+    width: 9px;
+}
+#viewboxcontent::-webkit-scrollbar-thumb {
+    border-left: 2px solid black;
+}
+#viewboxcontent::-webkit-scrollbar-track {
+    border-left: 2px solid black;
 }
 
 #viewboxcontent div[heslo]{

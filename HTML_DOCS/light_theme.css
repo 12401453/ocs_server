@@ -566,3 +566,11 @@ th.infl_titles {
 .search_button:hover {
   fill: black;
 }
+
+/*gorazd_results.css old-browser scrollbar*/
+#viewboxcontent::-webkit-scrollbar-thumb {
+  background-color: #f0c36d;
+}
+#viewboxcontent::-webkit-scrollbar-track {
+  background: white;
+}
