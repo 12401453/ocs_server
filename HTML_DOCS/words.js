@@ -99,6 +99,26 @@ const getCorpusInflections = (lemma_id=app_state.displayed_lemma[0], noun_verb=a
   });
 };
 
+const getCorpusInflectionSentences = (infl_table_cell_number) => {
+  if(app_state.corpus_paradigm[infl_table_cell_number] === undefined) {
+    return;
+  }
+  let send_data = "form_toknos="+app_state.corpus_paradigm[infl_table_cell_number][1].join(",");
+
+  const myheaders = new Headers();
+  myheaders.append('Content-Type', 'application/x-www-form-urlencoded');
+  myheaders.append('Cache-Control', 'no-cache');
+  const options = {method: "POST", headers: myheaders, cache: "no-store", body: send_data};
+
+  fetch("get_corpus_inflection_sentences.php", options)
+  .then(response => {
+    return response.json();
+  })
+  .then(response => {
+    console.log(response);
+  });
+};
+
 const switchConv = () => {
   if(convertFunction == convertToOCS) convertFunction = convertToORV;
   else convertFunction = convertToOCS;
@@ -198,7 +218,7 @@ const writeVerbTableCorpus = () => {
 
       let corpus_forms = new Array();
       if(app_state.corpus_paradigm[idx] != undefined) {
-        corpus_forms = app_state.corpus_paradigm[idx];
+        corpus_forms = app_state.corpus_paradigm[idx][0];
       }
       for(const corpus_form of corpus_forms) {
         const clean_corpus_form = cleanWord(corpus_form, remove_punct_map).toLowerCase();
@@ -364,7 +384,7 @@ const writeNounTableCorpus = () => {
 
       let corpus_forms = new Array();
       if(app_state.corpus_paradigm[idx] != undefined) {
-        corpus_forms = app_state.corpus_paradigm[idx];
+        corpus_forms = app_state.corpus_paradigm[idx][0];
       }
       for(const corpus_form of corpus_forms){
         const clean_corpus_form = cleanWord(corpus_form, remove_punct_map).toLowerCase();
@@ -502,21 +522,11 @@ const filterLemmas = (event) => {
   search_candidates.append(results_elem);
 
   search_candidates.querySelectorAll(".search_candidate").forEach(elem => elem.addEventListener('click', (event) => {
-    showTable2(Number(event.target.dataset.idx));
+    showTable(Number(event.target.dataset.idx));
   }));
 };
 
-/*const showTable = (event) => {
-  const lemma_id = Number(event.target.dataset.idx);
-  console.log(lemma_id);
-  const search_candidates = document.getElementById("search_candidates_box");
-  lemma_searchbox.style.borderBottomLeftRadius = "";
-  lemma_searchbox.style.borderBottomRightRadius = "";
-  search_candidates.innerHTML = "";
-  search_candidates.style.display = "";
-  generateInflection(lemmas_json.find(arr => arr[0] == lemma_id));
-} */
-const showTable2 = (lemma_id) => {
+const showTable = (lemma_id) => {
   console.log(lemma_id);
   const search_candidates = document.getElementById("search_candidates_box");
   lemma_searchbox.style.borderBottomLeftRadius = "";
@@ -557,8 +567,11 @@ lemma_searchbox.addEventListener('keydown', (event) => {
   if(event.key == 'Enter') {
     event.preventDefault();
     if(search_candidates.querySelector('.keyboard_selected')){
-      showTable2(Number(search_candidates.querySelector('.keyboard_selected').dataset.idx));
-    } 
+      showTable(Number(search_candidates.querySelector('.keyboard_selected').dataset.idx));
+    }
+    else if(search_candidates.children.length > 0) {
+      showTable(Number(search_candidates.children[0].dataset.idx));
+    }
     return;
   }
   else if(event.key == 'ArrowDown' || event.key == 'ArrowUp') {

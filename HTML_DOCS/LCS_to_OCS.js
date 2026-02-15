@@ -740,7 +740,7 @@ const remove_punct_map = {
   "!" : "",
   "҅" : "",
   "҆" : "",
-  //"҄" : "",
+  "҄" : "", //this is the palatalisation-diacritic; ideally it should be kept in both the "cleaned trigram" table of the DB and here, but it is used sometimes (possibly stupidly) for other diacritics where its non-removal would be problematic
   "͑" : "",
   "͗" : "",
   "̆" : "",

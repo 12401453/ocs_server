@@ -77,8 +77,14 @@ class OcsServer : public TcpListener {
 
         bool lemmaTooltips(std::string _POST[1], int clientSocket);
 
-        void writeSearchResults(const std::vector<int>& result_toknos_vec, sqlite3_stmt* statement1, sqlite3_stmt* statement2, std::ostringstream& text_results, std::ostringstream& lcs_results, std::ostringstream& tokno_results);
+        void writeSearchResults(const std::vector<sqlite3_int64>& result_toknos_vec, sqlite3_stmt* statement1, sqlite3_stmt* statement2, std::ostringstream& text_results, std::ostringstream& lcs_results, std::ostringstream& tokno_results);
         void trigramSearch(sqlite3* db_connection, const std::string& trigram_table, const std::string& target_column, std::string query, int tokno_start, int tokno_end, int clientSocket);
+
+        std::string getTextTitleInfoJSON(sqlite3* db_connection);
+        std::string getJSONSearchResultsFromToknos(sqlite3* db_connection, std::vector<sqlite3_int64>& result_toknos_vec);
+
+        void vectorFromListOfInt64s(std::vector<sqlite3_int64>& int64_vec, const std::string& comma_sep_int64_str);
+        void vectorFromListOfInts(std::vector<int>& int_vec, const std::string& comma_sep_int_str);
         
         bool lcsSearch(std::string _POST[3], int clientSocket);
         bool lcsRegexSearch(std::string _POST[3], int clientSocket);
@@ -112,6 +118,7 @@ class OcsServer : public TcpListener {
         int numerifyMorphTag(const std::string& morph_tag, int noun_verb);
 
         bool getCorpusInflections(std::string _POST[2], int clientSocket);
+        bool getCorpusInflectionSentences(std::string _POST[1], int clientSocket);
 
         const char*         m_post_data;
         std::string         m_post_data_incomplete;
