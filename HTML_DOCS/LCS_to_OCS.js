@@ -775,6 +775,19 @@ const remove_punct_map = {
   "ⸯ" : "",
   "’" : ""
 };
+
+const archiphonemeLCSMap = {
+  "ja" : "jǢ",
+  "ŕa" : "ŕǢ",
+  "ńa" : "ńǢ",
+  "ĺa" : "ĺǢ",
+  "ša" : "šǢ",
+  "ža" : "žǢ",
+  "ča" : "čǢ",
+  "ћa" : "ћǢ",
+  "ђa" : "ђǢ"
+};
+
 const cleanWord = (dirty_word, cleaning_map) => {
   let cleaned_word = dirty_word;
   for(const key in cleaning_map) {

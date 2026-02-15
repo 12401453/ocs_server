@@ -634,7 +634,24 @@ const showCorpusFormSentences = () => {
   
 }
 
-
+const expandCell = (event) => {
+  const infl_cell = event.currentTarget;  
+  infl_cell.classList.toggle("expandedInfl");
+  if(infl_cell.classList.contains("expandedInfl")) {
+      infl_cell.style.width = "300px";
+  }
+  else {
+      infl_cell.style.width = infl_cell.dataset.auto_cell_width;
+  }
+};
+const addExplicitWidths = () => {
+  document.querySelectorAll("td").forEach(cell => {
+    cell.addEventListener('click', expandCell);
+    const auto_cell_width = String(cell.getBoundingClientRect().width) + "px";
+    cell.dataset.auto_cell_width = auto_cell_width;
+    cell.style.width = auto_cell_width;
+  });
+};
 
 //
 //---------------------------------------------------------------------------------------------------------------------------------------------------------------------
