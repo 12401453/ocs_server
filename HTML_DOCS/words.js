@@ -630,6 +630,12 @@ for(const btn_evnt of button_events) {
 document.getElementById("random_lemma_btn").addEventListener('click', randomLemma);
 
 
+const showCorpusFormSentences = () => {
+  
+}
+
+
+
 //
 //---------------------------------------------------------------------------------------------------------------------------------------------------------------------
 app_state.theme = document.getElementById("theme_switcher").src.endsWith("moon-stars.svg") ? 1 : 0;

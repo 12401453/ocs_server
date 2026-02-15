@@ -407,3 +407,98 @@ tr:nth-child(7) td {
 #search_container {
   position: relative;
 }
+
+
+/*repeated dict- styles from the search-box, mostly from style.css and dict.cc*/
+#dict_body {
+  display: flex;
+  flex-flow: column nowrap;
+  height: fit-content;
+  overflow-y: auto;
+  scrollbar-width: thin;
+
+  position: relative;
+}
+
+#dict_body::-webkit-scrollbar {
+  width: 9px;
+}
+#dict_body::-webkit-scrollbar-thumb {
+  border-right: 2px solid black;
+  border-top:1px solid black;
+  border-bottom:1px solid black;
+}
+
+#dict_body::-webkit-scrollbar-track {
+  border-right: 2px solid black;
+}
+.dict_row {
+  display: flex;
+  flex-flow: row nowrap;
+  height: fit-content;
+ 
+  color: #cbd9f4;
+  font-family: IBM_Plex_Sans;
+  font-size: 13px;
+  background-color: #071022;
+  border-bottom: 1px solid black;
+}
+.dict_row:nth-child(even) {
+  background-color: #040a16;
+}
+.dict_row:first-child {
+  border-top: 1px solid black;
+}
+.dict_row.header {
+  font-weight: bold;
+  text-align: center;
+}
+
+.dict_cell, .dict_header {
+    
+  /*height: inherit; */
+  width: 100%;
+  padding: 5px;
+  box-sizing: border-box;
+  word-break: break-word;
+}
+
+.dict_header.left {
+  border-left: 2px solid black;
+  border-right: 1px solid black;
+  width: 30%;
+}
+.dict_header.middle {
+  width: 50%;
+}
+.dict_header.right {
+  border-left: 1px solid black;
+  border-right: 2px solid black;
+  width: 20%;
+}
+
+
+.dict_cell.left {
+  border-left: 2px solid black;
+  border-right: 1px solid black;
+  width: 30%;
+}
+.dict_cell.middle {
+  width: 50%;
+  font-family: Menaion;
+}
+.dict_cell.middle.cyr {
+  font-family: Menaion;
+  font-size: 13px;
+  letter-spacing: 0px;
+}
+.dict_cell.middle.glag {
+  font-family: Bukyvede;
+  font-size: 16px;
+  letter-spacing: 2px;
+}
+.dict_cell.right {
+  border-left: 1px solid black;
+  border-right: 2px solid black;
+  width: 20%;
+}

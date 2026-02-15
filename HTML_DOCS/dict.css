@@ -92,7 +92,7 @@
     overflow-y: auto;
 
     /*firefox*/
-    scrollbar-color: #040a16 #172136;
+    /* scrollbar-color: #040a16 #172136; */
     scrollbar-width: thin;
 
     position: relative;
