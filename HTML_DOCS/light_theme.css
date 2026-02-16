@@ -588,8 +588,19 @@ th.infl_titles {
 }
 .corpus_box_row {
   background-color: white;
+  opacity: 0.95;
   color: black;
 }
-.corpus_box_row:nth-child(even) {
+.corpus_box_row:nth-child(odd) {
   background-color: wheat;
+  opacity: 1;
+}
+#corpus_attestations_topbar {
+  background-color: #f1ad2e;
+}
+.corpus_box_row.header {
+  background-color: #f0c36d;
+}
+#corpus_attestations_bottombar {
+  background-color: #f1ad2e;
 }
