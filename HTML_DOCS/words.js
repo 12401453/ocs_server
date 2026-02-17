@@ -7,8 +7,17 @@ const app_state = {
   show_corpus_forms: false,
   displayed_lemma: [0, "", "", "", "", "", ""],
   corpus_paradigm: {},
-  raw_lcs_paradigm: []
+  raw_lcs_paradigm: [],
+  corpus_form_attestations_shown: false,
+  titles_info: []
 }
+
+document.getElementById("grids-container").addEventListener('click', (event) => {
+  const table_cell = event.target.closest("td");
+  if(app_state.show_corpus_forms && table_cell) {
+    getCorpusInflectionSentences(Number(table_cell.dataset.infl_idx))
+  }
+});
 
 let lemmas_json = Object.create(null);
 
@@ -115,7 +124,7 @@ const getCorpusInflectionSentences = (infl_table_cell_number) => {
     return response.json();
   })
   .then(response => {
-    console.log(response);
+    showCorpusFormSentences(response);
   });
 };
 
@@ -208,18 +217,23 @@ const writeVerbTable = (pv2_3_exists, lemma_id) => {
 };
 const writeVerbTableCorpus = () => {
   const writeCell = (idx) => {
-      table_html += "<td";
+      table_html += `<td data-infl_idx="` + idx + `"`;
+      let td_class_str = "";
       if(idx > 27) {
-        table_html += " class='last-col'";
+        //table_html += " class='last-col'";
+        td_class_str += "last-col";
       }
-      table_html += ">";
 
       const form_set = new Set();
 
       let corpus_forms = new Array();
       if(app_state.corpus_paradigm[idx] != undefined) {
         corpus_forms = app_state.corpus_paradigm[idx][0];
+        td_class_str += " corpus_table_clickable";
       }
+      if(td_class_str) table_html += " class='" + td_class_str.trim() + "'";
+      table_html += ">";
+
       for(const corpus_form of corpus_forms) {
         const clean_corpus_form = cleanWord(corpus_form, remove_punct_map).toLowerCase();
         if(form_set.has(clean_corpus_form)) {
@@ -278,9 +292,7 @@ const writeVerbTableCorpus = () => {
   }
   table_html += "</tbody></table></div>";
   const participles_table = document.createRange().createContextualFragment(table_html);
-  //console.log(participles_table);
- 
-  //finite_verb_table.innerHTML = table_html;
+
   grids_container.append(finite_verb_table);
   grids_container.append(participles_table);
 };
@@ -374,18 +386,23 @@ const writeNounTable = (pv2_3_exists, lemma_id) => {
 };
 const writeNounTableCorpus = () => {  
   const writeCell = (idx, gender) => {
-      table_html += "<td";
+      table_html += `<td data-infl_idx="` + idx + `"`;
+      let td_class_str = "";
       if(idx > gender*21+14) {
-        table_html += " class='last-col'";
+        //table_html += " class='last-col'";
+        td_class_str += "last-col";
       }
-      table_html += ">";
 
       const form_set = new Set();
 
       let corpus_forms = new Array();
       if(app_state.corpus_paradigm[idx] != undefined) {
         corpus_forms = app_state.corpus_paradigm[idx][0];
+        td_class_str += " corpus_table_clickable";
       }
+      if(td_class_str) table_html += " class='" + td_class_str.trim() + "'";
+      table_html += ">";
+
       for(const corpus_form of corpus_forms){
         const clean_corpus_form = cleanWord(corpus_form, remove_punct_map).toLowerCase();
         if(form_set.has(clean_corpus_form)) {
@@ -630,28 +647,64 @@ for(const btn_evnt of button_events) {
 document.getElementById("random_lemma_btn").addEventListener('click', randomLemma);
 
 
-const showCorpusFormSentences = () => {
-  
+const corpus_attestations_element = document.createRange().createContextualFragment(`<div id="corpus_attestations_box" style="display: flex;">
+  <div id="corpus_attestations_topbar">
+    <div id="dict_close">
+      <svg id="red_cross" xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="24" viewBox="0 0 24 24" width="24" focusable="false"><path fill-rule="evenodd" clip-rule="evenodd" d="M5.29289 5.29289C5.68342 4.90237 6.31658 4.90237 6.70711 5.29289L12 10.5858L17.2929 5.29289C17.6834 4.90237 18.3166 4.90237 18.7071 5.29289C19.0976 5.68342 19.0976 6.31658 18.7071 6.70711L13.4142 12L18.7071 17.2929C19.0976 17.6834 19.0976 18.3166 18.7071 18.7071C18.3166 19.0976 17.6834 19.0976 17.2929 18.7071L12 13.4142L6.70711 18.7071C6.31658 19.0976 5.68342 19.0976 5.29289 18.7071C4.90237 18.3166 4.90237 17.6834 5.29289 17.2929L10.5858 12L5.29289 6.70711C4.90237 6.31658 4.90237 5.68342 5.29289 5.29289Z"></path></svg>
+    </div>
+  </div>
+  <div id="corpus_attestations_body">
+    <div class="corpus_box_row header" id="corpus_sentences_header">
+      <div id="text_result_header">Text Result</div>
+      <div id="result_location_header">Location</div>
+    </div>
+    <div id="text_results_box"></div>  
+  </div>
+  <div id="corpus_attestations_bottombar"></div>
+</div>`);
+
+const getShortTextLocation = (tokno) => {
+  return app_state.titles_info.find(title => title[1] <= tokno && title[2] >= tokno)[0];
+}
+const getTextResultFont = (tokno) => {
+  //this should be replaced with a simple "script" field in the texts table in the DB which would return glag or cyr, not bullshit switching on title-strings
+  const title = app_state.titles_info.find(title => title[1] <= tokno && title[2] >= tokno)[0];
+
+  if(title == "Codex Suprasliensis" || title == "Vita Constantini" || title == "Vita Methodii" || title == "Treatise on the letters") {
+    return "cyr";
+  }
+  else return "glag";
 }
 
-const expandCell = (event) => {
-  const infl_cell = event.currentTarget;  
-  infl_cell.classList.toggle("expandedInfl");
-  if(infl_cell.classList.contains("expandedInfl")) {
-      infl_cell.style.width = "300px";
+const showCorpusFormSentences = (corpus_attestations_json) => {
+  app_state.titles_info = corpus_attestations_json[3];
+
+  let attestation_sentences_html = "";
+  for(const key in corpus_attestations_json[1]) {
+    const result_tokno = corpus_attestations_json[2][key];
+    const result_url = window.location.origin + "/texts?" + result_tokno;
+
+    attestation_sentences_html += `<div class="corpus_box_row"><div class="text_result_cell ` + getTextResultFont(result_tokno) + `">` + corpus_attestations_json[1][key] + `</div><div class="result_location_cell search_link" data-search_tokno="` + result_tokno + `"><a href="`+ result_url + `" target="_blank">` + getShortTextLocation(result_tokno)+`</a></div></div>`;
+  }
+
+  if(app_state.corpus_form_attestations_shown) {
+    //document.getElementById("spoofspan3").children[0].remove();
+    document.getElementById("text_results_box").innerHTML = attestation_sentences_html;
   }
   else {
-      infl_cell.style.width = infl_cell.dataset.auto_cell_width;
-  }
+    const new_corpus_attestations_fragment = corpus_attestations_element.cloneNode(true);
+    new_corpus_attestations_fragment.getElementById("text_results_box").innerHTML = attestation_sentences_html;
+    new_corpus_attestations_fragment.getElementById("dict_close").addEventListener('click', () => {
+      document.getElementById("corpus_attestations_box").remove();
+      app_state.corpus_form_attestations_shown = false;
+    })
+    document.body.append(new_corpus_attestations_fragment);
+    makeDraggable();
+  } 
+  app_state.corpus_form_attestations_shown = true;
 };
-const addExplicitWidths = () => {
-  document.querySelectorAll("td").forEach(cell => {
-    cell.addEventListener('click', expandCell);
-    const auto_cell_width = String(cell.getBoundingClientRect().width) + "px";
-    cell.dataset.auto_cell_width = auto_cell_width;
-    cell.style.width = auto_cell_width;
-  });
-};
+
+
 
 //
 //---------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -801,4 +854,93 @@ const cyrToGlag = (str) => {
     str = str.replaceAll(pair[0], pair[1]);
   }
   return str;
+};
+
+
+/////////////////////////////////STUFF THAT MIGHT BE USEFUL LATER///////////////
+const expandCell = (event) => {
+  const infl_cell = event.currentTarget;  
+  infl_cell.classList.toggle("expandedInfl");
+  if(infl_cell.classList.contains("expandedInfl")) {
+      infl_cell.style.width = "300px";
+  }
+  else {
+      infl_cell.style.width = infl_cell.dataset.auto_cell_width;
+  }
+};
+const addExplicitWidths = () => {
+  document.querySelectorAll("td").forEach(cell => {
+    cell.addEventListener('click', expandCell);
+    const auto_cell_width = String(cell.getBoundingClientRect().width) + "px";
+    cell.dataset.auto_cell_width = auto_cell_width;
+    cell.style.width = auto_cell_width;
+  });
+};
+/////////////////////////////////STUFF THAT MIGHT BE USEFUL LATER///////////////
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//this is stolen
+const makeDraggable = function () {
+  dragAnnotBox(document.getElementById("corpus_attestations_box"));
+
+  function dragAnnotBox(elmnt) {
+    var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+    if (document.getElementById("corpus_attestations_topbar")) {
+      /* if present, the header is where you move the DIV from:*/
+      document.getElementById("corpus_attestations_topbar").onmousedown = dragMouseDown;
+    } else {
+      /* otherwise, move the DIV from anywhere inside the DIV:*/
+      elmnt.onmousedown = dragMouseDown;
+    }
+
+    function dragMouseDown(e) {
+      e = e || window.event;
+      e.preventDefault();
+      // get the mouse cursor position at startup:
+      pos3 = e.clientX;
+      pos4 = e.clientY;
+      document.onmouseup = closeDragElement;
+      // call a function whenever the cursor moves:
+      document.onmousemove = elementDrag;
+    }
+
+    function elementDrag(e) {
+      e = e || window.event;
+      e.preventDefault();
+      // calculate the new cursor position:
+      pos1 = pos3 - e.clientX;
+      pos2 = pos4 - e.clientY;
+      pos3 = e.clientX;
+      pos4 = e.clientY;
+      // set the element's new position:
+      elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+      elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+    }
+
+    function closeDragElement() {
+      /* stop moving when mouse button is released:*/
+      document.onmouseup = null;
+      document.onmousemove = null;
+    }
+  }
+
+  document.getElementById('corpus_attestations_topbar').style.cursor = 'move';
+
 };

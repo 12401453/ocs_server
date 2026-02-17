@@ -13,7 +13,8 @@ html {
 
 a {
     text-decoration: none;
-    color: #cbd9f4a6;
+    /* color: #cbd9f4a6; */
+    color: inherit;
 }
 body {
   margin: 8px;
@@ -345,6 +346,10 @@ tr:nth-child(7) td {
   background-color: #040a16;
 } */
 
+.corpus_table_clickable {
+  cursor: pointer;
+}
+
 #lcs_lemma_searchbox {
   display: block;
   /* background-color: #040a16;
@@ -413,7 +418,7 @@ tr:nth-child(7) td {
   height: fit-content;
   /* overflow-y: auto;
   scrollbar-width: thin; */
-  position: fixed;
+  position: absolute;
   width: 200px;
   left: 50%;
   bottom: 50%;
@@ -450,6 +455,7 @@ tr:nth-child(7) td {
   align-items: center;
   border-right: 1px solid black;
   border-bottom: 1px solid black;
+  cursor: default;
 }
 
 #dict_close:hover #red_cross{
@@ -491,22 +497,22 @@ tr:nth-child(7) td {
 }
 
 
-#text_results_box {
+#corpus_attestations_body {
   box-sizing: border-box;
   word-break: break-word;
   overflow-y: auto;
   scrollbar-width: thin;
 }
-#text_results_box::-webkit-scrollbar {
+#corpus_attestations_body::-webkit-scrollbar {
   width: 6px;
 }
-#text_results_box::-webkit-scrollbar-thumb {
+#corpus_attestations_body::-webkit-scrollbar-thumb {
   border-right: 2px solid black;
   border-top:1px solid black;
   border-bottom:1px solid black;
 }
 
-#text_results_box::-webkit-scrollbar-track {
+#corpus_attestations_body::-webkit-scrollbar-track {
   border-right: 2px solid black;
 }
 
@@ -531,13 +537,13 @@ tr:nth-child(7) td {
 }
 .text_result_cell.cyr {
   font-family: Menaion;
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 0px;
 }
 .text_result_cell.glag {
   font-family: Bukyvede;
   font-size: 13px;
-  letter-spacing: 1.5px;
+  letter-spacing: 1.3px;
 }
 .result_location_cell {
   border-left: 1px solid black;

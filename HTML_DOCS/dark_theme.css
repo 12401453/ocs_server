@@ -571,7 +571,7 @@ th.infl_titles {
   background-color: #071022;
   color: #cbd9f4;
 }
-.corpus_box_row:nth-child(odd) {
+.corpus_box_row:nth-child(even) {
   background-color: #040a16;
 }
 #corpus_attestations_topbar {
