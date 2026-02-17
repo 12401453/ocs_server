@@ -418,11 +418,11 @@ tr:nth-child(7) td {
   height: fit-content;
   /* overflow-y: auto;
   scrollbar-width: thin; */
-  position: absolute;
+  position: fixed;
   width: 200px;
   left: 50%;
   bottom: 50%;
-  transform: translateX(-100px) translateY(125px);
+  /* transform: translateX(-100px) translateY(125px); */
   border: 1px solid black;
   border-radius: 7px;
   max-height: 250px;

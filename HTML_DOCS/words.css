@@ -425,8 +425,7 @@ tr:nth-child(7) td {
   position: absolute;
   width: 300px;
   left: 50%;
-  bottom: 50%;
-  transform: translateX(-150px) translateY(250px);
+  transform: translateX(-150px);
   border: 1px solid black;
   border-radius: 7px;
   max-height: 350px;

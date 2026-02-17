@@ -13,9 +13,10 @@ const app_state = {
 }
 
 document.getElementById("grids-container").addEventListener('click', (event) => {
-  const table_cell = event.target.closest("td");
-  if(app_state.show_corpus_forms && table_cell) {
-    getCorpusInflectionSentences(Number(table_cell.dataset.infl_idx))
+  const td_cell = event.target.closest("td");
+  if(app_state.show_corpus_forms && td_cell) {
+    const td_cell_rect = td_cell.getBoundingClientRect();
+    getCorpusInflectionSentences(Number(td_cell.dataset.infl_idx), td_cell_rect);
   }
 });
 
@@ -64,6 +65,8 @@ const generateInflection = ([lemma_id, stem, noun_verb, conj_type, lcs_lemma, pv
       }
     }
     
+    removeCorpusAttestationsBox();
+
     if(noun_verb ==  "1") writeVerbTable(pv2_3_exists, lemma_id);
     else if(noun_verb ==  "2") writeNounTable(pv2_3_exists, lemma_id);
 
@@ -96,6 +99,8 @@ const getCorpusInflections = (lemma_id=app_state.displayed_lemma[0], noun_verb=a
 
     app_state.displayed_lemma = lemmas_json.find(arr => arr[0] == lemma_id);
 
+    removeCorpusAttestationsBox();
+
     switch(Number(noun_verb)) {
       case 1:
         writeVerbTableCorpus();
@@ -108,7 +113,7 @@ const getCorpusInflections = (lemma_id=app_state.displayed_lemma[0], noun_verb=a
   });
 };
 
-const getCorpusInflectionSentences = (infl_table_cell_number) => {
+const getCorpusInflectionSentences = (infl_table_cell_number, td_cell_rect) => {
   if(app_state.corpus_paradigm[infl_table_cell_number] === undefined) {
     return;
   }
@@ -124,7 +129,7 @@ const getCorpusInflectionSentences = (infl_table_cell_number) => {
     return response.json();
   })
   .then(response => {
-    showCorpusFormSentences(response);
+    showCorpusFormSentences(response, td_cell_rect);
   });
 };
 
@@ -614,6 +619,7 @@ const toggleInflTables = (event) => {
       getCorpusInflections();
     }
     else {
+      removeCorpusAttestationsBox();
       if(app_state.displayed_lemma[2] == '2') writeNounTableCorpus();
       else if(app_state.displayed_lemma[2] == '1') writeVerbTableCorpus();
     }
@@ -627,6 +633,8 @@ const toggleInflTables = (event) => {
 
     const pv2_3_exists = app_state.displayed_lemma[5] == "" ? false : true;
     const lemma_id = app_state.displayed_lemma[0];
+
+    removeCorpusAttestationsBox();
 
     if(app_state.displayed_lemma[2] == '2') writeNounTable(pv2_3_exists, lemma_id);
     else if(app_state.displayed_lemma[2] == '1') writeVerbTable(pv2_3_exists, lemma_id);
@@ -676,7 +684,32 @@ const getTextResultFont = (tokno) => {
   else return "glag";
 }
 
-const showCorpusFormSentences = (corpus_attestations_json) => {
+const removeCorpusAttestationsBox = () => {
+  if(app_state.corpus_form_attestations_shown) {
+    document.getElementById("corpus_attestations_box").remove();
+    app_state.corpus_form_attestations_shown = false;
+  }
+};
+
+const centreAttestationsBox = (td_cell_rect) => {
+  const viewport_width = window.viewport.segments[0].width;
+  const corpus_box_elem = document.getElementById("corpus_attestations_box");
+  const attestations_box_height = corpus_box_elem.getBoundingClientRect().height;
+  
+  if(viewport_width > 768) {
+    corpus_box_elem.style.transform = "";
+    const td_cell_centre = td_cell_rect.top + (td_cell_rect.bottom - td_cell_rect.top)/2;
+
+    const initial_top_value = td_cell_centre - attestations_box_height/2;
+    corpus_box_elem.style.top = `${initial_top_value + window.scrollY}px`;
+    //corpus_box_elem.style.left = "";
+    return;
+  }
+  
+  corpus_box_elem.style.transform = `translateX(-100px) translateY(${attestations_box_height/2}px)`;
+};
+
+const showCorpusFormSentences = (corpus_attestations_json, td_cell_rect) => {
   app_state.titles_info = corpus_attestations_json[3];
 
   let attestation_sentences_html = "";
@@ -690,16 +723,19 @@ const showCorpusFormSentences = (corpus_attestations_json) => {
   if(app_state.corpus_form_attestations_shown) {
     //document.getElementById("spoofspan3").children[0].remove();
     document.getElementById("text_results_box").innerHTML = attestation_sentences_html;
+    centreAttestationsBox(td_cell_rect);
   }
   else {
     const new_corpus_attestations_fragment = corpus_attestations_element.cloneNode(true);
     new_corpus_attestations_fragment.getElementById("text_results_box").innerHTML = attestation_sentences_html;
     new_corpus_attestations_fragment.getElementById("dict_close").addEventListener('click', () => {
-      document.getElementById("corpus_attestations_box").remove();
-      app_state.corpus_form_attestations_shown = false;
-    })
+      removeCorpusAttestationsBox();
+    });
     document.body.append(new_corpus_attestations_fragment);
+    
+    centreAttestationsBox(td_cell_rect);
     makeDraggable();
+
   } 
   app_state.corpus_form_attestations_shown = true;
 };

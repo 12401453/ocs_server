@@ -100,8 +100,14 @@ void OcsServer::onMessageReceived(int clientSocket, const char* msg, int length)
         Cookies l_cookies;
         if(page_type > 0) {
             if(url_parameter.size() > 0) {
+                //TEST
+                cookies_present = readCookie(msg, l_cookies);
+                //TEST
                 valid_url_parameter_present = urlParameterReadCookies(url_parameter, l_cookies);
-                if(valid_url_parameter_present == false)  cookies_present = readCookie(msg, l_cookies);
+                //if(valid_url_parameter_present == false)  cookies_present = readCookie(msg, l_cookies); //TEST REMOVE
+                //TEST
+                if(valid_url_parameter_present) cookies_present = false;
+                //TEST
             }
             else cookies_present = readCookie(msg, l_cookies); //want to avoid reading cookies when serving auxilliary files like stylesheets
         }
@@ -936,7 +942,7 @@ bool OcsServer::urlParameterReadCookies(std::string url_parameter, Cookies& l_co
             l_cookies.text_id = intToString(text_id);
             l_cookies.current_pageno = intToString(result_pageno);
             l_cookies.subtitle_id = intToString(subtitle_id);
-            l_cookies.theme = "1";
+            //l_cookies.theme = "1"; //TEST REMOVE
             
             return true;
         }
