@@ -692,11 +692,11 @@ const removeCorpusAttestationsBox = () => {
 };
 
 const centreAttestationsBox = (td_cell_rect) => {
-  const viewport_width = window.viewport.segments[0].width;
+  const is_larger_screen_size = window.matchMedia("(min-width: 769px)").matches;
   const corpus_box_elem = document.getElementById("corpus_attestations_box");
   const attestations_box_height = corpus_box_elem.getBoundingClientRect().height;
   
-  if(viewport_width > 768) {
+  if(is_larger_screen_size) {
     corpus_box_elem.style.transform = "";
     const td_cell_centre = td_cell_rect.top + (td_cell_rect.bottom - td_cell_rect.top)/2;
 
