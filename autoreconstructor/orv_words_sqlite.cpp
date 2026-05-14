@@ -700,7 +700,7 @@ int main () {
         sqlite3_exec(DB, sql_BEGIN, nullptr, nullptr, nullptr);
 
         sqlite3_exec(DB, "DROP TABLE IF EXISTS corpus;CREATE TABLE corpus (tokno INTEGER PRIMARY KEY, chu_word_torot TEXT, chu_word_normalised TEXT, morph_tag TEXT, lemma_id INTEGER, sentence_no INTEGER, presentation_before TEXT, presentation_after TEXT, autoreconstructed_lcs TEXT, inflexion_class_id INTEGER, autoreconstructed_morph_replace TEXT, auto_tagged INTEGER, inflexion_class TEXT, pv2_3_exists INTEGER);CREATE INDEX lemma_id_index on corpus(lemma_id) WHERE lemma_id IS NOT NULL;CREATE INDEX sentence_no_index on corpus(sentence_no);CREATE INDEX inflexion_class_corpus_index on corpus(inflexion_class_id) WHERE inflexion_class_id IS NOT NULL", nullptr, nullptr, nullptr);
-        sqlite3_exec(DB, "DROP TABLE IF EXISTS lemmas;CREATE TABLE lemmas (lemma_id INTEGER PRIMARY KEY, pos INTEGER, lemma_lcs TEXT, lemma_ocs TEXT, stem_lcs TEXT, inflexion_class_id INTEGER, pv2_3_lemma TEXT);CREATE INDEX inflexion_class_index ON lemmas(inflexion_class_id) WHERE inflexion_class_id IS NOT NULL", nullptr, nullptr, nullptr);
+        sqlite3_exec(DB, "DROP TABLE IF EXISTS lemmas;CREATE TABLE lemmas (lemma_id INTEGER PRIMARY KEY, pos INTEGER, lemma_lcs TEXT, lemma_ocs TEXT, stem_lcs TEXT, inflexion_class_id INTEGER, pv2_3_lemma TEXT, noun_verb INTEGER);CREATE INDEX inflexion_class_index ON lemmas(inflexion_class_id) WHERE inflexion_class_id IS NOT NULL", nullptr, nullptr, nullptr);
         sqlite3_exec(DB, "DROP TABLE IF EXISTS inflexion_classes;CREATE TABLE inflexion_classes (inflexion_class_id INTEGER PRIMARY KEY, inflexion_class_name TEXT)", nullptr, nullptr, nullptr);
         sqlite3_exec(DB, "DROP TABLE IF EXISTS texts;CREATE TABLE texts (text_id INTEGER PRIMARY KEY, text_title TEXT, tokno_start INTEGER, tokno_end INTEGER)", nullptr, nullptr, nullptr);
         sqlite3_exec(DB, "DROP TABLE IF EXISTS subtitles;CREATE TABLE subtitles (subtitle_id INTEGER PRIMARY KEY, subtitle_text TEXT, text_id INTEGER, tokno_start INTEGER, tokno_end INTEGER)", nullptr, nullptr, nullptr);
@@ -813,7 +813,7 @@ int main () {
         //lemmas table
         std::cout << "Writing lemmas table into database...\n";
         sqlite3_stmt* lemma_stmt;
-        sql_text = "INSERT INTO lemmas (lemma_id, pos, lemma_lcs, lemma_ocs, stem_lcs, inflexion_class_id, pv2_3_lemma) VALUES (?,?,?,?,?,?,?)";
+        sql_text = "INSERT INTO lemmas (lemma_id, pos, lemma_lcs, lemma_ocs, stem_lcs, inflexion_class_id, pv2_3_lemma, noun_verb) VALUES (?,?,?,?,?,?,?,?)";
         sqlite3_prepare_v2(DB, sql_text, -1, &lemma_stmt, nullptr);
 
         //INFLEXION_CLASS SHIT TODO
@@ -830,6 +830,8 @@ int main () {
           sqlite3_bind_text(lemma_stmt, 4, lemma_row.first.substr(2).c_str(), -1, SQLITE_TRANSIENT); //torot lemma-form extracted from pos_lemma_combo string
 
           sqlite3_bind_text(lemma_stmt, 5, lemma_row.second.stem_lcs.c_str(), -1, SQLITE_TRANSIENT);
+
+          sqlite3_bind_int(lemma_stmt, 8, lemma_row.second.noun_verb);
 
           if(!inflexion_class_map.contains(lemma_row.second.inflexion_class)) {
             sqlite3_bind_null(lemma_stmt, 6);

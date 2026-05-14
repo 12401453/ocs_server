@@ -1,5 +1,5 @@
-
-function tt_type() {
+//DELETE-NOT-USED
+/*function tt_type() {
   if(tooltips_shown) {
     let lemma_tooltips = document.querySelectorAll('.lemma_tt, .mw_tt');
     lemma_tooltips.forEach(lemma_tooltip => {
@@ -12,7 +12,7 @@ function tt_type() {
     lemmaTooltipMW();
     tooltips_shown = true; //redundant but done incase the AJAX request in lemmaTooltips() fails
   }
-}
+} */
 
 let lang_id = 0;
 let dict = Object.create(null);
@@ -60,7 +60,9 @@ const app_state = {
   dict_html_entries: {1: "", 2: ""},
   titles_info: [],
   theme: 0,
-  dictionary: "gorazd"
+  dictionary: "gorazd",
+  raw_lcs_paradigm: [],
+  word_popup_shown: false
 }
 
 function selectText() {
@@ -107,8 +109,7 @@ function selectText() {
             document.getElementById("pagenos").addEventListener('keydown', selectText_splitup);
           }
           
-          if(tooltips_shown) {
-          }
+         
           document.getElementById("textselect").blur();
           //loadingbutton.remove();
 
@@ -126,16 +127,9 @@ function selectText() {
   httpRequest("POST", "retrieve_text.php");
 }
 const selectSubtitle = (event) => {
-  // if(displayWordEditor.edit_mode) {
-  //   displayWordEditor.stopEditing();
-  // }
-  if(display_word != null) delAnnotate();
-  //setLangId();  //not async safe, needs to change
 
-  // let loadingbutton = document.createElement('div');
-  // loadingbutton.innerHTML = "Loading...";
-  // loadingbutton.id = 'loadingbutton';
-  // document.getElementById('spoofspan').after(loadingbutton);
+  //if(display_word != null) delAnnotate();
+
 
   showLoadingButton();
 
@@ -174,15 +168,13 @@ const selectSubtitle = (event) => {
          
           //document.getElementById("textbody").addEventListener('click', showAnnotate);
 
-          document.querySelectorAll('.multiword').forEach(mw => {
-            mw.addEventListener('click', showMultiwordAnnotate);
-            mw.addEventListener('mouseover', underlineMultiwords);
-            mw.addEventListener('mouseout', removeUnderlineMultiwords);
-          });
+          // document.querySelectorAll('.multiword').forEach(mw => {
+          //   mw.addEventListener('click', showMultiwordAnnotate);
+          //   mw.addEventListener('mouseover', underlineMultiwords);
+          //   mw.addEventListener('mouseout', removeUnderlineMultiwords);
+          // });
           
-          if(tooltips_shown) {
-            //lemmaTooltipMW();
-          }
+          
           document.getElementById("subtitle_select").blur();
           //loadingbutton.remove();
           removeLoadingButton();
@@ -315,15 +307,8 @@ const selectText_splitup = (event) => {
   }
   if(new_pageno == current_pageno) return;
 
-  // if(displayWordEditor.edit_mode) {
-  //   displayWordEditor.stopEditing();
-  // }
-  if(display_word != null) delAnnotate();
+  //if(display_word != null) delAnnotate();
 
-  // let loadingbutton = document.createElement('div');
-  // loadingbutton.innerHTML = "Loading...";
-  // loadingbutton.id = 'loadingbutton';
-  // document.getElementById('spoofspan').after(loadingbutton);
   showLoadingButton();
 
   const tokno_start = page_toknos_arr[new_pageno - 1][0];
@@ -346,17 +331,13 @@ const selectText_splitup = (event) => {
           
           //document.getElementById("textbody").addEventListener('click', showAnnotate);
 
-          document.querySelectorAll('.multiword').forEach(mw => {
-            //mw.onclick = showMultiwordAnnotate;
-            mw.addEventListener('click', showMultiwordAnnotate);
-            mw.addEventListener('mouseover', underlineMultiwords);
-            mw.addEventListener('mouseout', removeUnderlineMultiwords);
-          });
+          // document.querySelectorAll('.multiword').forEach(mw => {
+          //   mw.addEventListener('click', showMultiwordAnnotate);
+          //   mw.addEventListener('mouseover', underlineMultiwords);
+          //   mw.addEventListener('mouseout', removeUnderlineMultiwords);
+          // });
    
-          if(tooltips_shown) {
-            //lemmaTooltipMW();
-          }
-          //loadingbutton.remove();
+          
           removeLoadingButton();
           if(new_pageno > current_pageno) {
             document.getElementById("textselect").scrollIntoView();
@@ -377,45 +358,51 @@ const selectText_splitup = (event) => {
   httpRequest("POST", "retrieve_text_pageno.php");
 };
 
+//DELETE-NOT-USED
+/* const noun_pos = '<span id="pos_tag_noun" class="pos_tag" onclick="selectPoS()">noun</span>';
+const verb_pos = '<span id="pos_tag_verb" class="pos_tag" onclick="selectPoS()">verb</span>';
+const adj_pos = '<span id="pos_tag_adj" class="pos_tag" onclick="selectPoS()" title="adjective">adject.</span>';
+const adverb_pos = '<span id="pos_tag_adverb" class="pos_tag" onclick="selectPoS()">adverb</span>';
+const prep_pos = '<span id="pos_tag_prep" class="pos_tag" title="preposition" onclick="selectPoS()">prep.</span>';
+const conj_pos = '<span id="pos_tag_conj" class="pos_tag" title="conjunction" onclick="selectPoS()">conj.</span>';
+const part_pos = '<span id="pos_tag_part" class="pos_tag" title="particle/interjection" onclick="selectPoS()">part.</span>';
+const ques_pos = '<span id="pos_tag_ques" class="pos_tag" title="interrogative" onclick="selectPoS()">ques.</span>'; */
+
+const noun_pos_tt = '<span id="pos_tag_noun_tt" class="pos_tag_tt" title="noun"></span>';
+const verb_pos_tt = '<span id="pos_tag_verb_tt" class="pos_tag_tt" title="verb"></span>';
+const adj_pos_tt = '<span id="pos_tag_adj_tt" class="pos_tag_tt" title="adjective"></span>';
+const adverb_pos_tt = '<span id="pos_tag_adverb_tt" class="pos_tag_tt" title="adverb"></span>';
+const prep_pos_tt = '<span id="pos_tag_prep_tt" class="pos_tag_tt" title="preposition"></span>';
+const conj_pos_tt = '<span id="pos_tag_conj_tt" class="pos_tag_tt" title="conjunction"></span>';
+const part_pos_tt = '<span id="pos_tag_part_tt" class="pos_tag_tt" title="particle/interjection"></span>';
+const ques_pos_tt = '<span id="pos_tag_ques_tt" class="pos_tag_tt" title="interrogative"></span>';
+const quant_pos_tt_elem = '<span id="pos_tag_quant_tt" class="pos_tag_tt" title="quantifier"></span>';
+const unassigned_pos_tt_elem = '<span id="pos_tag_unassigned_tt" class="pos_tag_tt" title="unassigned"></span>';
+
+const tt_pos_arr = {1: noun_pos_tt, 2: verb_pos_tt, 3: adj_pos_tt, 4: adverb_pos_tt, 5: prep_pos_tt, 6: conj_pos_tt, 7: part_pos_tt, 8: ques_pos_tt, 9: quant_pos_tt_elem, 10: unassigned_pos_tt_elem};
+
+//DELETE-NOT-USED
+/* const noun_pos_tt_elem = document.createRange().createContextualFragment('<span id="pos_tag_noun_tt" class="pos_tag_tt" title="noun"></span>');
+const verb_pos_tt_elem = document.createRange().createContextualFragment('<span id="pos_tag_verb_tt" class="pos_tag_tt" title="verb"></span>');
+const adj_pos_tt_elem = document.createRange().createContextualFragment('<span id="pos_tag_adj_tt" class="pos_tag_tt" title="adjective"></span>');
+const adverb_pos_tt_elem = document.createRange().createContextualFragment('<span id="pos_tag_adverb_tt" class="pos_tag_tt" title="adverb"></span>');
+const prep_pos_tt_elem = document.createRange().createContextualFragment('<span id="pos_tag_prep_tt" class="pos_tag_tt" title="preposition"></span>');
+const conj_pos_tt_elem = document.createRange().createContextualFragment('<span id="pos_tag_conj_tt" class="pos_tag_tt" title="conjunction"></span>');
+const part_pos_tt_elem = document.createRange().createContextualFragment('<span id="pos_tag_part_tt" class="pos_tag_tt" title="particle/interjection"></span>');
+const ques_pos_tt_elem = document.createRange().createContextualFragment('<span id="pos_tag_ques_tt" class="pos_tag_tt" title="interrogative"></span>'); */
+// const quant_pos_tt_elem = document.createRange().createContextualFragment('<span id="pos_tag_quant_tt" class="pos_tag_tt" title="quantifier"></span>');
+// const unassigned_pos_tt_elem = document.createRange().createContextualFragment('<span id="pos_tag_unassigned_tt" class="pos_tag_tt" title="unassigned"></span>');
+// const tt_pos_elements = [noun_pos_tt_elem, verb_pos_tt_elem, adj_pos_tt_elem, adverb_pos_tt_elem, prep_pos_tt_elem, conj_pos_tt_elem, part_pos_tt_elem, ques_pos_tt_elem, quant_pos_tt_elem, unassigned_pos_tt_elem];
+
 /*
 const highlightPageno = function (event) {
   event.target.classList.add("current_pageno");
 }; */
 
 
-function progressBar(word_count) {
 
-  let loading_bar_percentage = document.getElementById("percent");
-
-  const httpRequest = (method, url) => {
-
-    const xhttp = new XMLHttpRequest();
-    xhttp.open(method, url, true);
-    xhttp.responseType = 'text';
-    //xhttp.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-
-    xhttp.onload = () => {
-
-      if(xhttp.readyState == 4) {
-
-        let words_progress = Number(xhttp.responseText);
-        let percent = ((words_progress*100)/word_count).toFixed(2);
-        loading_bar_percentage.innerHTML = `${percent}%`;
-        //console.log("progress_bar.php triggered");
-      }
-
-    }
-    xhttp.send();
-  }
-  httpRequest("GET", "progress_bar.php");
-
-  setTimeout(`progressBar(${word_count})`, 100); //setTimeout() executes the function in its first argument after the number of milliseconds in its second argument, so this progressBar function gets called every 0.1 seconds forever until the page reloads when the text is fully loaded
- 
-} 
-
-
-
-function loadText() {
+//DELETE-NOT-USED
+/* function loadText() {
 
   let newtext_raw = document.getElementById('newtext').value.replaceAll('\u00AD', '').replaceAll("’", "\'").trim();
   let text_title_raw = document.getElementById('text_title').value.replaceAll('\u00AD', '').replaceAll("’", "\'").trim(); //U+00AD is a soft-hyphen, invisible little bastard
@@ -436,14 +423,6 @@ function loadText() {
   
   let text_title = encodeURIComponent(text_title_raw);
   
-
-  
-/*
-  let loadingbutton = document.createElement('div');
-  loadingbutton.innerHTML = 'Processing text: <span id="percent">0.00%</span>';
-  loadingbutton.id = 'loadingbutton';
-  let loading_bar_percentage = document.getElementById("percent");
-  document.getElementById('spoofspan').after(loadingbutton); */
 
   let loadingbutton = document.createElement('div');
   loadingbutton.innerHTML = "Loading...";
@@ -466,7 +445,7 @@ function loadText() {
   
     if(xhttp.readyState == 4)  {
       loadingbutton.innerHTML = "&nbsp;&nbsp;Done&nbsp;&nbsp;"; //not really needed
-      //location.reload(); /* window.open("update_db.php"); */
+      //location.reload();
       window.location = "/texts";
     }
   }
@@ -568,46 +547,12 @@ function showDeletion() {
 
 }
 
-const noun_pos = '<span id="pos_tag_noun" class="pos_tag" onclick="selectPoS()">noun</span>';
-const verb_pos = '<span id="pos_tag_verb" class="pos_tag" onclick="selectPoS()">verb</span>';
-const adj_pos = '<span id="pos_tag_adj" class="pos_tag" onclick="selectPoS()" title="adjective">adject.</span>';
-const adverb_pos = '<span id="pos_tag_adverb" class="pos_tag" onclick="selectPoS()">adverb</span>';
-const prep_pos = '<span id="pos_tag_prep" class="pos_tag" title="preposition" onclick="selectPoS()">prep.</span>';
-const conj_pos = '<span id="pos_tag_conj" class="pos_tag" title="conjunction" onclick="selectPoS()">conj.</span>';
-const part_pos = '<span id="pos_tag_part" class="pos_tag" title="particle/interjection" onclick="selectPoS()">part.</span>';
-const ques_pos = '<span id="pos_tag_ques" class="pos_tag" title="interrogative" onclick="selectPoS()">ques.</span>';
-
-const noun_pos_tt = '<span id="pos_tag_noun_tt" class="pos_tag_tt" title="noun"></span>';
-const verb_pos_tt = '<span id="pos_tag_verb_tt" class="pos_tag_tt" title="verb"></span>';
-const adj_pos_tt = '<span id="pos_tag_adj_tt" class="pos_tag_tt" title="adjective"></span>';
-const adverb_pos_tt = '<span id="pos_tag_adverb_tt" class="pos_tag_tt" title="adverb"></span>';
-const prep_pos_tt = '<span id="pos_tag_prep_tt" class="pos_tag_tt" title="preposition"></span>';
-const conj_pos_tt = '<span id="pos_tag_conj_tt" class="pos_tag_tt" title="conjunction"></span>';
-const part_pos_tt = '<span id="pos_tag_part_tt" class="pos_tag_tt" title="particle/interjection"></span>';
-const ques_pos_tt = '<span id="pos_tag_ques_tt" class="pos_tag_tt" title="interrogative"></span>';
-const quant_pos_tt_elem = '<span id="pos_tag_quant_tt" class="pos_tag_tt" title="quantifier"></span>';
-const unassigned_pos_tt_elem = '<span id="pos_tag_unassigned_tt" class="pos_tag_tt" title="unassigned"></span>';
-
-const tt_pos_arr = {1: noun_pos_tt, 2: verb_pos_tt, 3: adj_pos_tt, 4: adverb_pos_tt, 5: prep_pos_tt, 6: conj_pos_tt, 7: part_pos_tt, 8: ques_pos_tt, 9: quant_pos_tt_elem, 10: unassigned_pos_tt_elem};
-
-
-const noun_pos_tt_elem = document.createRange().createContextualFragment('<span id="pos_tag_noun_tt" class="pos_tag_tt" title="noun"></span>');
-const verb_pos_tt_elem = document.createRange().createContextualFragment('<span id="pos_tag_verb_tt" class="pos_tag_tt" title="verb"></span>');
-const adj_pos_tt_elem = document.createRange().createContextualFragment('<span id="pos_tag_adj_tt" class="pos_tag_tt" title="adjective"></span>');
-const adverb_pos_tt_elem = document.createRange().createContextualFragment('<span id="pos_tag_adverb_tt" class="pos_tag_tt" title="adverb"></span>');
-const prep_pos_tt_elem = document.createRange().createContextualFragment('<span id="pos_tag_prep_tt" class="pos_tag_tt" title="preposition"></span>');
-const conj_pos_tt_elem = document.createRange().createContextualFragment('<span id="pos_tag_conj_tt" class="pos_tag_tt" title="conjunction"></span>');
-const part_pos_tt_elem = document.createRange().createContextualFragment('<span id="pos_tag_part_tt" class="pos_tag_tt" title="particle/interjection"></span>');
-const ques_pos_tt_elem = document.createRange().createContextualFragment('<span id="pos_tag_ques_tt" class="pos_tag_tt" title="interrogative"></span>');
-// const quant_pos_tt_elem = document.createRange().createContextualFragment('<span id="pos_tag_quant_tt" class="pos_tag_tt" title="quantifier"></span>');
-// const unassigned_pos_tt_elem = document.createRange().createContextualFragment('<span id="pos_tag_unassigned_tt" class="pos_tag_tt" title="unassigned"></span>');
-// const tt_pos_elements = [noun_pos_tt_elem, verb_pos_tt_elem, adj_pos_tt_elem, adverb_pos_tt_elem, prep_pos_tt_elem, conj_pos_tt_elem, part_pos_tt_elem, ques_pos_tt_elem, quant_pos_tt_elem, unassigned_pos_tt_elem];
-
 const smallscreen_annot_box_html = '<div id="annot_box"><div id="annot_topbar"><div id="close_button"><svg id="red_cross" xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="24" viewBox="0 0 24 24" width="24" focusable="false"><path fill-rule="evenodd" clip-rule="evenodd" d="M5.29289 5.29289C5.68342 4.90237 6.31658 4.90237 6.70711 5.29289L12 10.5858L17.2929 5.29289C17.6834 4.90237 18.3166 4.90237 18.7071 5.29289C19.0976 5.68342 19.0976 6.31658 18.7071 6.70711L13.4142 12L18.7071 17.2929C19.0976 17.6834 19.0976 18.3166 18.7071 18.7071C18.3166 19.0976 17.6834 19.0976 17.2929 18.7071L12 13.4142L6.70711 18.7071C6.31658 19.0976 5.68342 19.0976 5.29289 18.7071C4.90237 18.3166 4.90237 17.6834 5.29289 17.2929L10.5858 12L5.29289 6.70711C4.90237 6.31658 4.90237 5.68342 5.29289 5.29289Z"/></svg></div><span id="edit_button" title="Edit current text-word">Edit</span><span id="pos_tag_box"><span id="pos_tag_adj" class="pos_tag" title="adjective">adject.</span></span></div><div id="lemma_tag_row"><textarea id="lemma_tag" spellcheck="false">uigennemtrængelig</textarea></div><div id="annot"><div id="right_column"><div id="left_column"><span id="lemma_box" class="box">Lemma</span><span id="multiword_box" class="box">Multiword</span><span id="context_box" class="box" title="not yet implemented">Context translation</span><span id="morph_box" class="box" title="not yet implemented">Morphology</span><span id="accent_box" class="box" title="not yet implemented">Accentology</span></div><div id="right_body"><textarea id="lemma_textarea" autocomplete="off">impenetrable</textarea><div id="meaning_no_box"><div id="meaning_leftarrow" class="nav_arrow">&lt;</div><div id="meaning_no">Meaning <span id="number">1</span></div><div id="meaning_rightarrow" class="nav_arrow">&gt;</div></div></div><div id="right_footer"><div id="save_button">Save</div><div id="delete_lemma_button">Delete</div></div></div></div></div>';
 
-const fullscreen_annot_box_html = '<div id="annot_box"><div id="annot_topbar" ondblclick="makeDraggable()"><span id="close_button" onclick="delAnnotate()">Close</span><span id="edit_button" title="Edit current text-word">Edit</span></div><div id="annot"><div id="left_column"><span id="lemma_box" class="box">Lemma translation</span><span id="multiword_box" class="box">Multiword</span><span id="context_box" class="box" title="not yet implemented">Context translation</span><span id="morph_box" class="box" title="not yet implemented">Morphology</span><span id="accent_box" class="box" title="not yet implemented">Accentology</span></div><div id="right_column"><div id="right_header"><textarea id="lemma_tag" spellcheck="false"></textarea></div><div id="right_body"><textarea id="lemma_textarea" autocomplete="off"></textarea></div><div id="right_footer"><span id="pos_tag_box"></span><div id="meaning_no_box"><div id="meaning_leftarrow" class="nav_arrow"><</div><div id="meaning_no">Meaning <span id="number"></span></div><div id="meaning_rightarrow" class="nav_arrow">></div></div><div id="save_and_delete_box"><div id="save_button">Save</div><div id="delete_lemma_button">Delete</div></div></div></div></div></div>';
+const fullscreen_annot_box_html = '<div id="annot_box"><div id="annot_topbar" ondblclick="makeDraggable()"><span id="close_button" onclick="delAnnotate()">Close</span><span id="edit_button" title="Edit current text-word">Edit</span></div><div id="annot"><div id="left_column"><span id="lemma_box" class="box">Lemma translation</span><span id="multiword_box" class="box">Multiword</span><span id="context_box" class="box" title="not yet implemented">Context translation</span><span id="morph_box" class="box" title="not yet implemented">Morphology</span><span id="accent_box" class="box" title="not yet implemented">Accentology</span></div><div id="right_column"><div id="right_header"><textarea id="lemma_tag" spellcheck="false"></textarea></div><div id="right_body"><textarea id="lemma_textarea" autocomplete="off"></textarea></div><div id="right_footer"><span id="pos_tag_box"></span><div id="meaning_no_box"><div id="meaning_leftarrow" class="nav_arrow"><</div><div id="meaning_no">Meaning <span id="number"></span></div><div id="meaning_rightarrow" class="nav_arrow">></div></div><div id="save_and_delete_box"><div id="save_button">Save</div><div id="delete_lemma_button">Delete</div></div></div></div></div></div>'; */
 
-function choosePoS(pos_number) {
+//DELETE-NOT-USED
+/*function choosePoS(pos_number) {
   let pos_html = noun_pos;
   switch(pos_number) {
     case 1:
@@ -636,17 +581,19 @@ function choosePoS(pos_number) {
       break;  
   }
   return pos_html;
-}
+} */
 
-const deadFunc = function () {
+//DELETE-NOT-USED
+/*const deadFunc = function () {
   let pos_selects = document.querySelectorAll('.pos_tag_select');
   pos_selects.forEach(pos_select => {
     pos_select.remove();
   });
   this.onclick = selectPoS;
-};
+}; */
 
-const changePoS = function () {
+//DELETE-NOT-USED
+/* const changePoS = function () {
   let pullInFunc = () => {};
   switch(annotation_mode){
     case 1:
@@ -702,9 +649,10 @@ const changePoS = function () {
       break;
   }
   pos_initial = pos;
-};
+}; */
 
-const selectPoS = function () {
+//DELETE-NOT-USED
+/*const selectPoS = function () {
   let pos_tag_current_id = document.querySelector('.pos_tag').id;
 
   let pos_tag_select_current = "noun_pos";
@@ -752,17 +700,16 @@ const selectPoS = function () {
 
   document.getElementById('pos_tag_box').removeChild(document.getElementById(pos_tag_select_current));
 
-}; 
+}; */
 
-const pullInLemma = function (can_skip = true) {
+//DELETE-NOT-USED
+/*const pullInLemma = function (can_skip = true) {
   
   let lemma_form = document.getElementById('lemma_tag').value.trim();
   if (lemma_form == lemma_form_tag_initial && can_skip) {
     return;
   }
-/*  if(lang_id == 5 && pos == 1) {
-    lemma_form = lemma_form[0].toUpperCase().concat(lemma_form.slice(1));
-  } */
+
   lemma_form_tag_initial = lemma_form;//TESTING
 
   document.getElementById('save_button').onclick = "";
@@ -985,9 +932,7 @@ const lemmaDelete = function () {
         let lemma_still_set = xhttp.responseText.trim() == "0" ? false : true;
 
         console.log('Lemma deleted');
-       /* document.getElementById('annot_box').remove();
-        display_word.classList.add("tooltip");
-        display_word.classList.remove("tooltip_selected"); */
+
         if(lemma_still_set == false) {
           let dataselectorstring = '[data-word_engine_id="' + word_engine_id + '"]';
           let current_words = document.querySelectorAll(dataselectorstring);
@@ -1120,10 +1065,11 @@ const lemmaTooltipMW = function () {
   };
   httpRequest("POST", "lemma_tooltip_mw.php");
 
-};
+}; */
 
 //need to write an equivalent for multiword_recording to update mw_tooltips
-const lemmaRecordTooltipUpdate = function (current_words) {
+//DELETE-NOT-USED
+/*const lemmaRecordTooltipUpdate = function (current_words) {
   current_words.forEach(current_word => {
     let current_lemma_tt = current_word.querySelector('.lemma_tt');
     if(current_lemma_tt != null) {
@@ -1172,9 +1118,10 @@ const lemmaRecordTooltipUpdate = function (current_words) {
     xhttp.send(send_data);
   };
   httpRequest("POST", "lemma_tooltip.php");
-};
+}; */
 
-const singleTooltipUpdate = function (single_word) {
+//DELETE-NOT-USED
+/* const singleTooltipUpdate = function (single_word) {
   
   if(!single_word.classList.contains('lemma_set_unexplicit')) return;
 
@@ -1213,9 +1160,10 @@ const singleTooltipUpdate = function (single_word) {
     xhttp.send(send_data);
   };
   httpRequest("POST", "lemma_tooltip.php");
-};
+}; */
 
-
+//DELETE-NOT-USED
+/*
 let pos = 1;
 let lemma_form_tag_initial = "";
 let lemma_textarea_content_initial = "";
@@ -1227,18 +1175,18 @@ let multiword_meanings = Object.create(null);
 let multiword_indices = Object.create(null);
 let multiword_id = 0;
 let multiword_meaning_no = 1;
-//let multiword_tag_initial = "";
 
-let tooltips_shown = false;
+
 let pos_initial = 1;
 
 let display_word = null;
 let tokno_current = 0;
 let word_engine_id = 0;
 
-let annotation_mode = 0;
+let annotation_mode = 0; */
 ///////////////////////////////
 
+/*
 function showAnnotate(event) {
   if(window.innerWidth < 769) return;
 
@@ -1331,7 +1279,7 @@ const fetchLemmaData = function (box_present = true) {
     xhttp.send(send_data);
   }
   httpRequest("POST", "retrieve_engword.php");
-};
+}; */
 
 const htmlSpecialChars = (unescaped) => {
   let escaped = "";
@@ -1359,7 +1307,8 @@ const htmlSpecialChars = (unescaped) => {
   return escaped;
 };
 
-const recordMultiword = function () {
+//DELETE-NOT-USED
+/* const recordMultiword = function () {
   if(document.getElementById("lemma_textarea").value.trim() != "" || multiword_meanings[multiword_meaning_no] != undefined) {
     multiword_meanings[multiword_meaning_no] = document.getElementById("lemma_textarea").value.trim();
   }
@@ -1826,9 +1775,10 @@ const fetchMultiwordData = function (box_present = true) {
   
   httpRequest("POST", "retrieve_multiword.php");
    
-};
+}; */
 
-const reactivateArrows = (meaning_no, max_meaning_no) => {
+//DELETE-NOT-USED
+/*const reactivateArrows = (meaning_no, max_meaning_no) => {
   let leftarrow = document.getElementById("meaning_leftarrow");
   let rightarrow = document.getElementById("meaning_rightarrow");
   leftarrow.classList.add("nav_arrow");
@@ -1843,10 +1793,11 @@ const reactivateArrows = (meaning_no, max_meaning_no) => {
     document.getElementById("meaning_rightarrow").classList.add("nav_arrow_deactiv");
     document.getElementById("meaning_rightarrow").classList.remove("nav_arrow");
   }
-};
+}; */
 
-const displayAnnotBox = function () {
-  const annot_box = document.createRange().createContextualFragment(/*'<div id="annot_box"><div id="annot_topbar" ondblclick="makeDraggable()"><span id="close_button" onclick="delAnnotate()">Close</span><span id="edit_button" title="Edit current text-word">Edit</span></div><div id="annot"><div id="left_column"><span id="lemma_box" class="box">Lemma translation</span><span id="multiword_box" class="box">Multiword</span><span id="context_box" class="box" title="not yet implemented">Context translation</span><span id="morph_box" class="box" title="not yet implemented">Morphology</span><span id="accent_box" class="box" title="not yet implemented">Accentology</span></div><div id="right_column"><div id="right_header"><textarea id="lemma_tag" spellcheck="false"></textarea></div><div id="right_body"><textarea id="lemma_textarea" autocomplete="off"></textarea></div><div id="right_footer"><span id="pos_tag_box"></span><div id="meaning_no_box"><div id="meaning_leftarrow" class="nav_arrow"><</div><div id="meaning_no">Meaning <span id="number"></span></div><div id="meaning_rightarrow" class="nav_arrow">></div></div><div id="save_and_delete_box"><div id="save_button">Save</div><div id="delete_lemma_button">Delete</div></div></div></div></div></div>'*/fullscreen_annot_box_html);
+//DELETE-NOT-USED
+/*const displayAnnotBox = function () {
+  const annot_box = document.createRange().createContextualFragment(fullscreen_annot_box_html);
 
   if(lang_id == 10) {
     annot_box.getElementById("lemma_tag").addEventListener('beforeinput', oldEnglishInput);
@@ -1863,9 +1814,8 @@ const delAnnotate = function (total = true) {
     let annot_box = document.getElementById('annot_box');
     display_word.classList.add("tooltip");
     display_word.classList.remove("tooltip_selected");
-    //display_word.onclick = showAnnotate;
+
     display_word = null;
-    //tokno_current and word_engine_id are not set to zero by delAnnotate() because certain AJAX requests which require these values can run after delAnnotate() (e.g. lemmaRecordTooltipUpdate, which runs after the lemmaRecord AJAX request resolves), or code to add/remove event-listeners from elements with data-attributes of these numbers is only run after AJAX requests return, whereas delAnnotate() is often run immediately to prevent the poor user-experience of having the annotation-box hang around for the brief period during which the network-request completes (though on localhost on a modern computer with an SSD this is always sub 30ms)
     annot_box.remove();
   }
 
@@ -1892,9 +1842,10 @@ const delAnnotate = function (total = true) {
   pos = 1;
   pos_initial = 1;
 
-};
+}; */
 
-let diff_unexplicit_annot = true;
+//DELETE-NOT-USED
+/*let diff_unexplicit_annot = true;
 const differentiateAnnotations = function () {
   if(diff_unexplicit_annot) {
     document.getElementById("lemma_set_style").href = "lemma_set.css";
@@ -1907,28 +1858,6 @@ const differentiateAnnotations = function () {
 
 };
 
-// const keyboard_tt = (event) => {
-//   if(display_word != null || displayWordEditor.edit_mode) return;
-//   if(event.key == "T") {
-//     if(document.getElementById("tt_toggle").checked == false) document.getElementById("tt_toggle").checked = true;
-//     else document.getElementById("tt_toggle").checked = false;
-//     tt_type();
-//     //console.log("shit and T down");
-//   }
-
-// };
-// window.addEventListener("keydown", event1 => {
-//   if(event1.key == "Shift") {
-//     window.addEventListener("keydown", keyboard_tt);
-//     //console.log("shift down");
-//   }
-// });
-// window.addEventListener("keyup", event1 => {
-//   if(event1.key == "Shift") {
-//     window.removeEventListener("keydown", keyboard_tt);
-//     //console.log("shift up");
-//   }
-// });
 
 const underlineMultiwords = function (event) {
   (document.querySelectorAll('[data-multiword="'+event.target.dataset.multiword+'"]').forEach(multiword =>  {multiword.style.borderBottom = "2px solid rgb(0, 255, 186)";})); 
@@ -1943,9 +1872,8 @@ document.querySelectorAll('.multiword').forEach(multiword => {
   multiword.addEventListener('click', showMultiwordAnnotate);
   multiword.addEventListener('mouseover', underlineMultiwords);
   multiword.addEventListener('mouseout', removeUnderlineMultiwords);
-});
+}); */
 
-//if(document.getElementById("textbody") !== null) document.getElementById("textbody").addEventListener('click', showAnnotate);
 
 const ttPosition = function () {
   const viewport_width = window.visualViewport.width;
@@ -1987,8 +1915,8 @@ const ttPosition = function () {
 
 window.addEventListener("resize", ttPosition);
 
-
-const pullInMultiwordByForm = (can_skip = true) => {
+//DELETE-NOT-USED
+/* const pullInMultiwordByForm = (can_skip = true) => {
   const candidate_mw_lemma_form = document.getElementById('lemma_tag').value.trim();
   const mw_length = Object.keys(multiword_indices).length;
 
@@ -2054,7 +1982,7 @@ const setPoSEventListenersOpenedMenu = (event_type) => {
   pos_tag_box.removeEventListener('click', selectPoS);
   pos_tag_box.removeEventListener('touchstart', selectPoS);
   pos_tag_box.addEventListener(event_type, changePoS); //we need to prevent changePoS from firing due to the click-event which happens after you release the touch-event
-};
+}; */
 
 
 
@@ -2307,18 +2235,6 @@ const convertToCyr = () => {
 };
 
 
-/*const lcsPageSearch = (query) => {
-  if(query == "") return;
-  query = query.replaceAll("ŕ̥", "W").replaceAll("r̥", "X").replaceAll("ĺ̥", "Y").replaceAll("l̥", "Z")
-  resetLcsPageSearch();
-  //const regex = new RegExp(`/${query}/u`);
-  document.querySelectorAll("[data-lcs_recon]").forEach(reconstructed_word => {
-    //if(regex.test(reconstructed_word.dataset.lcs_recon))
-    if(reconstructed_word.dataset.lcs_recon.replaceAll("ŕ̥", "W").replaceAll("r̥", "X").replaceAll("ĺ̥", "Y").replaceAll("l̥", "Z").replaceAll("Q", "ъ").replaceAll("ę̌", "ę").replaceAll("y̨", "y").includes(query)) {
-      reconstructed_word.classList.add("pulsate");
-    }
-  })
-}; */
 const resetLcsPageSearch = () => {
   document.querySelectorAll(".pulsate").forEach(elem => elem.classList.remove("pulsate"));
 };
@@ -2367,7 +2283,7 @@ const lemmaTooltip = function (show_load_spinner) {
 
     xhttp.onload = () => {
       if(xhttp.readyState == 4) {
-        tooltips_shown = true;
+
         const pos_array = xhttp.response[0];
         const lemma_ocs_array = xhttp.response[1];        
         // console.log(pos_array);
@@ -2969,7 +2885,7 @@ const greekTooltips = function (show_load_spinner) {
 
     xhttp.onload = () => {
       if(xhttp.readyState == 4) {
-        tooltips_shown = true;
+
         // const pos_array = xhttp.response[0];
         // const greek_forms_array = xhttp.response[1];
         // const greek_morph_tags_array = xhttp.response[2];
@@ -3290,7 +3206,8 @@ document.getElementById("gorazd_search_button").addEventListener('click', event 
 });
 const showGorazdSearchLoadSpinner = (minimised) => {
   document.getElementById("gorazd_searchbox").disabled = true;
-  document.getElementById("p1").removeEventListener('click', stealFromGorazdTOROT);
+  // document.getElementById("p1").removeEventListener('click', stealFromGorazdTOROT);
+  window.removeEventListener("keydown", activateClickDictLookup);
   if(minimised) {
     document.getElementById("gorazd_search_button").append(gorazd_search_load_spinner);
   }
@@ -3303,10 +3220,27 @@ const removeGorazdSearchLoadSpinner = () => {
   document.getElementById("gorazd_box").style.opacity = "";
   document.getElementById("gorazd_search_load_spinner").remove();
   document.getElementById("gorazd_searchbox").disabled = false;
-  document.getElementById("p1").addEventListener('click', stealFromGorazdTOROT);
+  //document.getElementById("p1").addEventListener('click', stealFromGorazdTOROT);
+  window.addEventListener("keydown", activateClickDictLookup);
 };
 
-document.getElementById("p1").addEventListener('click', stealFromGorazdTOROT);
+const activateClickDictLookup = (event) => {
+  if(event.key == "Control") {
+    document.getElementById("p1").addEventListener("click", stealFromGorazdTOROT);
+    document.getElementById("p1").removeEventListener("click", showWordInfoBox);
+  }
+};
+const deactivateClickDictLookup = (event) => {
+  if(event.key == "Control") {
+    document.getElementById("p1").removeEventListener("click", stealFromGorazdTOROT);
+    document.getElementById("p1").addEventListener("click", showWordInfoBox);
+  }
+};
+
+
+window.addEventListener("keydown", activateClickDictLookup);
+window.addEventListener("keyup", deactivateClickDictLookup);
+//document.getElementById("p1").addEventListener('click', stealFromGorazdTOROT);
 
 
 const dict_logo_srcs = ["gorazd_logo_yellow.png", "hwb.png"];
@@ -3344,3 +3278,301 @@ const switchTheme = (event) => {
   document.cookie = "theme=" + String(app_state.theme);
 };
 document.getElementById("theme_switcher").addEventListener('click', switchTheme);
+
+
+
+
+
+
+
+
+const generateInflectionMainText = (token_elem) => {
+
+  if(token_elem.dataset.inflexion === undefined || token_elem.dataset.inflexion == "non_infl") {
+    return;
+  }
+  const lemma_id = token_elem.dataset.lemma_id;
+  const conj_type = token_elem.dataset.inflexion;
+  const morph_tag = token_elem.dataset.morph_tag;
+
+  let send_data = "lemma_id="+lemma_id+"&conj_type="+encodeURIComponent(conj_type)+"&morph_tag="+morph_tag;
+  const myheaders = new Headers();
+  myheaders.append('Content-Type', 'application/x-www-form-urlencoded');
+  myheaders.append('Cache-Control', 'no-cache');
+  const options = {method: "POST", headers: myheaders, cache: "no-store", body: send_data};
+  
+  fetch("generate_inflection_main_text.php", options)
+  .then((response) => {
+    //alert("first response");
+    return response.json();
+  })
+  .then(response => {
+    app_state.raw_lcs_paradigm = response;
+    for(const variant_table of app_state.raw_lcs_paradigm.tables) {
+      for(const idx in variant_table) {
+        //need to add also nom. sg. PRAP variant in ǫћь- in table-2
+        if(app_state.raw_lcs_paradigm.noun_verb == "1" && variant_table[idx] != "" && (idx == 38 || (idx > 39 && idx < 43))) {
+            const jer = idx == 38 ? "ь" : "ъ";
+            const raw_participle = variant_table[idx];
+            variant_table[idx] = raw_participle.concat(jer);
+        }
+      }
+    }
+
+    /*
+    removeCorpusAttestationsBox();
+
+    if(noun_verb ==  "1") writeVerbTable(pv2_3_exists, lemma_id);
+    else if(noun_verb ==  "2") writeNounTable(pv2_3_exists, lemma_id);
+
+    app_state.displayed_lemma = [lemma_id, stem, noun_verb, conj_type, lcs_lemma, pv2_3_exists, torot_ocs_lemma];
+    lemma_searchbox.value = torot_ocs_lemma;
+    // lemma_searchbox.se
+
+
+    app_state.corpus_paradigm = {};
+  })
+  .finally(() => {
+    lemma_searchbox.blur();*/
+  }); 
+};
+
+const writeVerbTable = (pv2_3_exists, lemma_id) => {  
+  const writeCell = (idx) => {
+      table_html += "<td";
+      if(idx > 27) {
+        table_html += " class='last-col'";
+      }
+      table_html += ">";
+
+      let lcs_form = "";
+      if(app_state.raw_lcs_paradigm[0][idx] != undefined) {
+        lcs_form = app_state.raw_lcs_paradigm[0][idx];
+      }
+      table_html += "<div class='grid-child' title='"+lcs_form+"'>"+convertFunction(lcs_form, pv2_3_exists, lemma_id);
+      table_html += "<div class='infl_variants'>";
+      
+      let variants_written = false;
+      for(let i = 1; i < app_state.raw_lcs_paradigm.length; i++) {
+          const lcs_variant = app_state.raw_lcs_paradigm[i][idx]; //this often returns undefineds and it really shouldn't
+          //console.log(lcs_variant);
+          let variant_type = i == 2 ? "variant" : "deviance";
+          if(lcs_variant != "" && lcs_variant != undefined) {
+              table_html += "<span class='"+variant_type+"' title='" + lcs_variant + "'>" + convertFunction(lcs_variant, pv2_3_exists, lemma_id) + "</span> ";
+              variants_written = true;
+          }
+      }
+      if(variants_written) table_html = table_html.slice(0, -1);
+      
+      table_html += "</div>";
+      table_html += "</div>";
+      table_html += "</td>"
+  }
+  
+  const grids_container = document.getElementById("grids-container");
+  grids_container.innerHTML = "";
+
+  let table_html = "<div class='infl_table_rounder'><table class='infl-grid'><tbody>";
+  
+  const verb_persons = ["1st sg.", "2nd sg.", "3rd sg.", "1st du.", "2nd du.", "3rd du.", "1st pl.", "2nd pl.", "3rd pl.",];
+  const verb_tenses = ["Present", "Aorist", "Imperfect", "Imperative", "Participles"];
+  const participle_forms = ["PRAP<sup>1</sup>", "PRAP<sup>2</sup>", "PAP", "L-Part.", "PPP", "PrPP", "Infinitive", "Supine"];
+  const participle_titles = ["Present Active Participle (masc./nt. Nsg.)", "Present Active Participle", "Past Active Participle", "L-Participle", "Past Passive Participle", "Present Passive Participle", "Infinitive", "Supine"];
+  
+  table_html += "<tr class='verb_row'><th class='infl_titles' style='border-top: 1px solid black; border-left: 1px solid black;'></th>";
+  for(let i = 0; i < 4; i++) {
+    table_html += "<th class='infl_titles top_headers'>"+verb_tenses[i]+"</th>";
+  }
+  table_html += "</tr>";
+
+  for(let i = 1; i < 10; i++) {
+    table_html += "<tr class='verb_row'><th class='infl_titles side_headers'>"+ verb_persons[i - 1]+"</th>";
+    for(let j = i; j < 37; j+=9) {
+      writeCell(j);
+    }
+    table_html += "</tr>";
+  }
+  table_html += "</tbody></table></div>";
+
+  
+  const finite_verb_table = document.createRange().createContextualFragment(table_html);
+
+  table_html = "<div class='infl_table_rounder'><table class='infl-grid'><tbody>";
+  table_html += "<tr class='verb_row'><th class='infl_titles top_headers' colspan='2'>Participles</th></tr>";
+  for(let i = 0; i < participle_forms.length; i++) {
+    table_html += "<tr class='verb_row'><th class='infl_titles' title='"+participle_titles[i]+"'>"+ participle_forms[i]+"</th>";
+    writeCell(37+i);
+    table_html += "</tr>";
+  }
+  table_html += "</tbody></table></div>";
+  const participles_table = document.createRange().createContextualFragment(table_html);
+ 
+  grids_container.append(finite_verb_table);
+  grids_container.append(participles_table);
+};
+const writeNounTable = (pv2_3_exists, lemma_id) => {  
+  const writeCell = (idx, gender) => {
+      table_html += "<td";
+      if(idx > gender*21+14) {
+        table_html += " class='last-col'";
+      }
+      table_html += ">";
+
+      let lcs_form = "";
+      if(app_state.raw_lcs_paradigm[0][idx] != undefined) {
+        lcs_form = app_state.raw_lcs_paradigm[0][idx];
+      }
+      table_html += "<div class='grid-child' title='"+lcs_form+"'>"+convertFunction(lcs_form, pv2_3_exists, lemma_id);
+      table_html += "<div class='infl_variants'>";
+      
+      let variants_written = false;
+      for(let i = 1; i < app_state.raw_lcs_paradigm.length; i++) {
+          const lcs_variant = app_state.raw_lcs_paradigm[i][idx]; //this often returns undefineds and it really shouldn't
+          //console.log(lcs_variant);
+          let variant_type = i == 2 ? "variant" : "deviance";
+          if(lcs_variant != "" && lcs_variant != undefined) {
+              table_html += "<span class='"+variant_type+"' title='" + lcs_variant + "'>" + convertFunction(lcs_variant, pv2_3_exists, lemma_id) + "</span> ";
+              variants_written = true;
+          }
+      }
+      if(variants_written) table_html = table_html.slice(0, -1);
+      
+      table_html += "</div>";
+      table_html += "</div>";
+      table_html += "</td>"
+  }
+  
+  const grids_container = document.getElementById("grids-container");
+  grids_container.innerHTML = "";  
+  
+  const noun_cases = ["Nom.", "Acc.", "Gen.", "Dat.", "Loc.", "Instr.", "Voc."];
+  const noun_numbers = ["Sing.", "Dual", "Plural"];
+  const noun_genders = ["Masc.", "Fem.", "Neuter"];
+  
+  let firstKey;
+  for(firstKey in app_state.raw_lcs_paradigm[0]) {
+    break;
+  }
+  let gender_coefficient = Math.floor(Number(firstKey) / 21); //0 for masc, 1 for fem, 2 for nt. (or equivalent)
+
+  let table_html = "";
+  const makeNomTableHTML = (gender, adjectival=false) => {
+    table_html = "";
+    table_html += "<div class='infl_table_rounder'><table class='infl-grid'><tbody>";
+    table_html += "<tr><th class='infl_titles' style='border-top: 1px solid black; border-left: 1px solid black;'>";
+    if(adjectival) table_html += "<b>"+noun_genders[gender]+"</b>";
+    table_html += "</th>";
+    for(let i = 0; i < 3; i++) {
+      table_html += "<th class='infl_titles top_headers'>"+noun_numbers[i]+"</th>";
+    }
+    table_html += "</tr>";
+
+    for(let i = 1; i < 8; i++) {
+      table_html += "<tr><th class='infl_titles side_headers'>"+ noun_cases[i - 1]+"</th>";
+      for(let j = i + 21*gender; j < (gender + 1)*21 + 1; j+=7) {
+        writeCell(j, gender);
+      }
+      table_html += "</tr>";
+    }
+    table_html += "</tbody></table></div>";
+  };
+  
+  const tables_arr = new Array();
+
+  if(gender_coefficient == 0 && Object.keys(app_state.raw_lcs_paradigm[0]).length > 21) {
+    console.log("adjectival");
+    makeNomTableHTML(0, true)
+    tables_arr.push(document.createRange().createContextualFragment(table_html));
+    makeNomTableHTML(1, true);
+    tables_arr.push(document.createRange().createContextualFragment(table_html));
+    makeNomTableHTML(2, true);
+    tables_arr.push(document.createRange().createContextualFragment(table_html));
+  }
+  else {
+    makeNomTableHTML(gender_coefficient, false)
+    tables_arr.push(document.createRange().createContextualFragment(table_html));
+  }
+
+  for(const nom_table of tables_arr) {
+    grids_container.append(nom_table);
+  }
+};
+
+
+const showWordInfoBox = (event) => {
+
+  if(event.target.dataset.inflexion === undefined || event.target.dataset.inflexion == "non_infl") {
+    return;
+  }
+
+  const anchor_word_elem = event.target;
+  console.log(anchor_word_elem);
+
+  if(app_state.word_popup_shown == false) {
+    const word_info_box = document.createRange().createContextualFragment(`<div id="word_info_box" style="display: flex;">
+      <div id="word_info_box_topbar">
+        <div id="dict_close">
+          <svg id="red_cross" xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="24" viewBox="0 0 24 24" width="24" focusable="false"><path fill-rule="evenodd" clip-rule="evenodd" d="M5.29289 5.29289C5.68342 4.90237 6.31658 4.90237 6.70711 5.29289L12 10.5858L17.2929 5.29289C17.6834 4.90237 18.3166 4.90237 18.7071 5.29289C19.0976 5.68342 19.0976 6.31658 18.7071 6.70711L13.4142 12L18.7071 17.2929C19.0976 17.6834 19.0976 18.3166 18.7071 18.7071C18.3166 19.0976 17.6834 19.0976 17.2929 18.7071L12 13.4142L6.70711 18.7071C6.31658 19.0976 5.68342 19.0976 5.29289 18.7071C4.90237 18.3166 4.90237 17.6834 5.29289 17.2929L10.5858 12L5.29289 6.70711C4.90237 6.31658 4.90237 5.68342 5.29289 5.29289Z"></path></svg>
+        </div>
+      </div>
+      <div id="grids-container">
+      </div>
+      <div id="corpus_attestations_bottombar"></div>
+    </div>`);
+
+    word_info_box.getElementById("dict_close").addEventListener('click', () => {
+        removeCorpusAttestationsBox();
+    });
+    document.body.append(word_info_box);
+
+    app_state.word_popup_shown = true;
+  }
+    
+  centrePopupBox(anchor_word_elem.getBoundingClientRect(), document.getElementById("word_info_box"));
+  //makeDraggable();
+  app_state.corpus_form_attestations_shown = true;
+};
+
+document.getElementById("p1").addEventListener('click', showWordInfoBox);
+
+const centrePopupBox = (anchor_elem_bounding_client_rect, popup_box_elem) => {
+  const is_larger_screen_size = window.matchMedia("(min-width: 769px)").matches;
+  //const corpus_box_elem = document.getElementById("corpus_attestations_box");
+
+  const popup_box_height = popup_box_elem.getBoundingClientRect().height;
+  const popup_box_width = popup_box_elem.getBoundingClientRect().width;
+  
+  if(is_larger_screen_size) {
+
+    //ADD SOMETHING HERE TO BRING POPUP INTO VIEWPORT IF ABOVE OR BELOW
+
+    const viewport_width = window.visualViewport.width;
+
+    
+    popup_box_elem.style.transform = "";
+    const anchor_elem_vertical_centre = anchor_elem_bounding_client_rect.top + (anchor_elem_bounding_client_rect.bottom - anchor_elem_bounding_client_rect.top)/2;
+    const initial_top_value = anchor_elem_vertical_centre - popup_box_height/2;
+    popup_box_elem.style.top = `${initial_top_value + window.scrollY}px`;
+
+    const anchor_elem_horizontal_centre = anchor_elem_bounding_client_rect.right + (anchor_elem_bounding_client_rect.left - anchor_elem_bounding_client_rect.right)/2;
+    const initial_left_value = anchor_elem_horizontal_centre - popup_box_width/2;
+
+    const initial_right_value = initial_left_value + popup_box_width;
+
+    console.log(viewport_width, initial_left_value, initial_right_value);
+
+    let final_left_value = initial_left_value;
+    if(initial_left_value < 0) final_left_value = 0;
+    else if(initial_right_value > viewport_width) final_left_value = initial_left_value - (initial_right_value - viewport_width);
+    
+    popup_box_elem.style.left = `${final_left_value}px`;
+
+    console.log(popup_box_elem);
+
+    //corpus_box_elem.style.left = "";
+    return;
+  }
+  
+  popup_box_elem.style.transform = `translateX(-100px) translateY(${popup_box_height/2}px)`;
+
+};

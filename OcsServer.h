@@ -114,6 +114,7 @@ class OcsServer : public TcpListener {
         bool greekTooltips(std::string _POST[2], int clientSocket);
 
         bool generateInflection(std::string _POST[3], int clientSocket);
+        bool generateInflectionMainText(std::string _POST[3], int clientSocket);
 
         int numerifyMorphTag(const std::string& morph_tag, int noun_verb);
 

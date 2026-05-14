@@ -1362,3 +1362,46 @@ border-bottom: 2px solid rgb(23, 33, 54, 0);
   padding: 9px;
   color: rgb(255, 115, 0);
 }
+
+/*MAIN TEXT INFOBOX POPUP*/
+#word_info_box {
+  display: flex;
+  flex-flow: column nowrap;
+  height: fit-content;
+  /* overflow-y: auto;
+  scrollbar-width: thin; */
+  position: absolute;
+  width: 300px;
+  /* transform: translateX(-150px); */
+  border: 1px solid black;
+  border-radius: 7px;
+  height: 200px;
+  opacity: 0.95;
+  z-index: 2;
+}
+#word_info_box_topbar {
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: space-between;
+  box-sizing: border-box;
+  height: 25px;
+  width: 100%;
+  border-left: 2px solid black;
+  border-right: 2px solid black;
+  border-top: 2px solid black;
+  border-bottom: 1px solid black;
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+  /* background-color: #040a16; */
+  flex-shrink: 0;
+}
+#grids-container {
+  display: flex;
+  flex-flow: row wrap;
+  /* margin-top: 10px; */
+  width: 100%;
+  justify-content: flex-start;
+  row-gap: 15px;
+  column-gap: 15px;
+  align-items: start;
+}

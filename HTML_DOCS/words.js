@@ -691,22 +691,22 @@ const removeCorpusAttestationsBox = () => {
   }
 };
 
-const centreAttestationsBox = (td_cell_rect) => {
+const centrePopupBox = (anchor_elem_bounding_client_rect, popup_box_elem) => {
   const is_larger_screen_size = window.matchMedia("(min-width: 769px)").matches;
-  const corpus_box_elem = document.getElementById("corpus_attestations_box");
-  const attestations_box_height = corpus_box_elem.getBoundingClientRect().height;
+  //const corpus_box_elem = document.getElementById("corpus_attestations_box");
+  const attestations_box_height = popup_box_elem.getBoundingClientRect().height;
   
   if(is_larger_screen_size) {
-    corpus_box_elem.style.transform = "";
-    const td_cell_centre = td_cell_rect.top + (td_cell_rect.bottom - td_cell_rect.top)/2;
+    popup_box_elem.style.transform = "";
+    const td_cell_centre = anchor_elem_bounding_client_rect.top + (anchor_elem_bounding_client_rect.bottom - anchor_elem_bounding_client_rect.top)/2;
 
     const initial_top_value = td_cell_centre - attestations_box_height/2;
-    corpus_box_elem.style.top = `${initial_top_value + window.scrollY}px`;
+    popup_box_elem.style.top = `${initial_top_value + window.scrollY}px`;
     //corpus_box_elem.style.left = "";
     return;
   }
   
-  corpus_box_elem.style.transform = `translateX(-100px) translateY(${attestations_box_height/2}px)`;
+  popup_box_elem.style.transform = `translateX(-100px) translateY(${attestations_box_height/2}px)`;
 };
 
 const showCorpusFormSentences = (corpus_attestations_json, td_cell_rect) => {
@@ -721,9 +721,9 @@ const showCorpusFormSentences = (corpus_attestations_json, td_cell_rect) => {
   }
 
   if(app_state.corpus_form_attestations_shown) {
-    //document.getElementById("spoofspan3").children[0].remove();
+    const corpus_attestations_box = document.getElementById("corpus_attestations_box");
     document.getElementById("text_results_box").innerHTML = attestation_sentences_html;
-    centreAttestationsBox(td_cell_rect);
+    centrePopupBox(td_cell_rect, corpus_attestations_box);
   }
   else {
     const new_corpus_attestations_fragment = corpus_attestations_element.cloneNode(true);
@@ -732,8 +732,10 @@ const showCorpusFormSentences = (corpus_attestations_json, td_cell_rect) => {
       removeCorpusAttestationsBox();
     });
     document.body.append(new_corpus_attestations_fragment);
+
+    const corpus_attestations_box = document.getElementById("corpus_attestations_box");
     
-    centreAttestationsBox(td_cell_rect);
+    centrePopupBox(td_cell_rect, corpus_attestations_box);
     makeDraggable();
 
   } 

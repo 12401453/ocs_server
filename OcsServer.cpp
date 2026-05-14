@@ -798,6 +798,9 @@ void OcsServer::handlePOSTedData(const char* post_data, int clientSocket) {
     else if(!strcmp(m_url, "/get_corpus_inflection_sentences.php")) {
         bool php_func_success = getCorpusInflectionSentences(post_values, clientSocket);
     }
+    else if(!strcmp(m_url, "/generate_inflection_main_text.php")) {
+        bool php_func_success = generateInflectionMainText(post_values, clientSocket);
+    }
 
     std::cout << "m_url: " << m_url << std::endl;
     
@@ -838,6 +841,7 @@ int OcsServer::getPostFields(const char* url) {
     else if(!strcmp(url, "/cyr_fuzzy_search.php")) return 3;
     else if(!strcmp(url, "/get_corpus_inflections.php")) return 2;
     else if(!strcmp(url, "/get_corpus_inflection_sentences.php")) return 1;
+    else if(!strcmp(url, "/generate_inflection_main_text.php")) return 3;
     else return -1;
 }
 
@@ -3171,4 +3175,69 @@ std::string OcsServer::getJSONSearchResultsFromToknos(sqlite3* db_connection, st
     std::string json_str = "[" + lcs_results.str() + "," + text_results.str() + "," + tokno_results.str() + "," + getTextTitleInfoJSON(db_connection) + "]";
 
     return json_str;
+}
+
+bool OcsServer::generateInflectionMainText(std::string _POST[3], int clientSocket) {
+    sqlite3* DB;
+    if(!sqlite3_open(m_DB_path, &DB)) {
+        int lemma_id = safeStrToInt(_POST[0]);
+        std::string conj_type = URIDecode(_POST[1]);
+        std::string morph_tag = _POST[2];
+
+        sqlite3_stmt* lemma_info_stmt;
+        const char* sql_text_lemma_info = "SELECT stem_lcs, noun_verb FROM lemmas WHERE lemma_id = ?";
+        sqlite3_prepare_v2(DB, sql_text_lemma_info, -1, &lemma_info_stmt, NULL);
+        sqlite3_bind_int(lemma_info_stmt, 1, lemma_id);
+        sqlite3_step(lemma_info_stmt);
+
+        const unsigned char* raw_sql_text_result = sqlite3_column_text(lemma_info_stmt, 0);        
+        std::string stem = "";
+        if(raw_sql_text_result != nullptr) stem = (const char*)sqlite3_column_text(lemma_info_stmt, 0);        
+        int noun_verb_int = sqlite3_column_int(lemma_info_stmt, 1);
+        bool noun_verb = noun_verb_int == 2 ? true : false;
+
+        int row_number = numerifyMorphTag(morph_tag, noun_verb_int);
+
+        std::cout << "lemma_id: " << lemma_id << "\nconj_type: " << conj_type << "\nstem: " << stem << "\nrow_number: " << row_number << "\n";
+
+
+        std::ostringstream post_response;
+        std::ostringstream json_response;
+        
+        //since the inflection-tables are static they should be initialised only once on startup, not for each class instance
+        LcsFlecter lcs_flecter({stem, conj_type, noun_verb});
+
+        json_response << "{\"tables\":[";
+        int i = 0;
+        for(const auto& inflections : lcs_flecter.getFullParadigm()) {
+            json_response << "{";
+            int j = 0;
+            for(const auto& inflection : inflections) {
+                //std::cout << inflection.desinence_ix << " " << inflection.flected_form << "\n";
+                json_response << '\"' << inflection.desinence_ix << "\":\"" << inflection.flected_form << "\",";
+                j++;
+            }
+            if(j > 0) json_response.seekp(-1, std::ios_base::cur);
+            json_response << "},";
+            //std::cout << "\n";
+            i++;
+        }
+        if(i > 0) json_response.seekp(-1, std::ios_base::cur);
+        json_response << "]";
+        json_response << ",\"row_number\":" << row_number << ",\"noun_verb\":" << noun_verb_int << "}";
+
+
+        int content_length = json_response.str().length();
+        post_response << "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: " << content_length << "\r\n\r\n" << json_response.str();
+
+        
+        sendToClient(clientSocket, post_response.str().c_str(), post_response.str().length() + 1);
+
+        return true;
+    }
+    else {
+        std::cout << "Database connection failed on generateInflectionMainText()\n";
+        return false;
+    }
+
 }
