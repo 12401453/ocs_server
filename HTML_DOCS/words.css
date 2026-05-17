@@ -181,7 +181,7 @@ a {
   display: flex;
   overflow-x: auto;
 
-  scrollbar-color: #040a16 #172136;
+  /* scrollbar-color: #040a16 #172136; */
   scrollbar-width: thin;
 }
 
@@ -189,14 +189,13 @@ a {
   width: 9px;
 }
 .infl_table_rounder::-webkit-scrollbar-thumb {
-  background-color: #040a16;
+  /* background-color: #040a16; */
   border-right: 2px solid black;
   border-top:1px solid black;
   border-bottom:1px solid black;
 }
-
 .infl_table_rounder::-webkit-scrollbar-track {
-  background-color: #172136;
+  /* background-color: #172136; */
   border-right: 2px solid black;
 }
 

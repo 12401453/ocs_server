@@ -67,8 +67,8 @@ const generateInflection = ([lemma_id, stem, noun_verb, conj_type, lcs_lemma, pv
     
     removeCorpusAttestationsBox();
 
-    if(noun_verb ==  "1") writeVerbTable(pv2_3_exists, lemma_id);
-    else if(noun_verb ==  "2") writeNounTable(pv2_3_exists, lemma_id);
+    if(noun_verb ==  "1") writeVerbTable(pv2_3_exists, lemma_id, conj_type);
+    else if(noun_verb ==  "2") writeNounTable(pv2_3_exists, lemma_id, conj_type);
 
     app_state.displayed_lemma = [lemma_id, stem, noun_verb, conj_type, lcs_lemma, pv2_3_exists, torot_ocs_lemma];
     lemma_searchbox.value = torot_ocs_lemma;
@@ -140,7 +140,7 @@ const switchConv = () => {
 
 let convertFunction = convertToOCS;
 
-const writeVerbTable = (pv2_3_exists, lemma_id) => {  
+const writeVerbTable = (pv2_3_exists, lemma_id, conj_type) => {  
     const writeCell = (idx) => {
         table_html += "<td";
         if(idx > 27) {
@@ -302,7 +302,7 @@ const writeVerbTableCorpus = () => {
   grids_container.append(participles_table);
 };
 
-const writeNounTable = (pv2_3_exists, lemma_id) => {  
+const writeNounTable = (pv2_3_exists, lemma_id, conj_type) => {
   const writeCell = (idx, gender) => {
       table_html += "<td";
       if(idx > gender*21+14) {
@@ -348,11 +348,16 @@ const writeNounTable = (pv2_3_exists, lemma_id) => {
   let gender_coefficient = Math.floor(Number(firstKey) / 21); //0 for masc, 1 for fem, 2 for nt. (or equivalent)
 
   let table_html = "";
-  const makeNomTableHTML = (gender, adjectival=false) => {
+  const makeNomTableHTML = (gender_coefficient, gender_string="") => {
     table_html = "";
     table_html += "<div class='infl_table_rounder'><table class='infl-grid'><tbody>";
     table_html += "<tr><th class='infl_titles' style='border-top: 1px solid black; border-left: 1px solid black;'>";
-    if(adjectival) table_html += "<b>"+noun_genders[gender]+"</b>";
+    if(gender_string.length == 0) {
+      table_html += "<b>"+noun_genders[gender_coefficient]+"</b>";
+    }
+    else {
+      table_html += "<b>"+gender_string+"</b>";
+    }
     table_html += "</th>";
     for(let i = 0; i < 3; i++) {
       table_html += "<th class='infl_titles top_headers'>"+noun_numbers[i]+"</th>";
@@ -361,8 +366,8 @@ const writeNounTable = (pv2_3_exists, lemma_id) => {
 
     for(let i = 1; i < 8; i++) {
       table_html += "<tr><th class='infl_titles side_headers'>"+ noun_cases[i - 1]+"</th>";
-      for(let j = i + 21*gender; j < (gender + 1)*21 + 1; j+=7) {
-        writeCell(j, gender);
+      for(let j = i + 21*gender_coefficient; j < (gender_coefficient + 1)*21 + 1; j+=7) {
+        writeCell(j, gender_coefficient);
       }
       table_html += "</tr>";
     }
@@ -370,18 +375,25 @@ const writeNounTable = (pv2_3_exists, lemma_id) => {
   };
   
   const tables_arr = new Array();
+  const is_ungendered_pron_or_adj = (gender_coefficient == 0 && Object.keys(app_state.raw_lcs_paradigm[0]).some(x => Number(x) > 21));
 
-  if(gender_coefficient == 0 && Object.keys(app_state.raw_lcs_paradigm[0]).length > 21) {
+  if(is_ungendered_pron_or_adj) {
+    //checks for adjectives and pronouns which could be any gender by seeing whether something who has masculine-keys (1-21) also has keys above 21
     console.log("adjectival");
-    makeNomTableHTML(0, true)
+    makeNomTableHTML(0)
     tables_arr.push(document.createRange().createContextualFragment(table_html));
-    makeNomTableHTML(1, true);
+    makeNomTableHTML(1);
     tables_arr.push(document.createRange().createContextualFragment(table_html));
-    makeNomTableHTML(2, true);
+    makeNomTableHTML(2);
     tables_arr.push(document.createRange().createContextualFragment(table_html));
   }
   else {
-    makeNomTableHTML(gender_coefficient, false)
+    let gender_string = noun_genders[gender_coefficient];
+    if(conj_type.startsWith("masc_")) gender_string = "Masc.";
+    else if(conj_type.startsWith("fem_")) gender_string = "Fem.";
+    else if(conj_type.startsWith("nt_")) gender_string = "Neuter";
+
+    makeNomTableHTML(gender_coefficient, gender_string);
     tables_arr.push(document.createRange().createContextualFragment(table_html));
   }
 
@@ -429,7 +441,7 @@ const writeNounTableCorpus = () => {
   const noun_genders = ["Masc.", "Fem.", "Neuter"];
 
   let table_html = "";
-  const makeNomTableHTML = (gender) => {
+  const makeNomTableHTMLCorpus = (gender) => {
     table_html = "";
     table_html += "<div class='infl_table_rounder'><table class='infl-grid'><tbody>";
     table_html += "<tr><th class='infl_titles' style='border-top: 1px solid black; border-left: 1px solid black;'>";
@@ -461,7 +473,7 @@ const writeNounTableCorpus = () => {
 
   for(let i = 0; i < 3; i++) {
     if(gender_bitmask & (1 << i)) {
-      makeNomTableHTML(i);
+      makeNomTableHTMLCorpus(i);
       tables_arr.push(document.createRange().createContextualFragment(table_html));
     }
   }
@@ -469,24 +481,10 @@ const writeNounTableCorpus = () => {
   if(tables_arr.length == 0) {
     //handling for lemmas with no corpus occurrences (it can happen due to corrections etc.)
     for(let i = 0; i < 3; i++) {
-      makeNomTableHTML(i);
+      makeNomTableHTMLCorpus(i);
       tables_arr.push(document.createRange().createContextualFragment(table_html));
     }
   }
-
-/*  if(gender_coefficient == 0 && Object.keys(lcs_paradigm[0]).length > 21) {
-    console.log("adjectival");
-    makeNomTableHTML(0, true)
-    tables_arr.push(document.createRange().createContextualFragment(table_html));
-    makeNomTableHTML(1, true);
-    tables_arr.push(document.createRange().createContextualFragment(table_html));
-    makeNomTableHTML(2, true);
-    tables_arr.push(document.createRange().createContextualFragment(table_html));
-  }
-  else {
-    makeNomTableHTML(gender_coefficient, false)
-    tables_arr.push(document.createRange().createContextualFragment(table_html));
-  } */
 
   for(const nom_table of tables_arr) {
     grids_container.append(nom_table);
@@ -633,11 +631,12 @@ const toggleInflTables = (event) => {
 
     const pv2_3_exists = app_state.displayed_lemma[5] == "" ? false : true;
     const lemma_id = app_state.displayed_lemma[0];
+    const conj_type = app_state.displayed_lemma[3];
 
     removeCorpusAttestationsBox();
 
-    if(app_state.displayed_lemma[2] == '2') writeNounTable(pv2_3_exists, lemma_id);
-    else if(app_state.displayed_lemma[2] == '1') writeVerbTable(pv2_3_exists, lemma_id);
+    if(app_state.displayed_lemma[2] == '2') writeNounTable(pv2_3_exists, lemma_id, conj_type);
+    else if(app_state.displayed_lemma[2] == '1') writeVerbTable(pv2_3_exists, lemma_id, conj_type);
   }
   
 }

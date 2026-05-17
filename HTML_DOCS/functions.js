@@ -3323,12 +3323,24 @@ const generateInflectionMainText = (token_elem) => {
 
   
 
-    if(app_state.raw_lcs_paradigm.noun_verb ==  "1") writeVerbTable(pv2_3_exists, lemma_id, app_state.raw_lcs_paradigm.row_number);
-    else if(app_state.raw_lcs_paradigm.noun_verb ==  "2") writeNounTable(pv2_3_exists, lemma_id, app_state.raw_lcs_paradigm.row_number);
+    if(app_state.raw_lcs_paradigm.noun_verb ==  "1") writeVerbTable(pv2_3_exists, lemma_id, conj_type, app_state.raw_lcs_paradigm.row_number);
+    else if(app_state.raw_lcs_paradigm.noun_verb ==  "2") writeNounTable(pv2_3_exists, lemma_id, conj_type, app_state.raw_lcs_paradigm.row_number);
+
+    app_state.word_popup_shown = true;
+    
+    centrePopupBox(token_elem.getBoundingClientRect(), document.getElementById("word_info_box"));
+    makeDraggable("word_info_box", "word_info_box_topbar");
+    const highlighted_cell = document.getElementById("word_info_box").querySelector(".text_word_table_cell");
+    if(highlighted_cell) {
+      highlighted_cell.scrollIntoView({container: "nearest"});
+    }
+    else {
+      console.log("Morphology-tag does not correspond to any row of the paradigm");
+    }
   })
 };
 
-const writeVerbTable = (pv2_3_exists, lemma_id, text_word_row_number) => {  
+const writeVerbTable = (pv2_3_exists, lemma_id, conj_type, text_word_row_number) => {  
   const writeCell = (idx) => {
       table_html += "<td";
       if(idx > 27) {
@@ -3405,7 +3417,7 @@ const writeVerbTable = (pv2_3_exists, lemma_id, text_word_row_number) => {
   grids_container.append(finite_verb_table);
   grids_container.append(participles_table);
 };
-const writeNounTable = (pv2_3_exists, lemma_id, text_word_row_number) => {  
+/*const writeNounTable = (pv2_3_exists, lemma_id, text_word_row_number) => {
   const writeCell = (idx, gender) => {
       table_html += "<td";
       if(idx > gender*21+14) {
@@ -3481,7 +3493,8 @@ const writeNounTable = (pv2_3_exists, lemma_id, text_word_row_number) => {
   
   const tables_arr = new Array();
 
-  if(gender_coefficient == 0 && Object.keys(app_state.raw_lcs_paradigm.tables[0]).length > 21) {
+  //const highest
+  if(gender_coefficient == 0 && /*Object.keys(app_state.raw_lcs_paradigm.tables[0]).length > 21 */ /* Object.keys(app_state.raw_lcs_paradigm.tables[0]).some(x => Number(x) > 21)) {
     console.log("adjectival");
     makeNomTableHTML(0, true)
     tables_arr.push(document.createRange().createContextualFragment(table_html));
@@ -3492,6 +3505,113 @@ const writeNounTable = (pv2_3_exists, lemma_id, text_word_row_number) => {
   }
   else {
     makeNomTableHTML(gender_coefficient, false)
+    tables_arr.push(document.createRange().createContextualFragment(table_html));
+  }
+
+  for(const nom_table of tables_arr) {
+    grids_container.append(nom_table);
+  }
+}; */
+
+const writeNounTable = (pv2_3_exists, lemma_id, conj_type, text_word_row_number) => {
+  const writeCell = (idx, gender) => {
+      table_html += "<td";
+      if(idx > gender*21+14) {
+        table_html += " class='last-col'";
+      }
+      table_html += ">";
+
+      let lcs_form = "";
+      if(app_state.raw_lcs_paradigm.tables[0][idx] != undefined) {
+        lcs_form = app_state.raw_lcs_paradigm.tables[0][idx];
+      }
+      // table_html += "<div class='grid-child' title='"+lcs_form+"'>"+convertFunction(lcs_form, pv2_3_exists, lemma_id);
+      // table_html += "<div class='infl_variants'>";
+
+      table_html += "<div class='grid-child";
+      if(idx == text_word_row_number) {
+        table_html += " text_word_table_cell pulsate";
+      }
+      table_html += "' title='"+lcs_form+"'>"+convertToOCS(lcs_form, pv2_3_exists, lemma_id);
+      table_html += "<div class='infl_variants'>";
+      
+      let variants_written = false;
+      for(let i = 1; i < app_state.raw_lcs_paradigm.tables.length; i++) {
+          const lcs_variant = app_state.raw_lcs_paradigm.tables[i][idx]; //this often returns undefineds and it really shouldn't
+          //console.log(lcs_variant);
+          let variant_type = i == 2 ? "variant" : "deviance";
+          if(lcs_variant != "" && lcs_variant != undefined) {
+              table_html += "<span class='"+variant_type+"' title='" + lcs_variant + "'>" + convertToOCS(lcs_variant, pv2_3_exists, lemma_id) + "</span> ";
+              variants_written = true;
+          }
+      }
+      if(variants_written) table_html = table_html.slice(0, -1);
+      
+      table_html += "</div>";
+      table_html += "</div>";
+      table_html += "</td>"
+  }
+  
+  const grids_container = document.getElementById("grids-container");
+  grids_container.innerHTML = "";  
+  
+  const noun_cases = ["Nom.", "Acc.", "Gen.", "Dat.", "Loc.", "Instr.", "Voc."];
+  const noun_numbers = ["Sing.", "Dual", "Plural"];
+  const noun_genders = ["Masc.", "Fem.", "Neuter"];
+  
+  let firstKey;
+  for(firstKey in app_state.raw_lcs_paradigm.tables[0]) {
+    break;
+  }
+  let gender_coefficient = Math.floor(Number(firstKey) / 21); //0 for masc, 1 for fem, 2 for nt. (or equivalent)
+
+  let table_html = "";
+  const makeNomTableHTML = (gender_coefficient, gender_string="") => {
+    table_html = "";
+    table_html += "<div class='infl_table_rounder'><table class='infl-grid'><tbody>";
+    table_html += "<tr><th class='infl_titles' style='border-top: 1px solid black; border-left: 1px solid black;'>";
+    if(gender_string.length == 0) {
+      table_html += "<b>"+noun_genders[gender_coefficient]+"</b>";
+    }
+    else {
+      table_html += "<b>"+gender_string+"</b>";
+    }
+    table_html += "</th>";
+    for(let i = 0; i < 3; i++) {
+      table_html += "<th class='infl_titles top_headers'>"+noun_numbers[i]+"</th>";
+    }
+    table_html += "</tr>";
+
+    for(let i = 1; i < 8; i++) {
+      table_html += "<tr><th class='infl_titles side_headers'>"+ noun_cases[i - 1]+"</th>";
+      for(let j = i + 21*gender_coefficient; j < (gender_coefficient + 1)*21 + 1; j+=7) {
+        writeCell(j, gender_coefficient);
+      }
+      table_html += "</tr>";
+    }
+    table_html += "</tbody></table></div>";
+  };
+  
+  const tables_arr = new Array();
+  const is_ungendered_pron_or_adj = (gender_coefficient == 0 && Object.keys(app_state.raw_lcs_paradigm.tables[0]).some(x => Number(x) > 21));
+
+  if(is_ungendered_pron_or_adj) {
+    //checks for adjectives and pronouns which could be any gender by seeing whether something who has masculine-keys (1-21) also has keys above 21
+    console.log("adjectival");
+    makeNomTableHTML(0)
+    tables_arr.push(document.createRange().createContextualFragment(table_html));
+    makeNomTableHTML(1);
+    tables_arr.push(document.createRange().createContextualFragment(table_html));
+    makeNomTableHTML(2);
+    tables_arr.push(document.createRange().createContextualFragment(table_html));
+  }
+  else {
+    let gender_string = noun_genders[gender_coefficient];
+    if(conj_type.startsWith("masc_")) gender_string = "Masc.";
+    else if(conj_type.startsWith("fem_")) gender_string = "Fem.";
+    else if(conj_type.startsWith("nt_")) gender_string = "Neuter";
+
+    makeNomTableHTML(gender_coefficient, gender_string);
     tables_arr.push(document.createRange().createContextualFragment(table_html));
   }
 
@@ -3513,34 +3633,27 @@ const showWordInfoBox = (event) => {
     return;
   }
 
-  const anchor_word_elem = event.target;
-  console.log(anchor_word_elem);
-
   if(app_state.word_popup_shown) {
     removeWordInfoBox();
   } 
   const word_info_box = document.createRange().createContextualFragment(`<div id="word_info_box" style="display: flex;">
     <div id="word_info_box_topbar">
-      <div id="dict_close">
+      <div id="word_info_close">
         <svg id="red_cross" xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="24" viewBox="0 0 24 24" width="24" focusable="false"><path fill-rule="evenodd" clip-rule="evenodd" d="M5.29289 5.29289C5.68342 4.90237 6.31658 4.90237 6.70711 5.29289L12 10.5858L17.2929 5.29289C17.6834 4.90237 18.3166 4.90237 18.7071 5.29289C19.0976 5.68342 19.0976 6.31658 18.7071 6.70711L13.4142 12L18.7071 17.2929C19.0976 17.6834 19.0976 18.3166 18.7071 18.7071C18.3166 19.0976 17.6834 19.0976 17.2929 18.7071L12 13.4142L6.70711 18.7071C6.31658 19.0976 5.68342 19.0976 5.29289 18.7071C4.90237 18.3166 4.90237 17.6834 5.29289 17.2929L10.5858 12L5.29289 6.70711C4.90237 6.31658 4.90237 5.68342 5.29289 5.29289Z"></path></svg>
       </div>
     </div>
     <div id="grids-container">
     </div>
-    <div id="corpus_attestations_bottombar"></div>
+    <div id="word_info_box_bottombar"></div>
   </div>`);
 
-  word_info_box.getElementById("dict_close").addEventListener('click', () => {
+  word_info_box.getElementById("word_info_close").addEventListener('click', () => {
       removeWordInfoBox();
   });
   document.body.append(word_info_box);
 
   generateInflectionMainText(event.target);
-  app_state.word_popup_shown = true;
-    
-  centrePopupBox(anchor_word_elem.getBoundingClientRect(), document.getElementById("word_info_box"));
-  //makeDraggable();
-  app_state.corpus_form_attestations_shown = true;
+  
 };
 
 document.getElementById("p1").addEventListener('click', showWordInfoBox);
@@ -3557,23 +3670,31 @@ const centrePopupBox = (anchor_elem_bounding_client_rect, popup_box_elem) => {
     //ADD SOMETHING HERE TO BRING POPUP INTO VIEWPORT IF ABOVE OR BELOW
 
     const viewport_width = window.visualViewport.width;
+    const viewport_height = window.visualViewport.height;
 
     
     popup_box_elem.style.transform = "";
     const anchor_elem_vertical_centre = anchor_elem_bounding_client_rect.top + (anchor_elem_bounding_client_rect.bottom - anchor_elem_bounding_client_rect.top)/2;
     const initial_top_value = anchor_elem_vertical_centre - popup_box_height/2;
-    popup_box_elem.style.top = `${initial_top_value + window.scrollY}px`;
+    let final_top_value = initial_top_value;
+    const bottom_overflow = initial_top_value + popup_box_height - viewport_height;
+    if(initial_top_value < 0) final_top_value = 1;
+    else if(bottom_overflow > 0) final_top_value = initial_top_value - bottom_overflow - 1;
+
+    popup_box_elem.style.top = `${final_top_value + window.scrollY}px`;
+
+    console.log("initial_top_value:", initial_top_value, "\nwindow.scrollY:", window.scrollY, "popup_box_height/2:", popup_box_height/2);
 
     const anchor_elem_horizontal_centre = anchor_elem_bounding_client_rect.right + (anchor_elem_bounding_client_rect.left - anchor_elem_bounding_client_rect.right)/2;
     const initial_left_value = anchor_elem_horizontal_centre - popup_box_width/2;
 
     const initial_right_value = initial_left_value + popup_box_width;
 
-    console.log(viewport_width, initial_left_value, initial_right_value);
+    //console.log(viewport_width, initial_left_value, initial_right_value);
 
     let final_left_value = initial_left_value;
-    if(initial_left_value < 0) final_left_value = 0;
-    else if(initial_right_value > viewport_width) final_left_value = initial_left_value - (initial_right_value - viewport_width);
+    if(initial_left_value < 0) final_left_value = 1;
+    else if(initial_right_value > viewport_width) final_left_value = initial_left_value - (initial_right_value - viewport_width) - 1;
     
     popup_box_elem.style.left = `${final_left_value}px`;
 
@@ -3585,4 +3706,49 @@ const centrePopupBox = (anchor_elem_bounding_client_rect, popup_box_elem) => {
   
   popup_box_elem.style.transform = `translateX(-100px) translateY(${popup_box_height/2}px)`;
 
+};
+
+//this is stolen
+const makeDraggable = function (whole_element_id, draggable_part_id) {
+  dragAnnotBox(document.getElementById(whole_element_id));
+  function dragAnnotBox(elmnt) {
+    var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+    if (document.getElementById(draggable_part_id)) {
+      /* if present, the header is where you move the DIV from:*/
+      document.getElementById(draggable_part_id).onmousedown = dragMouseDown;
+    } else {
+      /* otherwise, move the DIV from anywhere inside the DIV:*/
+      elmnt.onmousedown = dragMouseDown;
+    }
+    function dragMouseDown(e) {
+      e = e || window.event;
+      e.preventDefault();
+      // get the mouse cursor position at startup:
+      pos3 = e.clientX;
+      pos4 = e.clientY;
+      document.onmouseup = closeDragElement;
+      // call a function whenever the cursor moves:
+      document.onmousemove = elementDrag;
+    }
+
+    function elementDrag(e) {
+      e = e || window.event;
+      e.preventDefault();
+      // calculate the new cursor position:
+      pos1 = pos3 - e.clientX;
+      pos2 = pos4 - e.clientY;
+      pos3 = e.clientX;
+      pos4 = e.clientY;
+      // set the element's new position:
+      elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+      elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+    }
+
+    function closeDragElement() {
+      /* stop moving when mouse button is released:*/
+      document.onmouseup = null;
+      document.onmousemove = null;
+    }
+  }
+  document.getElementById(draggable_part_id).style.cursor = 'move';
 };

@@ -370,6 +370,16 @@ span[aip-type="odkaz"]:hover{
 .search_candidate.keyboard_selected{
   background-color: black;
 }
+.infl_table_rounder {
+  scrollbar-color: #040a16 #172136;
+}
+.infl_table_rounder::-webkit-scrollbar-thumb {
+  background-color: #040a16;
+}
+.infl_table_rounder::-webkit-scrollbar-track {
+  background-color: #172136;
+}
+
 .infl-grid {
   color:#cbd9f4;
   background-color: #071022;
@@ -581,5 +591,24 @@ th.infl_titles {
   background-color: #040a16;
 }
 #corpus_attestations_bottombar {
+  background-color: #040a16;
+}
+
+#grids-container {
+  scrollbar-color: #040a16 #172136;
+  background-color: #071022;
+  color: #cbd9f4;
+  opacity: 0.95;
+}
+#word_info_box_topbar {
+  background-color: #040a16;
+}
+#word_info_close {
+  background-color: inherit;
+}
+#word_info_close:hover {
+  background-color: #172136;
+}
+#word_info_box_bottombar {
   background-color: #040a16;
 }
