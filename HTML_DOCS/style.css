@@ -515,7 +515,7 @@ border-bottom: 2px solid rgb(23, 33, 54, 0);
   border: solid 1px black;
 
   position: absolute;
-  z-index: 1;
+  z-index: 3;
   bottom: 100%;
   left: 50%;
   margin-left: -85px;

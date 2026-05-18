@@ -520,7 +520,7 @@ a {
     border: solid 1px black;
 
     position: absolute;
-    z-index: 1;
+    z-index: 3;
     bottom: 100%;
     left: 50%;
     margin-left: -62.5px;

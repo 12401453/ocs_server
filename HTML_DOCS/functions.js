@@ -114,6 +114,7 @@ function selectText() {
           //loadingbutton.remove();
 
           removeLoadingButton();
+          removeWordInfoBox();
 
           applyTooltips();
           history.replaceState(null, '', window.location.href.split("?")[0]);
@@ -178,6 +179,7 @@ const selectSubtitle = (event) => {
           document.getElementById("subtitle_select").blur();
           //loadingbutton.remove();
           removeLoadingButton();
+          removeWordInfoBox();
 
           applyTooltips();
           history.replaceState(null, '', window.location.href.split("?")[0]);
@@ -339,6 +341,7 @@ const selectText_splitup = (event) => {
    
           
           removeLoadingButton();
+          removeWordInfoBox();
           if(new_pageno > current_pageno) {
             document.getElementById("textselect").scrollIntoView();
           }
@@ -2741,6 +2744,7 @@ const retrieveTextFromSearch = (tokno) => {
         }
 
         removeLoadingButton();
+        removeWordInfoBox();
         
         console.log(tokno);
         console.log("https://ocstexts.co.uk/texts?"+String(tokno));
@@ -3697,10 +3701,6 @@ const centrePopupBox = (anchor_elem_bounding_client_rect, popup_box_elem) => {
     else if(initial_right_value > viewport_width) final_left_value = initial_left_value - (initial_right_value - viewport_width) - 1;
     
     popup_box_elem.style.left = `${final_left_value}px`;
-
-    console.log(popup_box_elem);
-
-    //corpus_box_elem.style.left = "";
     return;
   }
   

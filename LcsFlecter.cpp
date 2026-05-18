@@ -951,6 +951,7 @@ void LcsFlecter::class3Clean(std::string& flecter_output) {
 void LcsFlecter::class5AblautClean(std::string& flecter_output) {
     replaceAll(flecter_output, "strъg", "strug");
     replaceAll(flecter_output, "pĺ̥z", "pelz");
+    replaceAll(flecter_output, "tŕ̥g", "terg"); //RISK
     replaceAll(flecter_output, "stьl", "stel");
     replaceAll(flecter_output, "ĺьv", "ĺu");
     replaceAll(flecter_output, "zьd", "zid");
