@@ -11,6 +11,7 @@
 <!--<link rel="stylesheet" type="text/css" href="flexbox.css" id="flexbox_styles">-->
 <link href="dict.css" rel="stylesheet" media="all and (min-width: 769px)" type="text/css">
 <link href="dict_small_screens.css" rel="stylesheet" media="all and (max-width: 768.9px)" type="text/css">
+<link rel="preload" as="image" href="grid.svg" type="image/svg+xml">
 <!-- <link id="colour_theme" href="dark_theme.css" rel="stylesheet" type="text/css"> -->
 <?thm_lnk
 
