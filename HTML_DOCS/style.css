@@ -1315,10 +1315,13 @@ border-bottom: 2px solid rgb(23, 33, 54, 0);
   height: 100%;
   stroke: black;
   cursor: pointer;
+  color: #670202;
+  opacity: 0.95;
 }
 #grid_symbol:hover {
-  transform: scale(1.2, 1.2);
-  animation: burn_orange 1s infinite;
+  color: black;
+  opacity: 1;
+  /* animation: burn_orange 1s infinite; */
 }
 
 #gorazd_hidden_box {
