@@ -1392,7 +1392,6 @@ border-bottom: 2px solid rgb(23, 33, 54, 0);
   max-height: 90%;
   border: 1px solid black;
   border-radius: 7px;
-  
   opacity: 0.95;
   z-index: 2;
 }
@@ -1443,6 +1442,9 @@ border-bottom: 2px solid rgb(23, 33, 54, 0);
   border-left: 1px solid black;
   border-right: 1px solid black;
   box-sizing: border-box;
+
+  min-width: 200px;
+  min-height: 200px;
 }
 .text_word_table_cell {
   font-weight: bold;

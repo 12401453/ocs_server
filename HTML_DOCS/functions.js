@@ -3083,14 +3083,13 @@ const displayDictBox = (error_msg, event_target=null) => {
       const pv2_3_exists = event_target.dataset.pv3;
 
       
-      if(conj_type != undefined) {
+      if(conj_type != undefined && conj_type != "non_infl") {
         const dict_conj_table_btn_html_str = `<div id="dict_conj_table_btn" data-lemma_id="${lemma_id}" data-morph_tag="${morph_tag}" data-inflexion="${conj_type}" data-inflexion="${pv2_3_exists}" title="Show inflection table for this lemma"><svg id="grid_symbol" width="800px" height="800px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M9 4L9 20M15 4L15 20M3 9H21M3 15H21M6.2 20H17.8C18.9201 20 19.4802 20 19.908 19.782C20.2843 19.5903 20.5903 19.2843 20.782 18.908C21 18.4802 21 17.9201 21 16.8V7.2C21 6.0799 21 5.51984 20.782 5.09202C20.5903 4.71569 20.2843 4.40973 19.908 4.21799C19.4802 4 18.9201 4 17.8 4H6.2C5.07989 4 4.51984 4 4.09202 4.21799C3.71569 4.40973 3.40973 4.71569 3.21799 5.09202C3 5.51984 3 6.07989 3 7.2V16.8C3 17.9201 3 18.4802 3.21799 18.908C3.40973 19.2843 3.71569 19.5903 4.09202 19.782C4.51984 20 5.07989 20 6.2 20Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 </svg></div>`;
         const conj_table_symbol = document.createRange().createContextualFragment(dict_conj_table_btn_html_str);
-        conj_table_symbol.getElementById("dict_conj_table_btn").addEventListener('click', showWordInfoBox);
+        conj_table_symbol.getElementById("dict_conj_table_btn").addEventListener('click', showWordInfoBox, true);
         snsp_button.after(conj_table_symbol);
-        //document.getElementById("dict_conj_table_btn").addEventListener('click', showWordInfoBox);
       }
     }
   }
@@ -3229,8 +3228,8 @@ document.getElementById("gorazd_search_button").addEventListener('click', event 
 });
 const showGorazdSearchLoadSpinner = (minimised) => {
   document.getElementById("gorazd_searchbox").disabled = true;
-  // document.getElementById("p1").removeEventListener('click', stealFromGorazdTOROT);
-  window.removeEventListener("keydown", activateClickDictLookup);
+  document.getElementById("p1").removeEventListener('click', stealFromGorazdTOROT);
+  //window.removeEventListener("keydown", activateClickDictLookup);
   if(minimised) {
     document.getElementById("gorazd_search_button").append(gorazd_search_load_spinner);
   }
@@ -3243,26 +3242,43 @@ const removeGorazdSearchLoadSpinner = () => {
   document.getElementById("gorazd_box").style.opacity = "";
   document.getElementById("gorazd_search_load_spinner").remove();
   document.getElementById("gorazd_searchbox").disabled = false;
-  //document.getElementById("p1").addEventListener('click', stealFromGorazdTOROT);
-  window.addEventListener("keydown", activateClickDictLookup);
+  document.getElementById("p1").addEventListener('click', stealFromGorazdTOROT);
+  //window.addEventListener("keydown", activateClickDictLookup);
 };
 
-const activateClickDictLookup = (event) => {
-  if(event.key == "Control") {
-    document.getElementById("p1").addEventListener("click", stealFromGorazdTOROT);
-    document.getElementById("p1").removeEventListener("click", showWordInfoBox);
-  }
+const showInflectionTableLoadSpinner = () => {
+  const word_info_box = document.getElementById("word_info_box");
+  word_info_box.style.display = "flex";
+  word_info_box.style.backgroundColor = "#071022";
+  const grids_container = word_info_box.querySelector("#grids-container");
+  grids_container.style.opacity = "0.75";
+  grids_container.append(gorazd_search_load_spinner);
 };
-const deactivateClickDictLookup = (event) => {
+const removeInflectionTableLoadSpinner = () => {
+  const word_info_box = document.getElementById("word_info_box");
+  const infl_table_load_spinner = word_info_box.querySelector("#gorazd_search_load_spinner");
+  if(word_info_box == null || infl_table_load_spinner == null) return;
+  word_info_box.style.backgroundColor = "";
+  word_info_box.querySelector("#grids-container").style.opacity = "";
+  infl_table_load_spinner.remove();
+}
+
+const activateClickInflTables = (event) => {
   if(event.key == "Control") {
-    document.getElementById("p1").removeEventListener("click", stealFromGorazdTOROT);
     document.getElementById("p1").addEventListener("click", showWordInfoBox);
+    document.getElementById("p1").removeEventListener("click", stealFromGorazdTOROT);
+  }
+};
+const deactivateClickInflTables = (event) => {
+  if(event.key == "Control") {
+    document.getElementById("p1").removeEventListener("click", showWordInfoBox);
+    document.getElementById("p1").addEventListener("click", stealFromGorazdTOROT);
   }
 };
 
 
-window.addEventListener("keydown", activateClickDictLookup);
-window.addEventListener("keyup", deactivateClickDictLookup);
+window.addEventListener("keydown", activateClickInflTables);
+window.addEventListener("keyup", deactivateClickInflTables);
 //document.getElementById("p1").addEventListener('click', stealFromGorazdTOROT);
 
 
@@ -3304,64 +3320,49 @@ document.getElementById("theme_switcher").addEventListener('click', switchTheme)
 
 
 
-
-
-
-
-
-const generateInflectionMainText = (token_elem) => {
-
-  if(token_elem.dataset.inflexion === undefined || token_elem.dataset.inflexion == "non_infl") {
-    return;
-  }
-  const lemma_id = token_elem.dataset.lemma_id;
-  const conj_type = token_elem.dataset.inflexion;
-  const morph_tag = token_elem.dataset.morph_tag;
-  const pv2_3_exists = Boolean(Number(token_elem.dataset.pv3));
-  console.log(pv2_3_exists);
-
+const fetchInflectionTableData = async (lemma_id, conj_type, morph_tag) => {
   let send_data = "lemma_id="+lemma_id+"&conj_type="+encodeURIComponent(conj_type)+"&morph_tag="+morph_tag;
   const myheaders = new Headers();
   myheaders.append('Content-Type', 'application/x-www-form-urlencoded');
   myheaders.append('Cache-Control', 'no-cache');
   const options = {method: "POST", headers: myheaders, cache: "no-store", body: send_data};
-  
-  fetch("generate_inflection_main_text.php", options)
-  .then((response) => {
-    //alert("first response");
-    return response.json();
-  })
-  .then(response => {
-    app_state.raw_lcs_paradigm = response;
-    for(const variant_table of app_state.raw_lcs_paradigm.tables) {
-      for(const idx in variant_table) {
-        //need to add also nom. sg. PRAP variant in ǫћь- in table-2
-        if(app_state.raw_lcs_paradigm.noun_verb == "1" && variant_table[idx] != "" && (idx == 38 || (idx > 39 && idx < 43))) {
-            const jer = idx == 38 ? "ь" : "ъ";
-            const raw_participle = variant_table[idx];
-            variant_table[idx] = raw_participle.concat(jer);
-        }
+
+  const response = await fetch("generate_inflection_main_text.php", options);
+  const json_response = await response.json();
+
+  //console.log(json_response);
+
+  app_state.raw_lcs_paradigm = json_response;
+  for(const variant_table of app_state.raw_lcs_paradigm.tables) {
+    for(const idx in variant_table) {
+      //need to add also nom. sg. PRAP variant in ǫћь- in table-2
+      if(app_state.raw_lcs_paradigm.noun_verb == "1" && variant_table[idx] != "" && (idx == 38 || (idx > 39 && idx < 43))) {
+          const jer = idx == 38 ? "ь" : "ъ";
+          const raw_participle = variant_table[idx];
+          variant_table[idx] = raw_participle.concat(jer);
       }
     }
+  }
 
-  
-
-    if(app_state.raw_lcs_paradigm.noun_verb ==  "1") writeVerbTable(pv2_3_exists, lemma_id, conj_type, app_state.raw_lcs_paradigm.row_number);
-    else if(app_state.raw_lcs_paradigm.noun_verb ==  "2") writeNounTable(pv2_3_exists, lemma_id, conj_type, app_state.raw_lcs_paradigm.row_number);
-
-    app_state.word_popup_shown = true;
-    
-    centrePopupBox(token_elem.getBoundingClientRect(), document.getElementById("word_info_box"));
-    makeDraggable("word_info_box", "word_info_box_topbar");
-    const highlighted_cell = document.getElementById("word_info_box").querySelector(".text_word_table_cell");
-    if(highlighted_cell) {
-      highlighted_cell.scrollIntoView({container: "nearest"});
-    }
-    else {
-      console.log("Morphology-tag does not correspond to any row of the paradigm");
-    }
-  })
 };
+
+const writeOutInflectionTable = (lemma_id, conj_type, pv2_3_exists) => {
+  if(app_state.raw_lcs_paradigm.noun_verb ==  "1") writeVerbTable(pv2_3_exists, lemma_id, conj_type, app_state.raw_lcs_paradigm.row_number);
+  else if(app_state.raw_lcs_paradigm.noun_verb ==  "2") writeNounTable(pv2_3_exists, lemma_id, conj_type, app_state.raw_lcs_paradigm.row_number);
+
+  app_state.word_popup_shown = true;
+  
+  document.getElementById("word_info_box").style.display = "flex";
+
+  const highlighted_cell = document.getElementById("word_info_box").querySelector(".text_word_table_cell");
+  if(highlighted_cell) {
+    highlighted_cell.scrollIntoView({container: "nearest"});
+  }
+  else {
+    console.log("Morphology-tag does not correspond to any row of the paradigm");
+  }
+};
+
 
 const writeVerbTable = (pv2_3_exists, lemma_id, conj_type, text_word_row_number) => {  
   const writeCell = (idx) => {
@@ -3440,101 +3441,6 @@ const writeVerbTable = (pv2_3_exists, lemma_id, conj_type, text_word_row_number)
   grids_container.append(finite_verb_table);
   grids_container.append(participles_table);
 };
-/*const writeNounTable = (pv2_3_exists, lemma_id, text_word_row_number) => {
-  const writeCell = (idx, gender) => {
-      table_html += "<td";
-      if(idx > gender*21+14) {
-        table_html += " class='last-col'";
-      }
-      table_html += ">";
-
-      let lcs_form = "";
-      if(app_state.raw_lcs_paradigm.tables[0][idx] != undefined) {
-        lcs_form = app_state.raw_lcs_paradigm.tables[0][idx];
-      }
-      // table_html += "<div class='grid-child' title='"+lcs_form+"'>"+convertToOCS(lcs_form, pv2_3_exists, lemma_id);
-      // table_html += "<div class='infl_variants'>";
-
-      table_html += "<div class='grid-child";
-      if(idx == text_word_row_number) {
-        table_html += " text_word_table_cell pulsate";
-      }
-      table_html += "' title='"+lcs_form+"'>"+convertToOCS(lcs_form, pv2_3_exists, lemma_id);
-      table_html += "<div class='infl_variants'>";
-      
-      let variants_written = false;
-      for(let i = 1; i < app_state.raw_lcs_paradigm.tables.length; i++) {
-          const lcs_variant = app_state.raw_lcs_paradigm.tables[i][idx]; //this often returns undefineds and it really shouldn't
-          //console.log(lcs_variant);
-          let variant_type = i == 2 ? "variant" : "deviance";
-          if(lcs_variant != "" && lcs_variant != undefined) {
-              table_html += "<span class='"+variant_type+"' title='" + lcs_variant + "'>" + convertToOCS(lcs_variant, pv2_3_exists, lemma_id) + "</span> ";
-              variants_written = true;
-          }
-      }
-      if(variants_written) table_html = table_html.slice(0, -1);
-      
-      table_html += "</div>";
-      table_html += "</div>";
-      table_html += "</td>"
-  }
-  
-  const grids_container = document.getElementById("grids-container");
-  grids_container.innerHTML = "";  
-  
-  const noun_cases = ["Nom.", "Acc.", "Gen.", "Dat.", "Loc.", "Instr.", "Voc."];
-  const noun_numbers = ["Sing.", "Dual", "Plural"];
-  const noun_genders = ["Masc.", "Fem.", "Neuter"];
-  
-  let firstKey;
-  for(firstKey in app_state.raw_lcs_paradigm.tables[0]) {
-    break;
-  }
-  let gender_coefficient = Math.floor(Number(firstKey) / 21); //0 for masc, 1 for fem, 2 for nt. (or equivalent)
-
-  let table_html = "";
-  const makeNomTableHTML = (gender, adjectival=false) => {
-    table_html = "";
-    table_html += "<div class='infl_table_rounder'><table class='infl-grid'><tbody>";
-    table_html += "<tr><th class='infl_titles' style='border-top: 1px solid black; border-left: 1px solid black;'>";
-    if(adjectival) table_html += "<b>"+noun_genders[gender]+"</b>";
-    table_html += "</th>";
-    for(let i = 0; i < 3; i++) {
-      table_html += "<th class='infl_titles top_headers'>"+noun_numbers[i]+"</th>";
-    }
-    table_html += "</tr>";
-
-    for(let i = 1; i < 8; i++) {
-      table_html += "<tr><th class='infl_titles side_headers'>"+ noun_cases[i - 1]+"</th>";
-      for(let j = i + 21*gender; j < (gender + 1)*21 + 1; j+=7) {
-        writeCell(j, gender);
-      }
-      table_html += "</tr>";
-    }
-    table_html += "</tbody></table></div>";
-  };
-  
-  const tables_arr = new Array();
-
-  //const highest
-  if(gender_coefficient == 0 && /*Object.keys(app_state.raw_lcs_paradigm.tables[0]).length > 21 */ /* Object.keys(app_state.raw_lcs_paradigm.tables[0]).some(x => Number(x) > 21)) {
-    console.log("adjectival");
-    makeNomTableHTML(0, true)
-    tables_arr.push(document.createRange().createContextualFragment(table_html));
-    makeNomTableHTML(1, true);
-    tables_arr.push(document.createRange().createContextualFragment(table_html));
-    makeNomTableHTML(2, true);
-    tables_arr.push(document.createRange().createContextualFragment(table_html));
-  }
-  else {
-    makeNomTableHTML(gender_coefficient, false)
-    tables_arr.push(document.createRange().createContextualFragment(table_html));
-  }
-
-  for(const nom_table of tables_arr) {
-    grids_container.append(nom_table);
-  }
-}; */
 
 const writeNounTable = (pv2_3_exists, lemma_id, conj_type, text_word_row_number) => {
   const writeCell = (idx, gender) => {
@@ -3650,17 +3556,30 @@ const removeWordInfoBox = () => {
   }
 };
 
-const showWordInfoBox = (event) => {
+const showWordInfoBox = async (event) => {
 
-  if(event.target.dataset.inflexion === undefined || event.target.dataset.inflexion == "non_infl") {
+  let clicked_on_element = event.target;
+  let triggered_from_dict = false;
+
+  if(event.currentTarget.id == "dict_conj_table_btn") {
+    clicked_on_element = event.currentTarget;
+    triggered_from_dict= true;
+  }
+
+  if(clicked_on_element.dataset.inflexion === undefined || clicked_on_element.dataset.inflexion == "non_infl") {
     console.log("FACK");
     return;
   }
 
+  const lemma_id = clicked_on_element.dataset.lemma_id;
+  const conj_type = clicked_on_element.dataset.inflexion;
+  const morph_tag = clicked_on_element.dataset.morph_tag;
+  const pv2_3_exists = Boolean(Number(clicked_on_element.dataset.pv3));
+
   if(app_state.word_popup_shown) {
     removeWordInfoBox();
   } 
-  const word_info_box = document.createRange().createContextualFragment(`<div id="word_info_box" style="display: flex;">
+  const word_info_box = document.createRange().createContextualFragment(`<div id="word_info_box" style="display: none;">
     <div id="word_info_box_topbar">
       <div id="word_info_close">
         <svg id="red_cross" xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="24" viewBox="0 0 24 24" width="24" focusable="false"><path fill-rule="evenodd" clip-rule="evenodd" d="M5.29289 5.29289C5.68342 4.90237 6.31658 4.90237 6.70711 5.29289L12 10.5858L17.2929 5.29289C17.6834 4.90237 18.3166 4.90237 18.7071 5.29289C19.0976 5.68342 19.0976 6.31658 18.7071 6.70711L13.4142 12L18.7071 17.2929C19.0976 17.6834 19.0976 18.3166 18.7071 18.7071C18.3166 19.0976 17.6834 19.0976 17.2929 18.7071L12 13.4142L6.70711 18.7071C6.31658 19.0976 5.68342 19.0976 5.29289 18.7071C4.90237 18.3166 4.90237 17.6834 5.29289 17.2929L10.5858 12L5.29289 6.70711C4.90237 6.31658 4.90237 5.68342 5.29289 5.29289Z"></path></svg>
@@ -3675,23 +3594,34 @@ const showWordInfoBox = (event) => {
       removeWordInfoBox();
   });
   document.body.append(word_info_box);
-
-  generateInflectionMainText(event.target);
+  
+  //this is a trick to only show the loading-spinner and empty box if the request has taken more than 100ms. Will still look like shit if requests take 110ms
+  const loading_skeleton_timer = setTimeout(() => {
+    showInflectionTableLoadSpinner();
+    centrePopupBox(clicked_on_element.getBoundingClientRect(), document.getElementById("word_info_box"), triggered_from_dict);
+  }, 100);
+  await fetchInflectionTableData(lemma_id, conj_type, morph_tag);
+  clearTimeout(loading_skeleton_timer);
+  removeInflectionTableLoadSpinner();
+  writeOutInflectionTable(lemma_id, conj_type, pv2_3_exists);
+  
+  
+  centrePopupBox(clicked_on_element.getBoundingClientRect(), document.getElementById("word_info_box"), triggered_from_dict);
+  makeDraggable("word_info_box", "word_info_box_topbar");
+  
   
 };
 
-document.getElementById("p1").addEventListener('click', showWordInfoBox);
+document.getElementById("p1").addEventListener('click', stealFromGorazdTOROT);
 
-const centrePopupBox = (anchor_elem_bounding_client_rect, popup_box_elem) => {
+const centrePopupBox = (anchor_elem_bounding_client_rect, popup_box_elem, force_centre=false) => {
   const is_larger_screen_size = window.matchMedia("(min-width: 769px)").matches;
   //const corpus_box_elem = document.getElementById("corpus_attestations_box");
 
   const popup_box_height = popup_box_elem.getBoundingClientRect().height;
   const popup_box_width = popup_box_elem.getBoundingClientRect().width;
   
-  if(is_larger_screen_size) {
-
-    //ADD SOMETHING HERE TO BRING POPUP INTO VIEWPORT IF ABOVE OR BELOW
+  if(is_larger_screen_size && force_centre == false) {
 
     const viewport_width = window.visualViewport.width;
     const viewport_height = window.visualViewport.height;
@@ -3707,14 +3637,10 @@ const centrePopupBox = (anchor_elem_bounding_client_rect, popup_box_elem) => {
 
     popup_box_elem.style.top = `${final_top_value + window.scrollY}px`;
 
-    console.log("initial_top_value:", initial_top_value, "\nwindow.scrollY:", window.scrollY, "popup_box_height/2:", popup_box_height/2);
-
     const anchor_elem_horizontal_centre = anchor_elem_bounding_client_rect.right + (anchor_elem_bounding_client_rect.left - anchor_elem_bounding_client_rect.right)/2;
     const initial_left_value = anchor_elem_horizontal_centre - popup_box_width/2;
 
     const initial_right_value = initial_left_value + popup_box_width;
-
-    //console.log(viewport_width, initial_left_value, initial_right_value);
 
     let final_left_value = initial_left_value;
     if(initial_left_value < 0) final_left_value = 1;
@@ -3723,8 +3649,19 @@ const centrePopupBox = (anchor_elem_bounding_client_rect, popup_box_elem) => {
     popup_box_elem.style.left = `${final_left_value}px`;
     return;
   }
+  else {
+
+    const viewport_width = window.visualViewport.width;
+    const viewport_height = window.visualViewport.height;
+
+    const top_value = viewport_height/2 - popup_box_height/2 + window.scrollY;
+    const left_value = viewport_width/2 - popup_box_width/2;
+
+    popup_box_elem.style.left = `${left_value}px`;
+    popup_box_elem.style.top = `${top_value}px`;
+
+  }
   
-  popup_box_elem.style.transform = `translateX(-100px) translateY(${popup_box_height/2}px)`;
 
 };
 
