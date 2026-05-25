@@ -311,6 +311,16 @@ span[aip-type="odkaz"]:hover{
   color: black;
   background-color: #f1ad2e;
 }
+
+#grid_symbol {
+  color: #670202;
+  opacity: 0.95;
+}
+#grid_symbol:hover {
+  color: black;
+  opacity: 1;
+}
+
 #gorazd_searchbox { 
   background-color:white;
   color: black;

@@ -309,6 +309,15 @@ span[aip-type="odkaz"]:hover{
   background-color: #071022;
 }
 
+#grid_symbol {
+  color: #cbd9f4;
+  opacity: 0.85;
+}
+#grid_symbol:hover {
+  color: #e3ecff;
+  opacity: 1;
+}
+
 #dict_hidden_box, #gorazd_hidden_box {
   background-color: #040a16;
   color: #cbd9f4a6;

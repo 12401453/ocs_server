@@ -1313,13 +1313,9 @@ border-bottom: 2px solid rgb(23, 33, 54, 0);
 #grid_symbol {
   width: 100%;
   height: 100%;
-  stroke: black;
   cursor: pointer;
-  color: #670202;
-  opacity: 0.95;
 }
 #grid_symbol:hover {
-  color: black;
   opacity: 1;
   /* animation: burn_orange 1s infinite; */
 }
