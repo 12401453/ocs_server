@@ -2297,7 +2297,7 @@ const lemmaTooltip = function (show_load_spinner) {
           tt_box_string += lemma_ocs_array[i] + '</div><span id="pos_tag_box_tt">';
           tt_box_string += tt_pos_arr[proiel_pos_map[pos_array[i] - 1][0]] + '</span></span><span id="tt_mid"><div id="tt_meaning">';
           
-          document.querySelectorAll(`[data-lemma_id="${lemma_id}"]`).forEach(lemma_word => {
+          document.getElementById("p1").querySelectorAll(`[data-lemma_id="${lemma_id}"]`).forEach(lemma_word => {
             const finished_string = tt_box_string + convertMorphTag(lemma_word.dataset.morph_tag) + '</div></span><span id="tt_bottom"></span></span>'; 
             const tt_fragment = document.createRange().createContextualFragment(finished_string);
             tt_fragment.getElementById("pos_tag_box_tt").firstChild.title = proiel_pos_map[pos_array[i] - 1][1];
@@ -2329,7 +2329,7 @@ const lcsTooltip = function () {
   
   document.documentElement.style.setProperty("--no-lcs-opacity", "0.5");
   
-  const lcs_words = document.querySelectorAll("[data-lcs_recon]");
+  const lcs_words = document.getElementById("p1").querySelectorAll("[data-lcs_recon]");
 
   lcs_words.forEach(lcs_word => {
     
@@ -2897,8 +2897,10 @@ const greekTooltips = function (show_load_spinner) {
 
         const alligned_toknos = Object.keys(xhttp.response);
 
+        const p1_text_elem = document.getElementById("p1");
+
         alligned_toknos.forEach(alligned_tokno => {
-          const ocs_word = document.querySelector(`[data-tokno="${alligned_tokno}"]`);
+          const ocs_word = p1_text_elem.querySelector(`[data-tokno="${alligned_tokno}"]`);
           const greek_data_row = greek_data[alligned_tokno];
           
           let tt_box_string = '<span class="lemma_tt" onclick="event.stopPropagation()"><span id="tt_top"><div id="lemma_tag_tt" style="font-family: Bookerly;font-weight: bold;letter-spacing: 1px;font-size: var(--greek_tt_fontsize);">';
