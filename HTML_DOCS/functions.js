@@ -371,16 +371,16 @@ const conj_pos = '<span id="pos_tag_conj" class="pos_tag" title="conjunction" on
 const part_pos = '<span id="pos_tag_part" class="pos_tag" title="particle/interjection" onclick="selectPoS()">part.</span>';
 const ques_pos = '<span id="pos_tag_ques" class="pos_tag" title="interrogative" onclick="selectPoS()">ques.</span>'; */
 
-const noun_pos_tt = '<span id="pos_tag_noun_tt" class="pos_tag_tt" title="noun"></span>';
-const verb_pos_tt = '<span id="pos_tag_verb_tt" class="pos_tag_tt" title="verb"></span>';
-const adj_pos_tt = '<span id="pos_tag_adj_tt" class="pos_tag_tt" title="adjective"></span>';
-const adverb_pos_tt = '<span id="pos_tag_adverb_tt" class="pos_tag_tt" title="adverb"></span>';
-const prep_pos_tt = '<span id="pos_tag_prep_tt" class="pos_tag_tt" title="preposition"></span>';
-const conj_pos_tt = '<span id="pos_tag_conj_tt" class="pos_tag_tt" title="conjunction"></span>';
-const part_pos_tt = '<span id="pos_tag_part_tt" class="pos_tag_tt" title="particle/interjection"></span>';
-const ques_pos_tt = '<span id="pos_tag_ques_tt" class="pos_tag_tt" title="interrogative"></span>';
-const quant_pos_tt_elem = '<span id="pos_tag_quant_tt" class="pos_tag_tt" title="quantifier"></span>';
-const unassigned_pos_tt_elem = '<span id="pos_tag_unassigned_tt" class="pos_tag_tt" title="unassigned"></span>';
+const noun_pos_tt = '<span class="pos_tag_tt pos_tag_noun_tt" title="noun"></span>';
+const verb_pos_tt = '<span class="pos_tag_tt pos_tag_verb_tt" title="verb"></span>';
+const adj_pos_tt = '<span class="pos_tag_tt pos_tag_adj_tt" title="adjective"></span>';
+const adverb_pos_tt = '<span class="pos_tag_tt pos_tag_adverb_tt" title="adverb"></span>';
+const prep_pos_tt = '<span class="pos_tag_tt pos_tag_prep_tt" title="preposition"></span>';
+const conj_pos_tt = '<span class="pos_tag_tt pos_tag_conj_tt" title="conjunction"></span>';
+const part_pos_tt = '<span class="pos_tag_tt pos_tag_part_tt" title="particle/interjection"></span>';
+const ques_pos_tt = '<span class="pos_tag_tt pos_tag_ques_tt" title="interrogative"></span>';
+const quant_pos_tt_elem = '<span class="pos_tag_tt pos_tag_quant_tt" title="quantifier"></span>';
+const unassigned_pos_tt_elem = '<span class="pos_tag_tt pos_tag_unassigned_tt" title="unassigned"></span>';
 
 const tt_pos_arr = {1: noun_pos_tt, 2: verb_pos_tt, 3: adj_pos_tt, 4: adverb_pos_tt, 5: prep_pos_tt, 6: conj_pos_tt, 7: part_pos_tt, 8: ques_pos_tt, 9: quant_pos_tt_elem, 10: unassigned_pos_tt_elem};
 
@@ -2338,7 +2338,7 @@ const lcsTooltip = function () {
     const lemma_id = Number(lcs_word.dataset.lemma_id);
     let tt_box_string = '<span class="lemma_tt" onclick="event.stopPropagation()"><span id="tt_top"><div id="lemma_tag_tt">';
     tt_box_string += convertToOCS(lcs_recon, pv2_3_exists, lemma_id) + '</div><span id="pos_tag_box_tt">';
-    tt_box_string += '<span id="pos_tag_unassigned_tt" class="pos_tag_tt" title="unassigned"></span>' + '</span></span><span id="tt_mid"><div id="tt_meaning">';
+    tt_box_string += unassigned_pos_tt_elem + '</span></span><span id="tt_mid"><div id="tt_meaning">';
     tt_box_string +=  lcs_recon.replaceAll("Q", "ъ") + '</div></span><span id="tt_bottom"></span></span>';
     
     lcs_word.append(document.createRange().createContextualFragment(tt_box_string));

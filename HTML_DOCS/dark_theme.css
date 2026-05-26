@@ -435,35 +435,40 @@ th.infl_titles {
   background-color: #040a16;
 }
 
-#pos_tag_verb_tt {
+.pos_tag_verb_tt {
   background-color: #4dac0d;
 }
 
-#pos_tag_adj_tt {
+.pos_tag_adj_tt {
   background-color: #fc7f03;
 }
 
-#pos_tag_noun_tt {
+.pos_tag_noun_tt {
   background-color: #9cac0d;
 }
 
-#pos_tag_adverb_tt {
+.pos_tag_adverb_tt {
   background-color: #e32f1a;
 }
 
-#pos_tag_prep_tt {
+.pos_tag_prep_tt {
   background-color: #0d9cac;
 }
 
-#pos_tag_conj_tt {
+.pos_tag_conj_tt {
   background-color: #0dac62;
 }
 
-#pos_tag_part_tt {
+.pos_tag_part_tt {
   background-color: #ac0d9c;
 }
-#pos_tag_ques_tt {
+.pos_tag_ques_tt {
   background-color: hsl(345, 100%, 70%);
+}
+
+.pos_tag_tt.pos_tag_unassigned_tt {
+  border-left: 1px solid #071022;
+  border-bottom: 1px solid #071022;
 }
 
 /*********************MAIN PAGE SEARCH**********************/

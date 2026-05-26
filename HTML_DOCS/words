@@ -32,7 +32,7 @@
 <div id="main_words_box">
   <div id="search_top_row">
     <div id="search_container">  
-      <textarea id="lcs_lemma_searchbox" autocomplete="off" placeholder="LCS or OCS lemma..."></textarea>
+      <textarea id="lcs_lemma_searchbox" autocomplete="off" placeholder="LCS or OCS lemma..." disabled></textarea>
       <div id="search_candidates_box">
       </div>
     </div>

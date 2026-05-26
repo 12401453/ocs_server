@@ -1468,7 +1468,7 @@ border-bottom: 2px solid rgb(23, 33, 54, 0);
 }
 
 .infl-grid {
-  font-size: 16px;
+  font-size: 18px;
   font-family: Bukyvede;
   border-collapse: collapse;
   border: 4px solid black;
@@ -1491,7 +1491,7 @@ border-bottom: 2px solid rgb(23, 33, 54, 0);
 
 th.infl_titles {
   font-family: 'IBM_Plex_Sans';
-  font-size: 10.5px;
+  font-size: 11.8px;
   font-weight: normal;
   border-right: 4px solid black;
 }
@@ -1547,11 +1547,11 @@ tr:nth-child(7) td {
 
 .deviance {
   opacity: 0.8;
-  font-size: 10.5px;
+  font-size: 11.8px;
 }
 .variant {
   opacity: 1;
-  font-size: 16.1px;
+  font-size: 18px;
 }
 #word_info_box_bottombar {
   box-sizing: border-box;

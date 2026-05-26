@@ -24,9 +24,12 @@ let lemmas_json = Object.create(null);
 
 fetch("chu_lemmas_json.json")
 .then(response => {
-  return response.json()
+  return response.json();
 })
-.then(response => lemmas_json = response);
+.then(response => {
+  lemmas_json = response;
+  document.getElementById("lcs_lemma_searchbox").disabled = false;
+});
 
 const randomLemma = () => {
   app_state.raw_lcs_paradigm = {};
