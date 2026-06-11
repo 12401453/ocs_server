@@ -3251,7 +3251,7 @@ const removeGorazdSearchLoadSpinner = () => {
 const showInflectionTableLoadSpinner = () => {
   const word_info_box = document.getElementById("word_info_box");
   word_info_box.style.display = "flex";
-  word_info_box.style.backgroundColor = "#071022";
+  word_info_box.style.backgroundColor = "#0710229e";
   const grids_container = word_info_box.querySelector("#grids-container");
   grids_container.style.opacity = "0.75";
   grids_container.append(gorazd_search_load_spinner);
