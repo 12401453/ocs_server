@@ -40,8 +40,8 @@ class CurlFetcher {
                     
                     //m_get_html remains empty if the request times out or fails for any other reason
                     //if(curl_error_msg == "Timeout was reached") m_get_html = "Request timeout";
-                    if(res == CURLE_OPERATION_TIMEDOUT) m_get_html = "Request timeout";
-                    else m_get_html = "curl failure"; //these messages are for telling javascript what to do so I keep them short
+                    if(res == CURLE_OPERATION_TIMEDOUT) m_get_html = "\"Request timeout\"";
+                    else m_get_html = "\"curl failure\""; //these messages are for telling javascript what to do so I keep them short
 
                     error_state = true;
                 }

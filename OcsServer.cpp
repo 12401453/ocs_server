@@ -1722,7 +1722,7 @@ void OcsServer::sendBinaryFile(char* url_c_str, int clientSocket, const std::str
     
 }
 
-//it's simpler to handle errors and timeouts if I keep everything as raw text until it gets back to the client; pretty sure having an xhttp.reponseType = 'json' just means it runs JSON.parse() implicitly rather than explicitly;
+//This isn't used in OcsServer currently; the gorazdLookup curling explicitly requires JSON to be returned
 bool OcsServer::curlLookup(std::string _POST[1], int clientSocket) {
     
     CurlFetcher query(_POST[0].c_str(), m_dict_cookies);
@@ -2446,6 +2446,10 @@ bool OcsServer::gorazdLookup(std::string _POST[2], int clientSocket) {
         std::ostringstream post_response;
         post_response << "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: " << content_length << "\r\n\r\n" << json_str;
 
+        // std::string fake_curl_failure_result = "{\"query_form\":\"пльзати\",\"curl_return_text\":\"curl failure\"}";
+        // post_response << "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: " << fake_curl_failure_result.size() << "\r\n\r\n" << fake_curl_failure_result;
+
+
         int length = post_response.str().size() + 1;
         sendToClient(clientSocket, post_response.str().c_str(), length); 
         return true;
@@ -2575,7 +2579,7 @@ std::string OcsServer::curlGorazd(std::string plain_query, std::string uri_encod
     reflexive_thread.join();
 
     if(basic_query.error_state && numbered_query.error_state && reflexive_query.error_state) {
-        return "{\"query_form\":\"" + plain_query + "\",\"curl_return_text\":" + "\"" + basic_query.m_get_html + "\""  +"}";//normally GORAZD returns alread-escaped JSON, but my error-messages are raw strings, and the client expects a JSON response so I have to return a well-formed JSON object, which means the raw-string error-messages need to be quoted
+        return "{\"query_form\":\"" + plain_query + "\",\"curl_return_text\":" + basic_query.m_get_html +"}";//error-message have been quoted by CurlFetcher.cpp
     }
 
     else if(basic_query_worked) {
