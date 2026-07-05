@@ -2507,32 +2507,6 @@ bool OcsServer::gorazdLookup(std::string _POST[2], int clientSocket) {
     }
 }
 
-// std::string OcsServer::curlGorazd(std::string plain_query, std::string uri_encoded_query) {
-//     std::string gorazd_query_url = "http://castor.gorazd.org:8080/gorazd/advanced_search;jsessionid=013373AF9710B0E8728F91826ABBD8DD?queryFields=%7B%221%22%3A%7B%22fieldName%22%3A%22HeaderAll%22%2C%22rawFieldQuery%22%3A%22" + uri_encoded_query + "%22%2C%22logTerm%22%3A%22%22%7D%7D";
-    
-//     std::cout << "gorazd_query_url: " << gorazd_query_url << "\n";
-    
-//     CurlFetcher query(gorazd_query_url.c_str());
-
-//     query.fetch();
-
-//     if(query.m_get_html.find("\"found\":0,") != std::string::npos) {
-//         //there can be instances where SJS has no numeral appended, but SNSP does (родьство), which means only the SJS entry gets found with no indiciation of there being 2 SNSP entries, so possibly some more sophisticated probing and aggregating of results would be better
-//         std::cout << "first try nothing found, appending 1 to the query and re-running...\n";
-//         uri_encoded_query.append("1");
-//         gorazd_query_url = "http://castor.gorazd.org:8080/gorazd/advanced_search;jsessionid=013373AF9710B0E8728F91826ABBD8DD?queryFields=%7B%221%22%3A%7B%22fieldName%22%3A%22HeaderAll%22%2C%22rawFieldQuery%22%3A%22" + uri_encoded_query + "%22%2C%22logTerm%22%3A%22%22%7D%7D";
-
-//         query.fetch(gorazd_query_url);
-        
-//         if(query.m_get_html.find("\"found\":0,") == std::string::npos) {
-//             plain_query.append("1");
-//         }
-//     }
-//     if(query.error_state) query.m_get_html = "\"" + query.m_get_html + "\""; //normally GORAZD returns alread-escaped JSON, but my error-messages are raw strings, and the client expects a JSON response so I have to return a JSON object, which means the raw-string error-messages need to be quoted
-
-//     return "{\"query_form\":\"" + plain_query + "\",\"curl_return_text\":" + query.m_get_html  +"}";
-// };
-
 std::string OcsServer::curlGorazd(std::string plain_query, std::string uri_encoded_query) {
     std::string gorazd_query_url_basic = "http://castor.gorazd.org:8080/gorazd/advanced_search;jsessionid=013373AF9710B0E8728F91826ABBD8DD?queryFields=%7B%221%22%3A%7B%22fieldName%22%3A%22HeaderAll%22%2C%22rawFieldQuery%22%3A%22" + uri_encoded_query + "%22%2C%22logTerm%22%3A%22%22%7D%7D";
     
