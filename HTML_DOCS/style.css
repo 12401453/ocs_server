@@ -1381,7 +1381,7 @@ border-bottom: 2px solid rgb(23, 33, 54, 0);
 #word_info_box {
   display: flex;
   flex-flow: column nowrap;
-  position: absolute;
+  position: fixed;
   width: fit-content;
   height: fit-content;
   max-width: 300px;
@@ -1454,17 +1454,17 @@ border-bottom: 2px solid rgb(23, 33, 54, 0);
 
 #grids-container::-webkit-scrollbar {
   width: 9px;
+  height: 9px;
 }
 #grids-container::-webkit-scrollbar-thumb {
-  background-color: #040a16;
-  border-right: 2px solid black;
+  border-right: 1px solid black;
+  border-left: 1px solid black;
   border-top:1px solid black;
   border-bottom:1px solid black;
 }
 
 #grids-container::-webkit-scrollbar-track {
-  background-color: #172136;
-  border-right: 2px solid black;
+  /* border-right: 2px solid black; */
 }
 
 .infl-grid {

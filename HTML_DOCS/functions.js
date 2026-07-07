@@ -1944,6 +1944,7 @@ const removeWordInfoBox = () => {
   }
 };
 
+// const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 const showWordInfoBox = async (event) => {
 
   let clicked_on_element = event.target;
@@ -1993,7 +1994,6 @@ const showWordInfoBox = async (event) => {
   removeInflectionTableLoadSpinner();
   writeOutInflectionTable(lemma_id, conj_type, pv2_3_exists);
   
-  
   centrePopupBox(clicked_on_element.getBoundingClientRect(), document.getElementById("word_info_box"), triggered_from_dict);
   makeDraggable("word_info_box", "word_info_box_topbar");
   
@@ -2023,7 +2023,7 @@ const centrePopupBox = (anchor_elem_bounding_client_rect, popup_box_elem, force_
     if(initial_top_value < 0) final_top_value = 1;
     else if(bottom_overflow > 0) final_top_value = initial_top_value - bottom_overflow - 1;
 
-    popup_box_elem.style.top = `${final_top_value + window.scrollY}px`;
+    popup_box_elem.style.top = `${final_top_value /*+ window.scrollY*/}px`;
 
     const anchor_elem_horizontal_centre = anchor_elem_bounding_client_rect.right + (anchor_elem_bounding_client_rect.left - anchor_elem_bounding_client_rect.right)/2;
     const initial_left_value = anchor_elem_horizontal_centre - popup_box_width/2;
@@ -2042,7 +2042,7 @@ const centrePopupBox = (anchor_elem_bounding_client_rect, popup_box_elem, force_
     const viewport_width = window.visualViewport.width;
     const viewport_height = window.visualViewport.height;
 
-    const top_value = viewport_height/2 - popup_box_height/2 + window.scrollY;
+    const top_value = viewport_height/2 - popup_box_height/2;
     const left_value = viewport_width/2 - popup_box_width/2;
 
     popup_box_elem.style.left = `${left_value}px`;
