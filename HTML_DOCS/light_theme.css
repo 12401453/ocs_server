@@ -368,11 +368,23 @@ span[aip-type="odkaz"]:hover{
   background-color: #f0c36dbd;
   color: black;
 }
+#offline_gorazd_searchbox {
+  background-color: #f0c36dbd;
+  color: black;
+}
 #random_lemma_btn{
   color: black;
   background-color: #f0c36d;
 }
 #random_lemma_btn:hover {
+  background-color: #f1ad2e;
+  /* background-color: #f0c36d; */
+}
+#random_entry_btn{
+  color: black;
+  background-color: #f0c36d;
+}
+#random_entry_btn:hover {
   background-color: #f1ad2e;
   /* background-color: #f0c36d; */
 }
